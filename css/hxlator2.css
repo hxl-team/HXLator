@@ -1,0 +1,41 @@
+body {
+  padding-top: 80px; /* 60px to make the container go all the way to the bottom of the topbar */
+}
+
+div#xlsview{
+  margin-top: 30px;
+}
+
+sup {
+	font-size: 0.7em;
+	margin-left: 0.1em;
+}
+
+/* extend the links in the table cells to the whole cell: */
+
+a.link {
+display:block;
+width:100%;
+height:100%; 
+text-decoration:none;
+}
+
+a.link:hover {
+background-color:#666;
+color:#ccc;
+}
+
+div.shortguide{
+	margin-top: 30px;
+	margin-bottom: 30px;
+}
+
+tr.highlight, tr.highlight td{
+	color: #468847;
+	background-color: #DFF0D8 !important;
+}
+
+tr.first, tr.last {
+	font-weight: bold;
+}
+
