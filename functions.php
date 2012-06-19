@@ -4,20 +4,31 @@ set_include_path('Classes/');
 
 require_once "EasyRdf.php";
 require_once "html_tag_helpers.php";
-    
+
 // fires the $query against our SPARQL endpoint and returns a EasyRDF Sparql_Result object 
 // (see http://www.aelius.com/njh/easyrdf/docs/EasyRdf/EasyRdf_Sparql_Result.html)
 // this is basically an ArrayIterator with some extras
 function sparqlQuery($query){
 
-  $sparql = new EasyRdf_Sparql_Client('http://hxl.humanitarianresponse.info/sparql');
+	// these prefixes will be added to any SPARQL query
+	$prefixes = 'prefix xsd: <http://www.w3.org/2001/XMLSchema#>  
+	prefix skos: <http://www.w3.org/2004/02/skos/core#> 
+	prefix hxl:   <http://hxl.humanitarianresponse.info/ns-2012-06-14/#> 
+	prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+	
+	';
+
+
+  	$sparql = new EasyRdf_Sparql_Client('http://hxl.humanitarianresponse.info/sparql');
+  	$query = $prefixes.$query;
+  	error_log($query);
   
-  try {
-      $results = $sparql->query($query);      
-      return $results;
-  } catch (Exception $e) {
-      return "<div class='error'>".$e->getMessage()."</div>\n";
-  }
+  	try {
+    	$results = $sparql->query($query);      
+      	return $results;
+  	} catch (Exception $e) {
+      	return "<div class='error'>".$e->getMessage()."</div>\n";
+  	}
 }
 
 // generates the head for all pages, including highlighting of the activr page in the nav bar

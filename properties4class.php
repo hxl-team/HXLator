@@ -1,37 +1,23 @@
 <?php 
 
-include_once('functions.php');
-
-$domainprops = sparqlQuery('prefix skos: <http://www.w3.org/2004/02/skos/core#> 
-prefix hxl:   <http://hxl.humanitarianresponse.info/ns-2012-06-14/#> 
-prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
-
-SELECT * WHERE {  
-  GRAPH <http://hxl.humanitarianresponse.info/data/vocabulary/latest/> {     
-    '.$_GET['classuri'].' rdfs:subClassOf* ?class .           
-    ?prop rdfs:domain ?class ;
-          rdfs:range ?range ;
-          rdfs:comment ?description ;
-          skos:prefLabel ?proplabel .
-  }
-} ORDER BY ?proplabel');
-
-
-$rangeprops = sparqlQuery('prefix skos: <http://www.w3.org/2004/02/skos/core#> 
-prefix hxl:   <http://hxl.humanitarianresponse.info/ns-2012-06-14/#> 
-prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
-
-SELECT DISTINCT ?proplabel ?description ?prop WHERE {  
-  GRAPH <http://hxl.humanitarianresponse.info/data/vocabulary/latest/> {     
-    '.$_GET['classuri'].' rdfs:subClassOf* ?class  .
-    ?prop rdfs:domain ?domain ;
-          rdfs:range ?class ;
-          rdfs:comment ?description ;
-          skos:prefLabel ?proplabel .
-  }
-} ORDER BY ?proplabel');
-
-
+	include_once('functions.php');
+	
+	$props = sparqlQuery('SELECT DISTINCT ?domain ?range ?proplabel ?description ?prop WHERE {  
+	  GRAPH <http://hxl.humanitarianresponse.info/data/vocabulary/latest/> {     
+	    { '.$_GET['classuri'].' rdfs:subClassOf* ?range  .
+	      ?prop rdfs:domain ?domain ;
+	            rdfs:range ?range ;
+	            rdfs:comment ?description ;
+		    skos:prefLabel ?proplabel . }
+	    UNION {
+	      '.$_GET['classuri'].' rdfs:subClassOf* ?domain  .
+	      ?prop rdfs:domain ?domain ;
+	            rdfs:range ?range ;
+		    rdfs:comment ?description ;
+	            skos:prefLabel ?proplabel .
+	    }
+	  }
+	} ORDER BY ?proplabel');
 	
 	echo '<div class="step4"><ul class="nav nav-pills properties">
 	  ';
@@ -41,24 +27,13 @@ SELECT DISTINCT ?proplabel ?description ?prop WHERE {
 	  $description = "description";	  		  	
 	  $range = "range"; // TODO
 	  
-	  if(count($domainprops) > 0){
-		  foreach($domainprops as $row){
-		  	
-		  	print '	<li><a class="btn hxlclass hxlprop" href="#" rel="popover" title="'.$row->$label.'" data-content="'.$row->$description.'">'.$row->$label.' <b class="icon-info-sign"></b></a></li>
-		  		';
-		  			  		
-		  }
+  	  foreach($props as $row){
+	  	
+	  	print '	<li><a class="btn hxlclass hxlprop" href="#" rel="popover" title="'.$row->$label.'" data-content="'.$row->$description.'">'.$row->$label.' <b class="icon-info-sign"></b></a></li>
+	  		';
+	  			  		
 	  }
-	  
-	  if(count($rangeprops) > 0){
-		  foreach($rangeprops as $row){
-		  	
-		  	print '	<li><a class="btn hxlclass hxlprop" href="#" rel="popover" title="'.$row->$label.'" data-content="'.$row->$description.'">'.$row->$label.' <b class="icon-info-sign"></b></a></li>
-		  		';
-		  			  		
-		  }	  
-	  }  
-	    	    
+  	  	    	    
 	echo "</ul>	
 		</div>	
 		";

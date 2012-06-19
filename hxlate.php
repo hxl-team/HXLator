@@ -3,12 +3,7 @@ header("Access-Control-Allow-Origin: *");
 
 include_once('functions.php');
 
-$hxlTopConcepts = sparqlQuery('prefix xsd: <http://www.w3.org/2001/XMLSchema#>  
-prefix skos: <http://www.w3.org/2004/02/skos/core#> 
-prefix hxl:   <http://hxl.humanitarianresponse.info/ns-2012-06-14/#> 
-prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
-
-SELECT * WHERE {  
+$hxlTopConcepts = sparqlQuery('SELECT * WHERE {  
   GRAPH <http://hxl.humanitarianresponse.info/data/vocabulary/latest/> {     
     ?class hxl:topLevelConcept "true"^^xsd:boolean ;        
            skos:prefLabel ?label  ;     
