@@ -10,7 +10,7 @@ require_once "html_tag_helpers.php";
 // this is basically an ArrayIterator with some extras
 function sparqlQuery($query){
 
-	// these prefixes will be added to any SPARQL query
+	// these prefixes will be added to every SPARQL query - so no need to declare them over and over again
 	$prefixes = 'prefix xsd: <http://www.w3.org/2001/XMLSchema#>  
 	prefix skos: <http://www.w3.org/2004/02/skos/core#> 
 	prefix hxl:   <http://hxl.humanitarianresponse.info/ns-2012-06-14/#> 

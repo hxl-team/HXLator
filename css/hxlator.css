@@ -30,12 +30,14 @@ div.shortguide{
 	margin-bottom: 30px;
 }
 
-tr.highlight, tr.highlight td{
+tr.highlight{
 	color: #468847;
 	background-color: #DFF0D8 !important;
 }
 
-tr.first, tr.last {
-	font-weight: bold;
+td.selected {
+	color: black;
+	background-color: #FAA732;
 }
+
 

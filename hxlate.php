@@ -75,7 +75,6 @@ if($isMove === true) {
 		<div class='step1'>
 		<p class='lead'>Please start by telling us what the data in this spreadsheet is <em>primarily</em> about: </p>
 		<div class='btn-toolbar'>";
-	
 	  foreach($hxlTopConcepts as $row){
 	  	$label = "label";
 	  	$class = "class";
@@ -122,6 +121,7 @@ if($isMove === true) {
 	echo "
 		</div>
 		</div>
+		<div class='well' id='mappings'><h2 style='margin-bottom: 15px'>Mappings to HXL</h2></div>
 		";
 	
 	// Let's show the spreadsheet"
