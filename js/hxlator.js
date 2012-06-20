@@ -1,21 +1,33 @@
-// hover handler to show class/property definitions
+// hover handler to show class/property definitions in a popover
 $('.hxlclass').each(function() {
     $(this).popover({
         html: true,
     });    
 }); 
 
+
+// click handler for the class buttons - step1
 $('.hxlclass').click(function(){
-	$('.popover').hide();
 	$className = $(this).attr('data-original-title');
 	$classURI = $(this).attr('classuri');
+	step2($className, $classURI);
+});
+
+// pick the first row with data
+function step2($className, $classURI){
+	$('.popover').hide();
 	$('.shortguide').slideUp(function(){		
 		$('.step1').remove();
 		$('.shortguide').append('<div class="step2"><p class="lead selectedclass" style="visibility: none">Please click on the <strong>first</strong> row that contains data about '+$className+'(s).</p></div>');	
 		$('.shortguide').slideDown();
 	});
-
 	
+	step3($className, $classURI);	
+}
+
+
+
+function step3($className, $classURI){
 	$('.hxlatorrow').click(function(){
 		$(this).addClass('highlight');
 		$(this).addClass('first');
@@ -23,61 +35,68 @@ $('.hxlclass').click(function(){
 		
 		$('.shortguide').slideUp(function(){
 			$('.step2').remove();
-			$('.shortguide').append('<div class="step4"><p class="lead selectedclass" style="visibility: none">Please click on the <strong>last</strong> row that contains data about '+$className+'(s).</p></div>');	
-			$('.shortguide').slideDown();
+			$('.shortguide').append('<div class="step3"><p class="lead selectedclass" style="visibility: none">Please click on the <strong>last</strong> row that contains data about '+$className+'(s).</p></div>');	
+			$('.shortguide').slideDown();		
 			
-			$('.hxlatorrow').click(function(){
-				$(this).addClass('highlight');
-				$(this).addClass('last');
-				$('.hxlatorrow').unbind('click'); //only allow one click
-				
-				// highlight all rows between the selected rows:
-				$hi = false;
-				$(".hxlatorrow").each(function() {
-					if($hi){
-						$(this).addClass('highlight');
-						
-						// TODO: add classes to the cells in this row to enable us to add a click listener in the next step
-						
-						if($(this).hasClass('last')){
-							$hi = false;
-							// TODO: store the row range for the conversion process
-						}
-					}else{
-						if($(this).hasClass('highlight')){
-							$hi = true;
-						}
-					}				  
-				});	
-				
-				// go back to the top of the page:
-				$('body').scrollTop(0);		
-				
-				//next step: show properties: 
-				$('.shortguide').slideUp(function(){
-					$('.step4').remove();
-					$('.shortguide').append('<div class="step4"><p class="lead">We will now go through the <strong>first row</strong> in this block and map each element to an HXL property. In HXL, any '+$className+' can have the following properties:</p>');	
-					
-					$('#loader').show();
-					$.get('properties4class.php?classuri='+$classURI, function(data){
-						$('.shortguide').append(data);	
-						$('.hxlclass').each(function() {
-						    $(this).popover({
-						        html: true,
-						    });    
-						}); 
-						$('#loader').hide();
-						$('.shortguide').append('<p class="lead">Please select a property for which you have data in your spreadsheet. Once you have clicked the property button, click the corresponding cell in the spreadsheet.</p><p class="lead" id="furtherinstructions"></p></div>');
-						$('.shortguide').slideDown();
-						enableHXLmapping();
-					}).error(function() { 
-						hxlError('<strong>Oh snap!</strong> Our server has some hiccups. We will look into that as soon as possible.');
-					});
-				});	
-			});
+			step5($className, $classURI);				
 		});
 	});
-});
+}
+
+function step5($className, $classURI){
+	$('.hxlatorrow').click(function(){
+		$(this).addClass('highlight');
+		$(this).addClass('last');
+		$('.hxlatorrow').unbind('click'); //only allow one click
+		
+		highlightSpreadsheetBlock();	
+		
+		// go back to the top of the page:
+		$('body').scrollTop(0);		
+		
+		//next step: show properties: 
+		$('.shortguide').slideUp(function(){
+			$('.step3').remove();
+			$('.shortguide').append('<div class="step5"><p class="lead">We will now go through the <strong>first row</strong> in this block and map each element to an HXL property. In HXL, any '+$className+' can have the following properties:</p>');	
+			
+			$('#loader').show();
+			$.get('properties4class.php?classuri='+$classURI, function(data){
+				$('.shortguide').append(data);	
+				$('.hxlclass').each(function() {
+				    $(this).popover({
+				        html: true,
+				    });    
+				}); 
+				$('#loader').hide();
+				$('.shortguide').append('<p class="lead">Please select a property for which you have data in your spreadsheet. Once you have clicked the property button, click the corresponding cell in the spreadsheet.</p><p class="lead" id="furtherinstructions"></p></div>');
+				$('.shortguide').slideDown();
+				enableHXLmapping();
+			}).error(function() { 
+				hxlError('<strong>Oh snap!</strong> Our server has some hiccups. We will look into that as soon as possible.');
+			});
+		});	
+	});
+}
+
+// highlights all rows between the selected rows
+function highlightSpreadsheetBlock(){
+	
+	$hi = false;
+	$(".hxlatorrow").each(function() {
+		if($hi){
+			$(this).addClass('highlight');			
+			// TODO: add classes to the cells in this row to enable us to add a click listener in the next step			
+			if($(this).hasClass('last')){
+				$hi = false;
+				// TODO: store the row range for the conversion process
+			}
+		}else{
+			if($(this).hasClass('highlight')){
+				$hi = true;
+			}
+		}				  
+	});
+}
 
 function enableHXLmapping(){
 	// click listener for the property buttons:
