@@ -6,10 +6,13 @@ $('.hxlclass').each(function() {
 }); 
 
 $('.hxlclass').click(function(){
+	$('.popover').hide();
 	$className = $(this).attr('data-original-title');
 	$classURI = $(this).attr('classuri');
-	$('.step1').slideUp(function(){
-		$('.shortguide').append('<div class="step2"><p class="lead selectedclass" style="visibility: none">Please click on the <em>topmost</em> row that contains data for a '+$className+'.</p></div>');	
+	$('.shortguide').slideUp(function(){		
+		$('.step1').remove();
+		$('.shortguide').append('<div class="step2"><p class="lead selectedclass" style="visibility: none">Please click on the <strong>first</strong> row that contains data about '+$className+'(s).</p></div>');	
+		$('.shortguide').slideDown();
 	});
 
 	
@@ -18,8 +21,10 @@ $('.hxlclass').click(function(){
 		$(this).addClass('first');
 		$('.hxlatorrow').unbind('click'); //only allow one click
 		
-		$('.step2').slideUp(function(){
-			$('.shortguide').append('<div class="step3"><p class="lead selectedclass" style="visibility: none">Please click on the <em>last</em> row that contains data for a '+$className+'.</p></div>');	
+		$('.shortguide').slideUp(function(){
+			$('.step2').remove();
+			$('.shortguide').append('<div class="step4"><p class="lead selectedclass" style="visibility: none">Please click on the <strong>last</strong> row that contains data about '+$className+'(s).</p></div>');	
+			$('.shortguide').slideDown();
 			
 			$('.hxlatorrow').click(function(){
 				$(this).addClass('highlight');
@@ -49,8 +54,9 @@ $('.hxlclass').click(function(){
 				$('body').scrollTop(0);		
 				
 				//next step: show properties: 
-				$('.step3').slideUp(function(){
-					$('.shortguide').append('<div class="step4"><p class="lead">We will now go through the first row in this block and map each element to an HXL property. In HXL, any '+$className+' can have the following properties:</p>');	
+				$('.shortguide').slideUp(function(){
+					$('.step4').remove();
+					$('.shortguide').append('<div class="step4"><p class="lead">We will now go through the <strong>first row</strong> in this block and map each element to an HXL property. In HXL, any '+$className+' can have the following properties:</p>');	
 					
 					$('#loader').show();
 					$.get('properties4class.php?classuri='+$classURI, function(data){
@@ -62,6 +68,7 @@ $('.hxlclass').click(function(){
 						}); 
 						$('#loader').hide();
 						$('.shortguide').append('<p class="lead">Please select a property for which you have data in your spreadsheet. Once you have clicked the property button, click the corresponding cell in the spreadsheet.</p><p class="lead" id="furtherinstructions"></p></div>');
+						$('.shortguide').slideDown();
 						enableHXLmapping();
 					}).error(function() { 
 						hxlError('<strong>Oh snap!</strong> Our server has some hiccups. We will look into that as soon as possible.');
@@ -82,10 +89,11 @@ function enableHXLmapping(){
 			$('.hxlatorcell').unbind('click'); //only allow one click
 			$(this).addClass('selected');	
 			$('#furtherinstructions').html('Please repeat this pairwise maping until you have mapped all cells in your spreadsheet to a property. Note that a cell can also be mapped to several properties, so you might want to map the same cell several times. <a class="btn">Done?</a>');
-			$('#mappings').show();
 			$('#mappings').append('<p><code>This is a mapped triple.</code></p>');
-			$('.hxlprop').removeClass('btn-warning');
+			$('#mappings').slideDown(); // show the box after the first cell has been mapped
+			$('.hxlprop').removeClass('btn-warning'); 
 			$('.hxlatorcell').removeClass('selected');
+			
 			// TODO: add something to the table cell to indicate that it already has a mapping
 			enableHXLmapping();	
 		});	

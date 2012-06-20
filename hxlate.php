@@ -70,8 +70,12 @@ if($isMove === true) {
 	$workbook = load($uploadfile);
 	
 	echo "<div class='container'>
-		<h1><img src='img/loader.gif' id='loader' align='right' style='display: none' />HXLating <em>".$_FILES['userfile']['name']."</em></h2>
-		<div class='well shortguide'>
+		<div class='row'>
+		<div class='span12'>
+		<h1><img src='img/loader.gif' id='loader' align='right' style='display: none' />HXLating <em>".$_FILES['userfile']['name']."</em></h1>
+		</div>
+		</div>
+		<div class='row'><div class='shortguide span8'>
 		<div class='step1'>
 		<p class='lead'>Please start by telling us what the data in this spreadsheet is <em>primarily</em> about: </p>
 		<div class='btn-toolbar'>";
@@ -119,9 +123,10 @@ if($isMove === true) {
 	  }  
 	    	    
 	echo "
+		</div>		
 		</div>
-		</div>
-		<div class='well' id='mappings'><h2 style='margin-bottom: 15px'>Mappings to HXL</h2></div>
+		<div class='span4'><div class='well' id='mappings' style='display: none'><h2 style='margin-bottom: 15px'>Mappings to HXL</h2></div></div>
+		</div> <!-- row -->
 		";
 	
 	// Let's show the spreadsheet"
