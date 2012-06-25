@@ -26,7 +26,7 @@ function step2($className, $classURI){
 }
 
 
-
+// pick the last row with data
 function step3($className, $classURI){
 	$('.hxlatorrow').click(function(){
 		$(this).addClass('highlight');
@@ -43,6 +43,7 @@ function step3($className, $classURI){
 	});
 }
 
+// show properties for class and start mapping process
 function step5($className, $classURI){
 	$('.hxlatorrow').click(function(){
 		$(this).addClass('highlight');
@@ -98,6 +99,7 @@ function highlightSpreadsheetBlock(){
 	});
 }
 
+// adds the click listeners to the property buttons and table cells to enable the mapping
 function enableHXLmapping(){
 	// click listener for the property buttons:
 	$('.hxlprop').click(function(){
@@ -113,7 +115,7 @@ function enableHXLmapping(){
 			$('.hxlprop').removeClass('btn-warning'); 
 			$('.hxlatorcell').removeClass('selected');
 			
-			// TODO: add something to the table cell to indicate that it already has a mapping
+			// TODO: add something clever to the table cell to indicate that it already has a mapping
 			enableHXLmapping();	
 		});	
 	});
