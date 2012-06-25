@@ -11,7 +11,7 @@ $hxlTopConcepts = sparqlQuery('SELECT * WHERE {
   }
 } ORDER BY ?label');
 
-getHead(); 
+getHead("index.php"); 
 
 
 //  5MB maximum file size 

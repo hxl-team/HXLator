@@ -32,7 +32,13 @@ function sparqlQuery($query){
 }
 
 // generates the head for all pages, including highlighting of the activr page in the nav bar
-function getHead($activePage = "hxlator"){  // TODO handle active page! ?>
+function getHead($activePage = "index.php"){  
+
+$links = array("index.php" => "HXLate", 
+			   "guide.php" => "Quick Start Guide",
+			   "faq.php" => "FAQ",
+			   "contact.php" => "Contact"); 
+?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -60,18 +66,21 @@ function getHead($activePage = "hxlator"){  // TODO handle active page! ?>
     <div class="navbar navbar-fixed-top">
       <div class="navbar-inner">
         <div class="container">
-          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </a>
-          <a class="brand" href="index.php">HXLator</a>
+          <span class="brand">HXLator</span>
           <div class="nav-collapse">
             <ul class="nav">
-              <li class="active"><a href="index.php">HXLate</a></li>
-              <li><a href="guide.php">Quick Start Guide</a></li>
-			  <li><a href="faq.php">FAQ</a></li>
-              <li><a href="contact.php">Contact</a></li>
+<?php 
+
+foreach($links as $link => $text){
+	if($link === $activePage){
+		echo'
+			<li class="active"><a href="'.$link.'">'.$text.'</a></li>';
+	}else{
+		echo'
+			<li><a href="'.$link.'">'.$text.'</a></li>';	
+	}
+}
+?>           
             </ul>
           </div><!--/.nav-collapse -->
         </div>
