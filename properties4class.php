@@ -25,7 +25,7 @@
 	  $label = "proplabel";
 	  $class = "class";
 	  $description = "description";	  		  	
-	  $range = "range"; // TODO
+	  $range = "range"; 
 	  
   	  foreach($props as $row){
 	  	

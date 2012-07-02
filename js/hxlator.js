@@ -35,30 +35,30 @@ function step3($className, $classURI){
 		
 		$('.shortguide').slideUp(function(){
 			$('.step2').remove();
-			$('.shortguide').append('<div class="step3"><p class="lead selectedclass" style="visibility: none">Please click on the <strong>last</strong> row that contains data about '+$className+'(s).</p></div>');	
+			$('.shortguide').append('<div class="step3"><p class="lead selectedclass" style="visibility: none">Please click <strong>all</strong> cells in this row that identify a '+$className+'. If the whole row is about <em>one</em> '+$className+', please click the row number on the very left. </p></div>');	
 			$('.shortguide').slideDown();		
 			
-			step5($className, $classURI);				
+			step4($className, $classURI);				
 		});
 	});
+}
+
+// select the cells in the first data row that identify instances of the selected class 
+function step4($className, $classURI){
+	// TODO: highlight leftmost cell!
+	step5($className, $classURI);
 }
 
 // show properties for class and start mapping process
 function step5($className, $classURI){
 	$('.hxlatorrow').click(function(){
-		$(this).addClass('highlight');
-		$(this).addClass('last');
-		$('.hxlatorrow').unbind('click'); //only allow one click
-		
-		highlightSpreadsheetBlock();	
-		
 		// go back to the top of the page:
 		$('body').scrollTop(0);		
 		
 		//next step: show properties: 
 		$('.shortguide').slideUp(function(){
 			$('.step3').remove();
-			$('.shortguide').append('<div class="step5"><p class="lead">We will now go through the <strong>first row</strong> in this block and map each element to an HXL property. In HXL, any '+$className+' can have the following properties:</p>');	
+			$('.shortguide').append('<div class="step5"><p class="lead">In HXL, any '+$className+' can have the following properties:</p>');	
 			
 			$('#loader').show();
 			$.get('properties4class.php?classuri='+$classURI, function(data){
@@ -69,7 +69,7 @@ function step5($className, $classURI){
 				    });    
 				}); 
 				$('#loader').hide();
-				$('.shortguide').append('<p class="lead">Please select a property for which you have data in your spreadsheet. Once you have clicked the property button, click the corresponding cell in the spreadsheet.</p><p class="lead" id="furtherinstructions"></p></div>');
+				$('.shortguide').append('<p class="lead">Please select a </p><p class="lead" id="furtherinstructions"></p></div>');
 				$('.shortguide').slideDown();
 				enableHXLmapping();
 			}).error(function() { 
@@ -80,8 +80,7 @@ function step5($className, $classURI){
 }
 
 // highlights all rows between the selected rows
-function highlightSpreadsheetBlock(){
-	
+function highlightSpreadsheetBlock(){	
 	$hi = false;
 	$(".hxlatorrow").each(function() {
 		if($hi){

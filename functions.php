@@ -6,11 +6,14 @@ require_once "EasyRdf.php";
 require_once "html_tag_helpers.php";
 
 // fires the $query against our SPARQL endpoint and returns a EasyRDF Sparql_Result object 
-// (see http://www.aelius.com/njh/easyrdf/docs/EasyRdf/EasyRdf_Sparql_Result.html)
-// this is basically an ArrayIterator with some extras
+// (see http://www.aelius.com/njh/easyrdf/docs/EasyRdf/EasyRdf_Sparql_Result.html),
+// which is basically an ArrayIterator with some extras
 function sparqlQuery($query){
 
-	// these prefixes will be added to every SPARQL query - so no need to declare them over and over again
+	// these prefixes will be added to every SPARQL query - so no need to declare them over and 
+	// over again - please DO NOT add prefixes to the actual queries, this might mess things up 
+	// if we end up defining the same prefixes several times. Just put additional prefix 
+	// declarations here.
 	$prefixes = 'prefix xsd: <http://www.w3.org/2001/XMLSchema#>  
 	prefix skos: <http://www.w3.org/2004/02/skos/core#> 
 	prefix hxl:   <http://hxl.humanitarianresponse.info/ns-2012-06-14/#> 
@@ -21,7 +24,7 @@ function sparqlQuery($query){
 
   	$sparql = new EasyRdf_Sparql_Client('http://hxl.humanitarianresponse.info/sparql');
   	$query = $prefixes.$query;
-  	error_log($query);
+  	// error_log($query);
   
   	try {
     	$results = $sparql->query($query);      
@@ -49,8 +52,7 @@ $links = array("index.php" => "HXLate",
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <link href="css/bootstrap.css" rel="stylesheet">
-    <link href="css/hxlator.css" rel="stylesheet">
+    <link href="css/hxlator.css" rel="stylesheet"> 
     <link href="css/bootstrap-responsive.css" rel="stylesheet">
 
     <!--[if lt IE 9]>
@@ -64,10 +66,10 @@ $links = array("index.php" => "HXLate",
   <body>
 
     <div class="navbar navbar-fixed-top">
-      <div class="navbar-inner">
+<!--      <div class="navbar-inner"> -->
         <div class="container">
-          <span class="brand">HXLator</span>
-          <div class="nav-collapse">
+          <span class="brand"><img src="img/logo.png" /></span>
+          <div class="nav-hxlator">
             <ul class="nav">
 <?php 
 
@@ -83,7 +85,7 @@ foreach($links as $link => $text){
 ?>           
             </ul>
           </div><!--/.nav-collapse -->
-        </div>
+<!--        </div>-->
       </div>
     </div>    
 
@@ -94,6 +96,21 @@ foreach($links as $link => $text){
 // $extraJS can point to any extra js plugins in the /js folder that are required by the page that loads this header
 function getFoot($extraJS = null){ ?>
 
+	<div class="container footer">
+		<div class="row">
+		  <div class="span3"><strong>Contact</strong><br />
+		  This site is part of the HumanitarianResponse network. Write to 
+		  <a href="mailto:info@humanitarianresponse.info">info@humanitarianresponse.info</a> for more information.</div>
+		  <div class="span3"><strong>Links</strong><br />
+		  <a href="https://sites.google.com/site/hxlproject/">HXL Project</a><br />
+		  <a href="http://hxl.humanitarianresponse.info/">HXL Standard</a></div>
+		  <div class="span3"><strong>Follow HXL</strong><br />
+		  TBD</div>
+		  <div class="span3"><strong>Legal</strong><br />
+		  &copy; 2012 UNOCHA</div>
+		</div>
+	</div>
+	
     <script src="js/jquery.js"></script>
     <?php if($extraJS){
     
