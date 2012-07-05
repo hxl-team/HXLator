@@ -5,6 +5,9 @@ $('.hxlclass').each(function() {
     });    
 }); 
 
+// Testing the lookup function:
+// var jason = lookup('SELECT * WHERE { ?a ?b ?c . } LIMIT 10');
+// console.log(jason);
 
 // click handler for the class buttons - step1
 $('.hxlclass').click(function(){
@@ -124,4 +127,26 @@ function enableHXLmapping(){
 function hxlError($msg){
 	$('.shortguide').prepend('<p class="alert alert-error">'+$msg+'</p>');
 	$('#loader').hide();
+}
+
+
+// Generic SPARQL lookup function, returns JS object 
+function lookup(sparqlQuery){
+	console.log(sparqlQuery);
+	var endpoint = "http://hxl.humanitarianresponse.info/sparql";	
+	return $.ajax({
+	    url: endpoint,
+	    headers: {
+	    	Accept: "application/sparql-results+json", 
+	    },
+	    data: { 
+	    	query: sparqlQuery 
+	    },	    
+	    success: function(json) {
+	    	return json;
+	    },
+	    error: function(jqXHR, textStatus, errorThrown){
+	    	console.log(textStatus);
+	    }	   
+	});	
 }
