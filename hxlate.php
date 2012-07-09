@@ -77,8 +77,12 @@ if($isMove === true) {
 		</div>
 		<div class='row'><div class='shortguide span8'>
 		<div class='step1'>
-		<p class='lead'>Please start by telling us what the data in this spreadsheet is <em>primarily</em> about: </p>
-		<div class='btn-toolbar'>";
+		<p class='lead'>Please start by telling us what the data in this spreadsheet is <em>primarily</em> about (hover for explanations): </p>
+		
+		<ul class='nav nav-pills nav-stacked'>
+		  ";
+	
+		
 	  foreach($hxlTopConcepts as $row){
 	  	$label = "label";
 	  	$class = "class";
@@ -98,35 +102,40 @@ if($isMove === true) {
 	  	
 	  	// create a dropdown menu if that class has subclasses:
 	  	if ($subclasses->numRows() > 0){
-	  		print '	
-	  		<div class="btn-group"><button class="btn hxlclass" href="#" rel="popover" title="'.$row->$label.'" data-content="'.$row->$description.'<p style=\'margin-top:10px\'><span class=\'label label-info\'>Click to show more specific subclasses</span>" classuri="'.shorten($row->$class).'">'.multiply($row->$label).' <b class="icon-info-sign"></b></button>
-	  		    <button class="btn dropdown-toggle" data-toggle="dropdown">
-	  		        <span class="caret"></span>
-	  		    </button>
-	  			<ul class="dropdown-menu">
-	  		';
-	  		
-	  		foreach ($subclasses as $subclass) {
-					print '     <li><a class="hxlclass" href="#" rel="popover" title="'.$subclass->$label.'" data-content="'.$subclass->$description.'" classuri="'.shorten($row->$class).'">'.multiply($subclass->$label).' <b class="icon-info-sign"></b></a></li>
-	   				';		  			
-	  		}
-	  		
-	  		print '</ul>
-	  		</div>
-	  		</div><!-- step1 -->
-	  		';
+//	  		print '	
+//	  		<div class="btn-group"><button class="btn hxlclass" href="#" rel="popover" title="'.$row->$label.'" data-content="'.$row->$description.'<p style=\'margin-top:10px\'><span class=\'label label-info\'>Click to show more specific subclasses</span>" classuri="'.shorten($row->$class).'">'.multiply($row->$label).' <b class="icon-info-sign"></b></button>
+//	  		    <button class="btn dropdown-toggle" data-toggle="dropdown">
+//	  		        <span class="caret"></span>
+//	  		    </button>
+//	  			<ul class="dropdown-menu">
+//	  		';
+//	  		
+//	  		foreach ($subclasses as $subclass) {
+//					print '     <li><a class="hxlclass" href="#" rel="popover" title="'.$subclass->$label.'" data-content="'.$subclass->$description.'" classuri="'.shorten($row->$class).'">'.multiply($subclass->$label).' <b class="icon-info-sign"></b></a></li>
+//	   				';		  			
+//	  		}
+//	  		
+//	  		print '</ul>
+//	  		</div>
+//	  		</div><!-- step1 -->
+//	  		';
+			print '<li><a href="#" class="hxlclass" rel="popover" title="'.$row->$label.'" data-content="'.$row->$description.'" classuri="'.shorten($row->$class).'">'.multiply($row->$label).' <b class="icon-circle-arrow-right pull-right"></b></a></li>';
 	  		
 	  	} else {	  	// if there are no subclasses:	  		  
-	  		print '	<div class="btn-group"><button class="btn hxlclass" href="#" rel="popover" title="'.$row->$label.'" data-content="'.$row->$description.'" classuri="'.shorten($row->$class).'">'.multiply($row->$label).' <b class="icon-info-sign"></b></button></div>
-	  		';
+
+			print '<li><a href="#" class="hxlclass selectable" rel="popover" title="'.$row->$label.'" data-content="'.$row->$description.'" classuri="'.shorten($row->$class).'">'.multiply($row->$label).' </a></li>';
+
+//	  		print '	<div class="btn-group"><button class="btn hxlclass" href="#" rel="popover" title="'.$row->$label.'" data-content="'.$row->$description.'" classuri="'.shorten($row->$class).'">'.multiply($row->$label).' <b class="icon-info-sign"></b></button></div>
+//	  		';
 	  	}		  		
 	  }  
 	    	    
-	echo "
-		</div>		
+	echo "	
+			</ul>
 		</div>
 		<div class='span4'><div class='well' id='mappings' style='display: none'><h2 style='margin-bottom: 15px'>Mappings to HXL</h2></div></div>
 		</div> <!-- row -->
+		</div> <!-- container -->
 		";
 	
 	// Let's show the spreadsheet"
@@ -267,7 +276,7 @@ function createReaderForFile($pFilename) {
 
 
 // load the footer, along with the extra JS required for this page
-getFoot(array("bootstrap-tooltip.js", "bootstrap-popover.js", "bootstrap-dropdown.js", "hxlator.js", ));
+getFoot(array("bootstrap-tooltip.js", "bootstrap-popover.js", "bootstrap-dropdown.js",  "hxlhistory.js", "hxlator.js", ));
 
 function makeTableHead($sheetData){
 	echo"
