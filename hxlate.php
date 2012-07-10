@@ -3,14 +3,6 @@ header("Access-Control-Allow-Origin: *");
 
 include_once('functions.php');
 
-$hxlTopConcepts = sparqlQuery('SELECT * WHERE {  
-  GRAPH <http://hxl.humanitarianresponse.info/data/vocabulary/latest/> {     
-    ?class hxl:topLevelConcept "true"^^xsd:boolean ;        
-           skos:prefLabel ?label  ;     
-           rdfs:comment ?description .
-  }
-} ORDER BY ?label');
-
 getHead("index.php"); 
 
 
@@ -77,61 +69,12 @@ if($isMove === true) {
 		</div>
 		<div class='row'><div class='shortguide span8'>
 		<div class='step1'>
-		<p class='lead'>Please start by telling us what the data in this spreadsheet is <em>primarily</em> about (hover for explanations): </p>
+		<p class='lead'>What is the data in this spreadsheet <em>primarily</em> about? Hover for explanations: </p>";
 		
-		<ul class='nav nav-pills nav-stacked'>
-		  ";
 	
+	echo getClassPills();
 		
-	  foreach($hxlTopConcepts as $row){
-	  	$label = "label";
-	  	$class = "class";
-	  	$description = "description";	  		  	
-	  	
-	  	$subclasses = sparqlQuery('prefix skos: <http://www.w3.org/2004/02/skos/core#> 
-	  	prefix hxl:   <http://hxl.humanitarianresponse.info/ns-2012-06-14/#> 
-	  	prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
-	  	
-	  	SELECT DISTINCT * WHERE {  
-	  	  GRAPH <http://hxl.humanitarianresponse.info/data/vocabulary/latest/> {     
-	  	    ?subclass rdfs:subClassOf+ <'.$row->$class.'> ;        
-	  	           skos:prefLabel ?label  ;     
-	  	           rdfs:comment ?description .
-	  	  }
-	  	} ORDER BY ?label');
-	  	
-	  	// create a dropdown menu if that class has subclasses:
-	  	if ($subclasses->numRows() > 0){
-//	  		print '	
-//	  		<div class="btn-group"><button class="btn hxlclass" href="#" rel="popover" title="'.$row->$label.'" data-content="'.$row->$description.'<p style=\'margin-top:10px\'><span class=\'label label-info\'>Click to show more specific subclasses</span>" classuri="'.shorten($row->$class).'">'.multiply($row->$label).' <b class="icon-info-sign"></b></button>
-//	  		    <button class="btn dropdown-toggle" data-toggle="dropdown">
-//	  		        <span class="caret"></span>
-//	  		    </button>
-//	  			<ul class="dropdown-menu">
-//	  		';
-//	  		
-//	  		foreach ($subclasses as $subclass) {
-//					print '     <li><a class="hxlclass" href="#" rel="popover" title="'.$subclass->$label.'" data-content="'.$subclass->$description.'" classuri="'.shorten($row->$class).'">'.multiply($subclass->$label).' <b class="icon-info-sign"></b></a></li>
-//	   				';		  			
-//	  		}
-//	  		
-//	  		print '</ul>
-//	  		</div>
-//	  		</div><!-- step1 -->
-//	  		';
-			print '<li><a href="#" class="hxlclass" rel="popover" title="'.$row->$label.'" data-content="'.$row->$description.'" classuri="'.shorten($row->$class).'">'.multiply($row->$label).' <b class="icon-circle-arrow-right pull-right"></b></a></li>';
-	  		
-	  	} else {	  	// if there are no subclasses:	  		  
-
-			print '<li><a href="#" class="hxlclass selectable" rel="popover" title="'.$row->$label.'" data-content="'.$row->$description.'" classuri="'.shorten($row->$class).'">'.multiply($row->$label).' </a></li>';
-
-//	  		print '	<div class="btn-group"><button class="btn hxlclass" href="#" rel="popover" title="'.$row->$label.'" data-content="'.$row->$description.'" classuri="'.shorten($row->$class).'">'.multiply($row->$label).' <b class="icon-info-sign"></b></button></div>
-//	  		';
-	  	}		  		
-	  }  
-	    	    
-	echo "	
-			</ul>
+	echo "
 		</div>
 		<div class='span4'><div class='well' id='mappings' style='display: none'><h2 style='margin-bottom: 15px'>Mappings to HXL</h2></div></div>
 		</div> <!-- row -->
@@ -330,12 +273,161 @@ function makeTableBody($sheetData){
 				</tbody>";
 }
 
+
+
+
+
+
+// function to show horziontally stacked pills of the HXL class hierarchy that fold out to the right, 
+// revealing a classes subclasses when the corresponding pill is clicked
+//function getClassPills($hxlClasses = null, $superclass = null, $pills = ""){
+//	
+//	if($hxlClasses == null){	
+//		$hxlClasses = sparqlQuery('SELECT  ?subclass ?label ?description ?super ?top (COUNT(?subsub) as ?subsubCount) WHERE {  
+//	  		?top hxl:topLevelConcept "true"^^xsd:boolean .
+//			?subclass rdfs:subClassOf* ?top ;                          
+//	        	rdfs:subClassOf ?super ;                                    
+//				skos:prefLabel ?label  ;     
+//		  		rdfs:comment ?description .
+//	  		OPTIONAL { ?subsub rdfs:subClassOf ?subclass }
+//		} GROUP BY ?subclass ?label ?description ?super ?top ORDER BY ?label ');
+//	}
+//	
+	// start with the top-level pills:
+//	$thisPill = "<ul class='nav nav-pills nav-stacked hxl-pills'>
+//		  ";
+//	
+//	$label = "label";
+//	$class = "subclass";
+//	$description = "description";	  	
+//	$count = "subsubCount";	  	
+//	$super = "super";	  	
+//	$top = "top";
+//	
+//	foreach($hxlClasses as $row){	  	
+//			
+//	  	if($superclass == null && $row->$class == $row->$top){
+//		if(($superclass == null && $row->$class == $row->$top)  // toplevel classes
+//			|| $row->$super == $superclass){					// subclasses of $superclass
+//						
+//		  	if ($row->$count != "0"){ 	// if there are any subclasses:
+	//	  		print '	
+	//	  		<div class="btn-group"><button class="btn hxlclass" href="#" rel="popover" title="'.$row->$label.'" data-content="'.$row->$description.'<p style=\'margin-top:10px\'><span class=\'label label-info\'>Click to show more specific subclasses</span>" classuri="'.shorten($row->$class).'">'.multiply($row->$label).' <b class="icon-info-sign"></b></button>
+	//	  		    <button class="btn dropdown-toggle" data-toggle="dropdown">
+	//	  		        <span class="caret"></span>
+	//	  		    </button>
+	//	  			<ul class="dropdown-menu">
+	//	  		';
+	//	  		
+	//	  		foreach ($subclasses as $subclass) {
+	//					print '     <li><a class="hxlclass" href="#" rel="popover" title="'.$subclass->$label.'" data-content="'.$subclass->$description.'" classuri="'.shorten($row->$class).'">'.multiply($subclass->$label).' <b class="icon-info-sign"></b></a></li>
+	//	   				';		  			
+	//	  		}
+	//	  		
+	//	  		print '</ul>
+	//	  		</div>
+	//	  		</div><!-- step1 -->
+	//	  		';
+//				$thisPill .= '<li><a href="#" class="hxlclass" rel="popover" title="'.$row->$label.'" data-content="'.$row->$description.' <br /><small><strong>Click to view '.$row->$count.' subclasses.<strong></small>" classuri="'.shorten($row->$class).'">'.multiply($row->$label).' <span class="badge pull-right">'.$row->$count.'</span></a></li>';
+//								
+//		  	} else {	  	// if there are no subclasses:	  		  
+//	
+//				$thisPill .= '<li><a href="#" class="hxlclass selectable" rel="popover" title="'.$row->$label.'" data-content="'.$row->$description.'" classuri="'.shorten($row->$class).'">'.multiply($row->$label).' </a></li>';
+//	
+	//	  		print '	<div class="btn-group"><button class="btn hxlclass" href="#" rel="popover" title="'.$row->$label.'" data-content="'.$row->$description.'" classuri="'.shorten($row->$class).'">'.multiply($row->$label).' <b class="icon-info-sign"></b></button></div>
+	//	  		';
+//		  	}	
+//		  	}	  		
+//	  }  
+//	  	    	    
+//	$thisPill .= "</ul>";	
+//	
+//	$pills .= $thisPill;
+//	
+	// recursion
+//	foreach($hxlClasses as $row){
+//		if ((($row->$class == $row->$top)  // toplevel classes
+//			|| $row->$super == $superclass) && $row->$count != "0"){  					
+//			error_log(" ---- Going into recursion for ".$row->$class);
+//			$pills = getClassPills($hxlClasses, $row->$class, $pills);	
+//		}else{
+//			error_log("NO recursion for ".$row->$class);
+//		}		
+//	}
+//	
+//	return $pills;	
+//}
+
+
+function getClassPills($superclass = null){
+	
+	$recursionClasses = array();
+	
+	if($superclass == null){
+		$hxlClasses = sparqlQuery('SELECT  ?class ?label ?description (COUNT(?subsub) as ?subsubCount) WHERE {  
+	  		?class  hxl:topLevelConcept "true"^^xsd:boolean ;
+				skos:prefLabel ?label  ;     
+			  	rdfs:comment ?description .
+		  	OPTIONAL { ?subsub rdfs:subClassOf ?class }
+		} GROUP BY ?class ?label ?description ORDER BY ?label');
+	} else {
+		$hxlClasses = sparqlQuery('SELECT  ?class ?label ?description (COUNT(?subsub) as ?subsubCount) WHERE {  
+		  	?class  rdfs:subClassOf <'.$superclass.'> ;
+				skos:prefLabel ?label  ;     
+			  	rdfs:comment ?description .
+		  	OPTIONAL { ?subsub rdfs:subClassOf ?class }
+		} GROUP BY ?class ?label ?description ORDER BY ?label ');			
+	}
+	
+	
+	$label = "label";
+	$class = "class";
+	$description = "description";	  	
+	$count = "subsubCount";	  			
+				
+	$pills = '<ul class="nav nav-pills nav-stacked hxl-pills">
+	';
+	
+	foreach($hxlClasses as $hxlClass){	  	
+		$pills .= '<li><a href="#" class="hxlclass" rel="popover" title="'.$hxlClass->$label.'" data-content="'.$hxlClass->$description;
+		
+		if($hxlClass->$count != "0") { $pills .= ' <br /><small><strong>Click to view '.$hxlClass->$count.' subclasses.<strong></small>'; }
+		
+		$pills .= '" classuri="'.shorten($hxlClass->$class).'">'.multiply($hxlClass->$label);
+		
+		if($hxlClass->$count != "0") { 
+			$pills .= ' <span class="badge pull-right">'.$hxlClass->$count.'</span>'; 
+			// we're gonna show subclasses for this one:
+			$recursionClasses[] = $hxlClass->$class;
+		}
+		
+		$pills .= '</a></li>';
+	}
+	
+	$pills .= '</ul>';
+	
+	foreach ($recursionClasses as $recClass) {
+		$pills .= getClassPills($recClass);
+	}
+	
+	return $pills;
+}
+
+
+
+
+
+
+// ------- some convenience functions
+
 function shorten($uri){
 	$parts = explode("#", $uri);
 	return "hxl:".$parts[1];
 }
 
+
 function showError($msg){
 	echo '<div class="container"><div class="alert alert-error"><h2>Oops.</h2>'.$msg.'</div>';
 }
+
 ?>
