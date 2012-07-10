@@ -66,7 +66,6 @@ $links = array("index.php" => "HXLate",
   <body>
 
     <div class="navbar navbar-fixed-top">
-<!--      <div class="navbar-inner"> -->
         <div class="container">
           <span class="brand"><img src="img/logo.png" /></span>
           <div class="nav-hxlator">
@@ -84,8 +83,7 @@ foreach($links as $link => $text){
 }
 ?>           
             </ul>
-          </div><!--/.nav-collapse -->
-<!--        </div>-->
+          </div>
       </div>
     </div>    
 

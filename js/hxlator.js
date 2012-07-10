@@ -10,10 +10,17 @@ $('.hxlclass').each(function() {
 // console.log(jason);
 
 // click handler for the class buttons - step1
-$('.hxlclass').click(function(){
+$('.hxlclass-selectable').click(function(){
 	$className = $(this).attr('data-original-title');
 	$classURI = $(this).attr('classuri');
 	step2($className, $classURI);
+});
+
+// click handler to expand the subclasses of a given HXL class:
+$('.hxlclass-expandable').click(function(){
+	$(this).parent().addClass('active');
+	$subclassesof = $(this).attr('classuri');
+	$('div[subclassesof*="'+$subclassesof+'"]').removeClass('hxl-hidden');
 });
 
 // pick the first row with data

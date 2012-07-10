@@ -61,25 +61,28 @@ if($isMove === true) {
 	// using IOFactory to identify the format
 	$workbook = load($uploadfile);
 	
-	echo "<div class='container'>
-		<div class='row'>
-		<div class='span12'>
-		<h1><img src='img/loader.gif' id='loader' align='right' style='display: none' />HXLating <em>".$_FILES['userfile']['name']."</em></h1>
-		</div>
-		</div>
-		<div class='row'><div class='shortguide span8'>
-		<div class='step1'>
-		<p class='lead'>What is the data in this spreadsheet <em>primarily</em> about? Hover for explanations: </p>";
+	echo '<div class="container">
+			<div class="row">
+			<div class="span12">
+			<h1><img src="img/loader.gif" id="loader" align="right" style="display: none" />HXLating <em>'.$_FILES["userfile"]["name"].'</em></h1>
+			</div>
+			</div>
+			</div>
+			<div class="shortguide container">
+			<div class="step1">
+			<p class="lead">What is the data in this spreadsheet <em>primarily</em> about? Hover for explanations: </p>
+						
+			<div class="row">';
 		
-	
 	echo getClassPills();
 		
-	echo "
+	echo '
 		</div>
-		<div class='span4'><div class='well' id='mappings' style='display: none'><h2 style='margin-bottom: 15px'>Mappings to HXL</h2></div></div>
-		</div> <!-- row -->
-		</div> <!-- container -->
-		";
+		</div>
+		<!--<div class="span4"><div class="well" id="mappings" style="display: none"><h2 style="margin-bottom: 15px">Mappings to HXL</h2></div></div>-->
+		</div> <!-- shortguide -->
+		<div class="container">
+		';
 	
 	// Let's show the spreadsheet"
 	// iterate once for the tabs (i.e., one tab per sheet in the workbook)
@@ -370,13 +373,21 @@ function getClassPills($superclass = null){
 			  	rdfs:comment ?description .
 		  	OPTIONAL { ?subsub rdfs:subClassOf ?class }
 		} GROUP BY ?class ?label ?description ORDER BY ?label');
+		
+		$pills = '<div class="span3"><ul class="nav nav-pills nav-stacked hxl-pills">
+		';
+		
 	} else {
 		$hxlClasses = sparqlQuery('SELECT  ?class ?label ?description (COUNT(?subsub) as ?subsubCount) WHERE {  
 		  	?class  rdfs:subClassOf <'.$superclass.'> ;
 				skos:prefLabel ?label  ;     
 			  	rdfs:comment ?description .
 		  	OPTIONAL { ?subsub rdfs:subClassOf ?class }
-		} GROUP BY ?class ?label ?description ORDER BY ?label ');			
+		} GROUP BY ?class ?label ?description ORDER BY ?label ');
+		
+		$pills = '<div class="span3 hxl-hidden" subclassesof="'.shorten($superclass).'"><ul class="nav nav-pills nav-stacked hxl-pills">
+		';
+					
 	}
 	
 	
@@ -385,26 +396,26 @@ function getClassPills($superclass = null){
 	$description = "description";	  	
 	$count = "subsubCount";	  			
 				
-	$pills = '<ul class="nav nav-pills nav-stacked hxl-pills">
-	';
+	
 	
 	foreach($hxlClasses as $hxlClass){	  	
-		$pills .= '<li><a href="#" class="hxlclass" rel="popover" title="'.$hxlClass->$label.'" data-content="'.$hxlClass->$description;
-		
-		if($hxlClass->$count != "0") { $pills .= ' <br /><small><strong>Click to view '.$hxlClass->$count.' subclasses.<strong></small>'; }
-		
-		$pills .= '" classuri="'.shorten($hxlClass->$class).'">'.multiply($hxlClass->$label);
-		
 		if($hxlClass->$count != "0") { 
-			$pills .= ' <span class="badge pull-right">'.$hxlClass->$count.'</span>'; 
+			$pills .= '<li><a href="#" class="hxlclass hxlclass-expandable" rel="popover" title="'.$hxlClass->$label.'" data-content="'.$hxlClass->$description.' <br /><small><strong>Click to view '.$hxlClass->$count.' subclasses.<strong></small>" classuri="'.shorten($hxlClass->$class).'">'.multiply($hxlClass->$label).'<span class="badge pull-right">'.$hxlClass->$count.'</span>'; 
 			// we're gonna show subclasses for this one:
 			$recursionClasses[] = $hxlClass->$class;
+		}else{
+			$pills .= '<li><a href="#" class="hxlclass hxlclass-selectable" rel="popover" title="'.$hxlClass->$label.'" data-content="'.$hxlClass->$description.'" classuri="'.shorten($hxlClass->$class).'">'.multiply($hxlClass->$label);
 		}
 		
 		$pills .= '</a></li>';
 	}
 	
-	$pills .= '</ul>';
+	if($superclass != null){
+		$pills .= '<li><a href="#" class="hxlclass hxlclass-selectable" rel="popover" title="Mix of different '.multiply($superclass).'" data-content="Select this option if you have serveral of those classes in your data." classuri="'.shorten($superclass).'">It is a <em>mix</em> of those.</a></li>';
+	}
+	
+	$pills .= '</ul></div>
+	';
 	
 	foreach ($recursionClasses as $recClass) {
 		$pills .= getClassPills($recClass);
