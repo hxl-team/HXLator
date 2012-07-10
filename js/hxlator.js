@@ -1,9 +1,9 @@
 // hover handler to show class/property definitions in a popover
-$('.hxlclass').each(function() {
-    $(this).popover({
-        html: true,
-    });    
-}); 
+//$('.hxlclass').each(function() {
+//    $(this).popover({
+//        html: true,
+//    });    
+//}); 
 
 // Testing the lookup function:
 // var jason = lookup('SELECT * WHERE { ?a ?b ?c . } LIMIT 10');
@@ -18,7 +18,19 @@ $('.hxlclass-selectable').click(function(){
 
 // click handler to expand the subclasses of a given HXL class:
 $('.hxlclass-expandable').click(function(){
+	// 'un-highlight' all other LIs in this UL and hide the sub-class div
+	
+	// TODO this only works for going one "level" back so far 
+	$(this).parent().siblings('.solo').each(function(){
+		$(this).removeClass('active');	
+		$subclassesof = $(this).children().first().attr('classuri');
+		$('div[subclassesof*="'+$subclassesof+'"]').addClass('hxl-hidden');
+	});
+	
+	// highlight the clicked one:
 	$(this).parent().addClass('active');
+	
+	// show the div containing the subclasses:
 	$subclassesof = $(this).attr('classuri');
 	$('div[subclassesof*="'+$subclassesof+'"]').removeClass('hxl-hidden');
 });

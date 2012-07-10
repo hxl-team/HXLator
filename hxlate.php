@@ -400,18 +400,19 @@ function getClassPills($superclass = null){
 	
 	foreach($hxlClasses as $hxlClass){	  	
 		if($hxlClass->$count != "0") { 
-			$pills .= '<li><a href="#" class="hxlclass hxlclass-expandable" rel="popover" title="'.$hxlClass->$label.'" data-content="'.$hxlClass->$description.' <br /><small><strong>Click to view '.$hxlClass->$count.' subclasses.<strong></small>" classuri="'.shorten($hxlClass->$class).'">'.multiply($hxlClass->$label).'<span class="badge pull-right">'.$hxlClass->$count.'</span>'; 
+			$pills .= '<li class="solo"><a href="#" class="hxlclass hxlclass-expandable" rel="popover" title="'.$hxlClass->$label.'" data-content="'.$hxlClass->$description.' <br /><small><strong>Click to view '.$hxlClass->$count.' subclasses.<strong></small>" classuri="'.shorten($hxlClass->$class).'">'.multiply($hxlClass->$label).'<span class="badge badge-inverse pull-right">'.$hxlClass->$count.'</span>'; 
 			// we're gonna show subclasses for this one:
 			$recursionClasses[] = $hxlClass->$class;
 		}else{
-			$pills .= '<li><a href="#" class="hxlclass hxlclass-selectable" rel="popover" title="'.$hxlClass->$label.'" data-content="'.$hxlClass->$description.'" classuri="'.shorten($hxlClass->$class).'">'.multiply($hxlClass->$label);
+			$pills .= '<li class="solo"><a href="#" class="hxlclass hxlclass-selectable" rel="popover" title="'.$hxlClass->$label.'" data-content="'.$hxlClass->$description.'" classuri="'.shorten($hxlClass->$class).'">'.multiply($hxlClass->$label);
 		}
 		
 		$pills .= '</a></li>';
 	}
-	
+
+	// TODO selection doesn't work yet
 	if($superclass != null){
-		$pills .= '<li><a href="#" class="hxlclass hxlclass-selectable" rel="popover" title="Mix of different '.multiply($superclass).'" data-content="Select this option if you have serveral of those classes in your data." classuri="'.shorten($superclass).'">It is a <em>mix</em> of those.</a></li>';
+		$pills .= '<li><a href="#" class="hxlclass hxlclass-selectable" rel="popover" title="Mix of different '.multiply($superclass).'" data-content="Select this option if you have serveral of those classes in your data." classuri="'.shorten($superclass).'">It is a <em>mix</em> of those. <i class="icon-random pull-right"></i></a></li>';
 	}
 	
 	$pills .= '</ul></div>
