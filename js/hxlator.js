@@ -2,6 +2,7 @@
 $('.hxlclass').each(function() {
     $(this).popover({
         html: true,
+        placement: 'bottom'
     });    
 }); 
 
@@ -10,10 +11,31 @@ $('.hxlclass').each(function() {
 // console.log(jason);
 
 // click handler for the class buttons - step1
-$('.hxlclass').click(function(){
+$('.hxlclass-selectable').click(function(){
 	$className = $(this).attr('data-original-title');
 	$classURI = $(this).attr('classuri');
+	console.log($className);
+	console.log($classURI);
 	step2($className, $classURI);
+});
+
+// click handler to expand the subclasses of a given HXL class:
+$('.hxlclass-expandable').click(function(){
+	// 'un-highlight' all other LIs in this UL and hide the sub-class div
+	
+	// TODO this only works for going one "level" back so far 
+	$(this).parent().siblings('.solo').each(function(){
+		$(this).removeClass('active');	
+		$subclassesof = $(this).children().first().attr('classuri');
+		$('div[subclassesof*="'+$subclassesof+'"]').addClass('hxl-hidden');
+	});
+	
+	// highlight the clicked one:
+	$(this).parent().addClass('active');
+	
+	// show the div containing the subclasses:
+	$subclassesof = $(this).attr('classuri');
+	$('div[subclassesof*="'+$subclassesof+'"]').removeClass('hxl-hidden');	
 });
 
 // pick the first row with data
