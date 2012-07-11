@@ -33,7 +33,7 @@ if ($isFile) {//  sanatize file name
         if(preg_match($rEFileTypes, strrchr($safe_filename, '.'))) {
         	$isMove = move_uploaded_file ( $_FILES['userfile']['tmp_name'], $uploadfile);
         } else {
-        	showError("<strong>".$_FILES['userfile']['name']."</strong> does not seem to be a spreadsheet.");
+        	showError('<strong>'.$_FILES['userfile']['name'].'</strong> does not seem to be a spreadsheet (<code>.xls</code>, <code>.xlsx</code>, <code>.ods</code>, <code>.csv</code>, and the like). Please <a href="index.php" class="btn">go back</a> and try a different file.</p><p>If you are sure it is a spreadsheet, there is something wrong with the HXLator; in that case, please <a class="btn" href="contact.php">get in touch with us</a>, so we can fix it.');
         }	
     } else {
     	showError("<strong>".$_FILES['userfile']['name']."</strong> is too large. The limit for uploaded files is <strong>5MB</strong>.");
@@ -41,7 +41,7 @@ if ($isFile) {//  sanatize file name
     
 } else {
 
-	showError("There is something wrong with <strong>".$_FILES['userfile']['name']."</strong>.");
+	showError('You\'ll need to <a class="btn" href="index.php">upload a spreadsheet</a> to HXLate.');
 
 }
 
@@ -190,7 +190,7 @@ function createReaderForFile($pFilename) {
 					// all files including Excel files etc.
 					break;
 				default:
-					showError('This file does not seem to be a spreadsheet.</p><p>If you are sure it is, there is something wrong with the HXLator; in that case, please <a href="contact.php">get in touch with us</a>, so we can fix it.'); 
+					showError('This file does not seem to be a spreadsheet.</p><p>If you are sure it is, there is something wrong with the HXLator; in that case, please <a class="btn" href="contact.php">get in touch with us</a>, so we can fix it.'); 
 					break;
 			}
 
@@ -216,7 +216,8 @@ function createReaderForFile($pFilename) {
 			}
 		}
 
-    	print '<p>This file does not seem to be a spreadsheet.</p>'; // TODO make this nicer
+    	showError('This file does not seem to be a spreadsheet.</p><p>If you are sure it is, there is something wrong with the HXLator; in that case, please <a class="btn" href="contact.php">get in touch with us</a>, so we can fix it.'); 
+    	 
 	}	//	function createReaderForFile()
 
 
@@ -283,85 +284,6 @@ function makeTableBody($sheetData){
 
 // function to show horziontally stacked pills of the HXL class hierarchy that fold out to the right, 
 // revealing a classes subclasses when the corresponding pill is clicked
-//function getClassPills($hxlClasses = null, $superclass = null, $pills = ""){
-//	
-//	if($hxlClasses == null){	
-//		$hxlClasses = sparqlQuery('SELECT  ?subclass ?label ?description ?super ?top (COUNT(?subsub) as ?subsubCount) WHERE {  
-//	  		?top hxl:topLevelConcept "true"^^xsd:boolean .
-//			?subclass rdfs:subClassOf* ?top ;                          
-//	        	rdfs:subClassOf ?super ;                                    
-//				skos:prefLabel ?label  ;     
-//		  		rdfs:comment ?description .
-//	  		OPTIONAL { ?subsub rdfs:subClassOf ?subclass }
-//		} GROUP BY ?subclass ?label ?description ?super ?top ORDER BY ?label ');
-//	}
-//	
-	// start with the top-level pills:
-//	$thisPill = "<ul class='nav nav-pills nav-stacked hxl-pills'>
-//		  ";
-//	
-//	$label = "label";
-//	$class = "subclass";
-//	$description = "description";	  	
-//	$count = "subsubCount";	  	
-//	$super = "super";	  	
-//	$top = "top";
-//	
-//	foreach($hxlClasses as $row){	  	
-//			
-//	  	if($superclass == null && $row->$class == $row->$top){
-//		if(($superclass == null && $row->$class == $row->$top)  // toplevel classes
-//			|| $row->$super == $superclass){					// subclasses of $superclass
-//						
-//		  	if ($row->$count != "0"){ 	// if there are any subclasses:
-	//	  		print '	
-	//	  		<div class="btn-group"><button class="btn hxlclass" href="#" rel="popover" title="'.$row->$label.'" data-content="'.$row->$description.'<p style=\'margin-top:10px\'><span class=\'label label-info\'>Click to show more specific subclasses</span>" classuri="'.shorten($row->$class).'">'.multiply($row->$label).' <b class="icon-info-sign"></b></button>
-	//	  		    <button class="btn dropdown-toggle" data-toggle="dropdown">
-	//	  		        <span class="caret"></span>
-	//	  		    </button>
-	//	  			<ul class="dropdown-menu">
-	//	  		';
-	//	  		
-	//	  		foreach ($subclasses as $subclass) {
-	//					print '     <li><a class="hxlclass" href="#" rel="popover" title="'.$subclass->$label.'" data-content="'.$subclass->$description.'" classuri="'.shorten($row->$class).'">'.multiply($subclass->$label).' <b class="icon-info-sign"></b></a></li>
-	//	   				';		  			
-	//	  		}
-	//	  		
-	//	  		print '</ul>
-	//	  		</div>
-	//	  		</div><!-- step1 -->
-	//	  		';
-//				$thisPill .= '<li><a href="#" class="hxlclass" rel="popover" title="'.$row->$label.'" data-content="'.$row->$description.' <br /><small><strong>Click to view '.$row->$count.' subclasses.<strong></small>" classuri="'.shorten($row->$class).'">'.multiply($row->$label).' <span class="badge pull-right">'.$row->$count.'</span></a></li>';
-//								
-//		  	} else {	  	// if there are no subclasses:	  		  
-//	
-//				$thisPill .= '<li><a href="#" class="hxlclass selectable" rel="popover" title="'.$row->$label.'" data-content="'.$row->$description.'" classuri="'.shorten($row->$class).'">'.multiply($row->$label).' </a></li>';
-//	
-	//	  		print '	<div class="btn-group"><button class="btn hxlclass" href="#" rel="popover" title="'.$row->$label.'" data-content="'.$row->$description.'" classuri="'.shorten($row->$class).'">'.multiply($row->$label).' <b class="icon-info-sign"></b></button></div>
-	//	  		';
-//		  	}	
-//		  	}	  		
-//	  }  
-//	  	    	    
-//	$thisPill .= "</ul>";	
-//	
-//	$pills .= $thisPill;
-//	
-	// recursion
-//	foreach($hxlClasses as $row){
-//		if ((($row->$class == $row->$top)  // toplevel classes
-//			|| $row->$super == $superclass) && $row->$count != "0"){  					
-//			error_log(" ---- Going into recursion for ".$row->$class);
-//			$pills = getClassPills($hxlClasses, $row->$class, $pills);	
-//		}else{
-//			error_log("NO recursion for ".$row->$class);
-//		}		
-//	}
-//	
-//	return $pills;	
-//}
-
-
 function getClassPills($superclass = null, $superclassLabel = null){
 	
 	$recursionClasses = array();
@@ -410,7 +332,6 @@ function getClassPills($superclass = null, $superclassLabel = null){
 		$pills .= '</a></li>';
 	}
 
-	// TODO selection doesn't work yet
 	if($superclass != null){
 		$pills .= '<li><a href="#" class="hxlclass hxlclass-selectable" rel="popover" title="Different '.multiply($superclassLabel).'" data-content="Select this option if you have a mix of different '.multiply($superclassLabel).' in your data." classuri="'.shorten($superclass).'">It is a <em>mix</em> of those. <i class="icon-random pull-right"></i></a></li>';
 	}

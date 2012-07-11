@@ -35,7 +35,7 @@ $('.hxlclass-expandable').click(function(){
 	
 	// show the div containing the subclasses:
 	$subclassesof = $(this).attr('classuri');
-	$('div[subclassesof*="'+$subclassesof+'"]').removeClass('hxl-hidden');
+	$('div[subclassesof*="'+$subclassesof+'"]').removeClass('hxl-hidden');	
 });
 
 // pick the first row with data
