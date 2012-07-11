@@ -1,9 +1,10 @@
 // hover handler to show class/property definitions in a popover
-//$('.hxlclass').each(function() {
-//    $(this).popover({
-//        html: true,
-//    });    
-//}); 
+$('.hxlclass').each(function() {
+    $(this).popover({
+        html: true,
+        placement: 'bottom'
+    });    
+}); 
 
 // Testing the lookup function:
 // var jason = lookup('SELECT * WHERE { ?a ?b ?c . } LIMIT 10');
@@ -13,6 +14,8 @@
 $('.hxlclass-selectable').click(function(){
 	$className = $(this).attr('data-original-title');
 	$classURI = $(this).attr('classuri');
+	console.log($className);
+	console.log($classURI);
 	step2($className, $classURI);
 });
 
