@@ -24,7 +24,7 @@ function sparqlQuery($query){
 
   	$sparql = new EasyRdf_Sparql_Client('http://hxl.humanitarianresponse.info/sparql');
   	$query = $prefixes.$query;
-  	// error_log($query);
+//  	error_log($query);
   
   	try {
     	$results = $sparql->query($query);      
@@ -54,11 +54,12 @@ $links = array("index.php" => "HXLate",
 
     <link href="css/hxlator.css" rel="stylesheet"> 
     <link href="css/bootstrap-responsive.css" rel="stylesheet">
-    <link href="css/jquery-ui-1.8.21.custom.css" rel="stylesheet">
-
+	<link href="css/jquery-ui-1.8.21.custom.css" rel="stylesheet">
+	
     <!--[if lt IE 9]>
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->    
+    <![endif]-->
+    
     
     <link rel="shortcut icon" href="img/ochaonline_theme_favicon.ico">
   </head>
@@ -66,7 +67,6 @@ $links = array("index.php" => "HXLate",
   <body>
 
     <div class="navbar navbar-fixed-top">
-<!--      <div class="navbar-inner"> -->
         <div class="container">
           <span class="brand"><img src="img/logo.png" /></span>
           <div class="nav-hxlator">
@@ -84,8 +84,7 @@ foreach($links as $link => $text){
 }
 ?>           
             </ul>
-          </div><!--/.nav-collapse -->
-<!--        </div>-->
+          </div>
       </div>
     </div>    
 

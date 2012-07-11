@@ -3,14 +3,6 @@ header("Access-Control-Allow-Origin: *");
 
 include_once('functions.php');
 
-$hxlTopConcepts = sparqlQuery('SELECT * WHERE {  
-  GRAPH <http://hxl.humanitarianresponse.info/data/vocabulary/latest/> {     
-    ?class hxl:topLevelConcept "true"^^xsd:boolean ;        
-           skos:prefLabel ?label  ;     
-           rdfs:comment ?description .
-  }
-} ORDER BY ?label');
-
 getHead("index.php"); 
 
 
@@ -41,7 +33,7 @@ if ($isFile) {//  sanatize file name
         if(preg_match($rEFileTypes, strrchr($safe_filename, '.'))) {
         	$isMove = move_uploaded_file ( $_FILES['userfile']['tmp_name'], $uploadfile);
         } else {
-        	showError("<strong>".$_FILES['userfile']['name']."</strong> does not seem to be a spreadsheet.");
+        	showError('<strong>'.$_FILES['userfile']['name'].'</strong> does not seem to be a spreadsheet (<code>.xls</code>, <code>.xlsx</code>, <code>.ods</code>, <code>.csv</code>, and the like). Please <a href="index.php" class="btn">go back</a> and try a different file.</p><p>If you are sure it is a spreadsheet, there is something wrong with the HXLator; in that case, please <a class="btn" href="contact.php">get in touch with us</a>, so we can fix it.');
         }	
     } else {
     	showError("<strong>".$_FILES['userfile']['name']."</strong> is too large. The limit for uploaded files is <strong>5MB</strong>.");
@@ -49,7 +41,7 @@ if ($isFile) {//  sanatize file name
     
 } else {
 
-	showError("There is something wrong with <strong>".$_FILES['userfile']['name']."</strong>.");
+	showError('You\'ll need to <a class="btn" href="index.php">upload a spreadsheet</a> to HXLate.');
 
 }
 
@@ -69,65 +61,28 @@ if($isMove === true) {
 	// using IOFactory to identify the format
 	$workbook = load($uploadfile);
 	
-	echo "<div class='container'>
-		<div class='row'>
-		<div class='span12'>
-		<h1><img src='img/loader.gif' id='loader' align='right' style='display: none' />HXLating <em>".$_FILES['userfile']['name']."</em></h1>
+	echo '<div class="container">
+			<div class="row">
+			<div class="span12">
+			<h1><img src="img/loader.gif" id="loader" align="right" style="display: none" />HXLating <em>'.$_FILES["userfile"]["name"].'</em></h1>
+			</div>
+			</div>
+			</div>
+			<div class="shortguide container">
+			<div class="step1">
+			<p class="lead">What is the data in this spreadsheet <em>primarily</em> about? Hover for explanations: </p>
+						
+			<div class="row">';
+		
+	echo getClassPills();
+		
+	echo '
 		</div>
 		</div>
-		<div class='row'><div class='shortguide span8'>
-		<div class='step1'>
-		<p class='lead'>Please start by telling us what the data in this spreadsheet is <em>primarily</em> about: </p>
-		<div class='btn-toolbar'>";
-	  foreach($hxlTopConcepts as $row){
-	  	$label = "label";
-	  	$class = "class";
-	  	$description = "description";	  		  	
-	  	
-	  	$subclasses = sparqlQuery('prefix skos: <http://www.w3.org/2004/02/skos/core#> 
-	  	prefix hxl:   <http://hxl.humanitarianresponse.info/ns-2012-06-14/#> 
-	  	prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
-	  	
-	  	SELECT DISTINCT * WHERE {  
-	  	  GRAPH <http://hxl.humanitarianresponse.info/data/vocabulary/latest/> {     
-	  	    ?subclass rdfs:subClassOf+ <'.$row->$class.'> ;        
-	  	           skos:prefLabel ?label  ;     
-	  	           rdfs:comment ?description .
-	  	  }
-	  	} ORDER BY ?label');
-	  	
-	  	// create a dropdown menu if that class has subclasses:
-	  	if ($subclasses->numRows() > 0){
-	  		print '	
-	  		<div class="btn-group"><button class="btn hxlclass" href="#" rel="popover" title="'.$row->$label.'" data-content="'.$row->$description.'<p style=\'margin-top:10px\'><span class=\'label label-info\'>Click to show more specific subclasses</span>" classuri="'.shorten($row->$class).'">'.multiply($row->$label).' <b class="icon-info-sign"></b></button>
-	  		    <button class="btn dropdown-toggle" data-toggle="dropdown">
-	  		        <span class="caret"></span>
-	  		    </button>
-	  			<ul class="dropdown-menu">
-	  		';
-	  		
-	  		foreach ($subclasses as $subclass) {
-					print '     <li><a class="hxlclass" href="#" rel="popover" title="'.$subclass->$label.'" data-content="'.$subclass->$description.'" classuri="'.shorten($row->$class).'">'.multiply($subclass->$label).' <b class="icon-info-sign"></b></a></li>
-	   				';		  			
-	  		}
-	  		
-	  		print '</ul>
-	  		</div>
-	  		</div><!-- step1 -->
-	  		';
-	  		
-	  	} else {	  	// if there are no subclasses:	  		  
-	  		print '	<div class="btn-group"><button class="btn hxlclass" href="#" rel="popover" title="'.$row->$label.'" data-content="'.$row->$description.'" classuri="'.shorten($row->$class).'">'.multiply($row->$label).' <b class="icon-info-sign"></b></button></div>
-	  		';
-	  	}		  		
-	  }  
-	    	    
-	echo "
-		</div>		
-		</div>
-		<div class='span4'><div class='well' id='mappings' style='display: none'><h2 style='margin-bottom: 15px'>Mappings to HXL</h2></div></div>
-		</div> <!-- row -->
-		";
+		<!--<div class="span4"><div class="well" id="mappings" style="display: none"><h2 style="margin-bottom: 15px">Mappings to HXL</h2></div></div>-->
+		</div> <!-- shortguide -->
+		<div class="container">
+		';
 	
 	// Let's show the spreadsheet"
 	// iterate once for the tabs (i.e., one tab per sheet in the workbook)
@@ -235,7 +190,7 @@ function createReaderForFile($pFilename) {
 					// all files including Excel files etc.
 					break;
 				default:
-					showError('This file does not seem to be a spreadsheet.</p><p>If you are sure it is, there is something wrong with the HXLator; in that case, please <a href="contact.php">get in touch with us</a>, so we can fix it.'); 
+					showError('This file does not seem to be a spreadsheet.</p><p>If you are sure it is, there is something wrong with the HXLator; in that case, please <a class="btn" href="contact.php">get in touch with us</a>, so we can fix it.'); 
 					break;
 			}
 
@@ -261,13 +216,14 @@ function createReaderForFile($pFilename) {
 			}
 		}
 
-    	print '<p>This file does not seem to be a spreadsheet.</p>'; // TODO make this nicer
+    	showError('This file does not seem to be a spreadsheet.</p><p>If you are sure it is, there is something wrong with the HXLator; in that case, please <a class="btn" href="contact.php">get in touch with us</a>, so we can fix it.'); 
+    	 
 	}	//	function createReaderForFile()
 
 
 
 // load the footer, along with the extra JS required for this page
-getFoot(array("bootstrap-tooltip.js", "bootstrap-popover.js", "bootstrap-dropdown.js", "hxlator.js", ));
+getFoot(array("bootstrap-tooltip.js", "bootstrap-popover.js", "bootstrap-dropdown.js",  "hxlhistory.js", "hxlator.js", ));
 
 function makeTableHead($sheetData){
 	echo"
@@ -321,12 +277,90 @@ function makeTableBody($sheetData){
 				</tbody>";
 }
 
+
+
+
+
+
+// function to show horziontally stacked pills of the HXL class hierarchy that fold out to the right, 
+// revealing a classes subclasses when the corresponding pill is clicked
+function getClassPills($superclass = null, $superclassLabel = null){
+	
+	$recursionClasses = array();
+	
+	if($superclass == null){
+		$hxlClasses = sparqlQuery('SELECT  ?class ?label ?description (COUNT(?subsub) as ?subsubCount) WHERE {  
+	  		?class  hxl:topLevelConcept "true"^^xsd:boolean ;
+				skos:prefLabel ?label  ;     
+			  	rdfs:comment ?description .
+		  	OPTIONAL { ?subsub rdfs:subClassOf ?class }
+		} GROUP BY ?class ?label ?description ORDER BY ?label');
+		
+		$pills = '<div class="span3"><ul class="nav nav-pills nav-stacked hxl-pills">
+		';
+		
+	} else {
+		$hxlClasses = sparqlQuery('SELECT  ?class ?label ?description (COUNT(?subsub) as ?subsubCount) WHERE {  
+		  	?class  rdfs:subClassOf <'.$superclass.'> ;
+				skos:prefLabel ?label  ;     
+			  	rdfs:comment ?description .
+		  	OPTIONAL { ?subsub rdfs:subClassOf ?class }
+		} GROUP BY ?class ?label ?description ORDER BY ?label ');
+		
+		$pills = '<div class="span3 hxl-hidden" subclassesof="'.shorten($superclass).'"><ul class="nav nav-pills nav-stacked hxl-pills">
+		';
+					
+	}
+	
+	
+	$label = "label";
+	$class = "class";
+	$description = "description";	  	
+	$count = "subsubCount";	  			
+				
+	
+	
+	foreach($hxlClasses as $hxlClass){	  	
+		if($hxlClass->$count != "0") { 
+			$pills .= '<li class="solo"><a href="#" class="hxlclass hxlclass-expandable" rel="popover" title="'.$hxlClass->$label.'" data-content="'.$hxlClass->$description.' <br /><small><strong>Click to view '.$hxlClass->$count.' subclasses.<strong></small>" classuri="'.shorten($hxlClass->$class).'">'.multiply($hxlClass->$label).'<span class="badge badge-inverse pull-right">'.$hxlClass->$count.'</span>'; 
+			// we're gonna show subclasses for this one:
+			$recursionClasses[] = array($hxlClass->$class, $hxlClass->$label);
+		}else{
+			$pills .= '<li class="solo"><a href="#" class="hxlclass hxlclass-selectable" rel="popover" title="'.$hxlClass->$label.'" data-content="'.$hxlClass->$description.'" classuri="'.shorten($hxlClass->$class).'">'.multiply($hxlClass->$label);
+		}
+		
+		$pills .= '</a></li>';
+	}
+
+	if($superclass != null){
+		$pills .= '<li><a href="#" class="hxlclass hxlclass-selectable" rel="popover" title="Different '.multiply($superclassLabel).'" data-content="Select this option if you have a mix of different '.multiply($superclassLabel).' in your data." classuri="'.shorten($superclass).'">It is a <em>mix</em> of those. <i class="icon-random pull-right"></i></a></li>';
+	}
+	
+	$pills .= '</ul></div>
+	';
+	
+	foreach ($recursionClasses as $recClass) {
+		$pills .= getClassPills($recClass[0], $recClass[1]);
+	}
+	
+	return $pills;
+}
+
+
+
+
+
+
+// ------- some convenience functions
+
 function shorten($uri){
 	$parts = explode("#", $uri);
 	return "hxl:".$parts[1];
 }
 
+
 function showError($msg){
 	echo '<div class="container"><div class="alert alert-error"><h2>Oops.</h2>'.$msg.'</div>';
 }
+
 ?>
