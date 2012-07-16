@@ -16,6 +16,7 @@ $('.hxlclass-selectable').click(function(){
 	$plural    = $(this).attr('plural');
 	$classURI  = $(this).attr('classuri');
 	step2($className, $plural, $classURI);
+	hxlHistory.pushState(null);
 });
 
 // click handler to expand the subclasses of a given HXL class:

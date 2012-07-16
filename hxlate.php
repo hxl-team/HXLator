@@ -213,7 +213,7 @@ function createReaderForFile($pFilename) {
 
 
 // load the footer, along with the extra JS required for this page
-getFoot(array("bootstrap-tooltip.js", "bootstrap-popover.js", "bootstrap-dropdown.js",  "hxlhistory.js", "hxlator.js", ));
+getFoot(array("bootstrap-tooltip.js", "bootstrap-popover.js", "bootstrap-dropdown.js",  "hxlator.js", "hxlhistory.js" ));
 
 function makeTableHead($sheetData){
 	echo"

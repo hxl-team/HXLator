@@ -71,7 +71,7 @@ $links = array("index.php" => "HXLate",
         <div class="container">
           <span class="brand"><img src="img/logo.png" /></span>
           <div class="nav-hxlator">
-            <ul class="nav">
+            <ul class="nav" id="topnav">
 <?php 
 
 foreach($links as $link => $text){

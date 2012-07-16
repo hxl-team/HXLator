@@ -26,7 +26,7 @@ emmergencyQuery();
         <p>Welcome <?php echo $user_name; ?> from <?php echo $user_organisation; ?>, you are logged in.</p>
         <p>Please, specify below the emergency you are working on, select a report category and eventually upload the file.</p>
         
-        <form class="alert" enctype="multipart/form-data" action="hxlate.php" method="POST">
+        <form class="alert" enctype="multipart/form-data" action="hxlate.php#" method="POST">
 
             <input type="hidden" name="user_name" value="<?php echo $user_name; ?>">
             <input type="hidden" name="user_organisation" value="<?php echo $user_organisation; ?>">
