@@ -1,0 +1,26 @@
+{
+  "templates": {
+    "<http://hxl.humanitarianresponse.info/data/population/bka/deou/>": {
+      "triples": [
+        {
+          "predicate": "rdf:type",
+          "object": 
+            { 
+              "@replacecellvalue": 
+                {
+      		      "REF": "hxl:RefugeesAsylumSeekers",
+      		      "IDP": "hxl:IDP"
+    	        }
+	        },
+          "cell": "1-C-4"
+        },
+        {
+          "predicate": "hxl:populationCount",
+          "object": "@cellvalue",
+          "datatype": "xsd:int",
+          "cell": "1-C-3"
+        }
+      ]
+    }
+  }
+}
