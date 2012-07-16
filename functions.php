@@ -16,8 +16,9 @@ function sparqlQuery($query){
 	// declarations here.
 	$prefixes = 'prefix xsd: <http://www.w3.org/2001/XMLSchema#>  
 	prefix skos: <http://www.w3.org/2004/02/skos/core#> 
-	prefix hxl:   <http://hxl.humanitarianresponse.info/ns-2012-06-14/#> 
+	prefix hxl:   <http://hxl.humanitarianresponse.info/ns/#> 
 	prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+	prefix label: <http://www.wasab.dk/morten/2004/03/label#> 
 	
 	';
 

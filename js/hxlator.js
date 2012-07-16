@@ -12,11 +12,10 @@ $('.hxlclass').each(function() {
 
 // click handler for the class buttons - step1
 $('.hxlclass-selectable').click(function(){
-	$className = $(this).attr('data-original-title');
-	$classURI = $(this).attr('classuri');
-	console.log($className);
-	console.log($classURI);
-	step2($className, $classURI);
+	$className = $(this).attr('singular');
+	$plural    = $(this).attr('plural');
+	$classURI  = $(this).attr('classuri');
+	step2($className, $plural, $classURI);
 });
 
 // click handler to expand the subclasses of a given HXL class:
@@ -39,11 +38,11 @@ $('.hxlclass-expandable').click(function(){
 });
 
 // pick the first row with data
-function step2($className, $classURI){
+function step2($className, $plural, $classURI){
 	$('.popover').hide();
 	$('.shortguide').slideUp(function(){		
 		$('.step1').remove();
-		$('.shortguide').append('<div class="step2"><p class="lead selectedclass" style="visibility: none">Please click on the <strong>first</strong> row that contains data about '+$className+'(s).</p></div>');	
+		$('.shortguide').append('<div class="step2"><p class="lead selectedclass" style="visibility: none">Please click on the <strong>first</strong> row that contains data about a '+$className+'/'+ $plural +'.</p></div>');	
 		$('.shortguide').slideDown();
 	});
 	
