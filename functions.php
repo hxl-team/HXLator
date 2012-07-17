@@ -93,8 +93,10 @@ foreach($links as $link => $text){
 
 
 // creates the footer for the page, including the JS to load
-// $extraJS can point to any extra js plugins in the /js folder that are required by the page that loads this header
-function getFoot($extraJS = null){ ?>
+// $extraJS can point to any extra js plugins in the /js folder 
+// that are required by the page that loads this header
+// amd an option to include an inline $script
+function getFoot($extraJS = null, $script = null){ ?>
 
 	<div class="container footer">
 		<div class="row">
@@ -120,6 +122,14 @@ function getFoot($extraJS = null){ ?>
     		<script src="js/'.$js.'"></script>
     		';    
     	}
+    }
+    
+    
+    if($script){
+    	echo'
+    	<script type="text/javascript">
+    	'.$script.'
+    	</script>';
     }
     ?>
 	

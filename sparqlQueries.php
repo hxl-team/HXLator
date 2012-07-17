@@ -10,7 +10,7 @@ function emmergencyQuery()
 {
     $emergencies = sparqlQuery('SELECT ?label WHERE {
         GRAPH <http://hxl.humanitarianresponse.info/data/reference/fts-emergencies-2012> {
-            ?uri <http://hxl.humanitarianresponse.info/ns-2012-06-14/#commonTitle> ?label .
+            ?uri <http://hxl.humanitarianresponse.info/ns/#commonTitle> ?label .
         }
     }');
 

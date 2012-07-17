@@ -1,3 +1,74 @@
+// ---------------------------------------------------
+// The history/undo stuff
+// ---------------------------------------------------
+
+// History object – that's what we'll interact with and that's the object stack will store our stack of mapping objects:
+$hxlHistory = new Object();
+
+// this is the stack of mapping objects (see MappingTemplate.json for an example)
+$hxlHistory.states = new Array();
+$hxlHistory.currentState = 0; // pointer to where we are in the array with the mapping currently in use
+
+// adds a new state (aka. mapping xls->hxl) to the history stack:
+$hxlHistory.pushState = function($mapping){
+	// enable back/forward links:
+	$('li.historynav > a').css('display', 'block');
+	$hxlHistory.states.push($mapping);				
+	// set pointer to the last element in the array, i.e., the one we just added:
+	$hxlHistory.currentState = $hxlHistory.states.length-1;
+	console.log($mapping);
+	console.log($hxlHistory.states);
+	console.log($hxlHistory.currentState);
+}
+
+// go one step back and revert to the last stored stage of the mapping
+$hxlHistory.back = function(){
+	if($hxlHistory.currentState > 0){
+		$hxlHistory.currentState--;	
+		$thisState = $hxlHistory.states[$hxlHistory.currentState];
+		$hxlHistory.processMapping($thisState);
+		// todo: enable forward link
+	}	
+}
+
+$hxlHistory.foward = function(){
+	if($hxlHistory.currentState < $hxlHistory.states.length-1){
+		$hxlHistory.currentState++;	
+		$thisState = $hxlHistory.states[$hxlHistory.currentState];
+		$hxlHistory.processMapping($thisState);
+		// todo: disable back link of we are at the first element in the array
+	}			
+}
+
+$hxlHistory.processMapping = function($mapping){
+	console.log("Processing mapping:");
+	console.log($mapping);
+	
+	// todo: this is where the magic happens...
+}
+
+// finally, make sure the user doesn't go back through the browser's back button:
+window.onbeforeunload = function (e) {
+  var message = "You are about to leave this page and lose your current HXL mapping. If you have made a mistake in your mapping process, you can go back to the previous step by clicking the HXL back button at the top left.",
+    e = e || window.event;
+	  // For IE and Firefox
+	if (e) {
+	    e.returnValue = message;
+	}
+	
+	// For Safari
+	return message;
+};
+
+$('ul#topnav').append('<li class="historynav"><a href="#" id="back">&laquo; Back</a></li><li class="historynav"><a href="#" id="forward">Forward &raquo;</a></li>');
+
+
+
+// ---------------------------------------------------
+// Popovers
+// ---------------------------------------------------
+
+
 // hover handler to show class/property definitions in a popover
 $('.hxlclass').each(function() {
     $(this).popover({
@@ -9,6 +80,12 @@ $('.hxlclass').each(function() {
 // Testing the lookup function:
 // var jason = lookup('SELECT * WHERE { ?a ?b ?c . } LIMIT 10');
 // console.log(jason);
+
+
+// ---------------------------------------------------
+// User interaction handling
+// ---------------------------------------------------
+
 
 // click handler for the class buttons - step1
 $('.hxlclass-selectable').click(function(){
@@ -145,6 +222,12 @@ function enableHXLmapping(){
 	});
 }
 
+
+// ---------------------------------------------------
+// Convenience functions
+// ---------------------------------------------------
+
+
 // a generic error display for hxlate.php. Will show $msg in a red alert box on top of the page
 function hxlError($msg){
 	$('.shortguide').prepend('<p class="alert alert-error">'+$msg+'</p>');
@@ -173,42 +256,3 @@ function lookup(sparqlQuery){
 	});	
 }
 
-// ---------------------------------------------------
-// The history/undo stuff
-// ---------------------------------------------------
-
-// History object – that's what we'll interact with and that's the object stack will store our stack of mapping objects:
-var hxlHistory = new Object();
-
-// this is the stack of mapping objects (see MappingTemplate.json for an example)
-var states = new Array();
-
-// adds a new state to the history, either via history.js (for html5) or with a HXL-specific fallback for HTML4 browsers: 
-hxlHistory.pushState = function($mapping){
-	// enable back/forward links:
-	$('li.historynav > a').css('display', 'block');
-	states.push($mapping);				
-}
-
-hxlHistory.back = function(){
-	// todo				
-}
-
-hxlHistory.foward = function(){
-	// todo		
-}
-
-// finally, make sure the user doesn' go back through the browser's back button:
-window.onbeforeunload = function (e) {
-  var message = "You are about to leave this page and lose your current HXL mapping. If you have made a mistake in your mapping process, you can go back to the previous step by clicking the HXL back button at the top left.",
-    e = e || window.event;
-	  // For IE and Firefox
-	if (e) {
-	    e.returnValue = message;
-	}
-	
-	// For Safari
-	return message;
-};
-
-$('ul#topnav').append('<li class="historynav"><a href="#" id="back">&laquo; Back</a></li><li class="historynav"><a href="#" id="forward">Forward &raquo;</a></li>');

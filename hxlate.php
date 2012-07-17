@@ -211,9 +211,37 @@ function createReaderForFile($pFilename) {
 	}	//	function createReaderForFile()
 
 
+$inlineScript = '$inititalMapping = {
+  "templates": {
+    "<http://hxl.humanitarianresponse.info/data/population/bka/deou/>": {
+      "triples": [
+        {
+          "predicate": "rdf:type",
+          "object": 
+            { 
+              "@replacecellvalue": 
+                {
+      		      "REF": "hxl:RefugeesAsylumSeekers",
+      		      "IDP": "hxl:IDP"
+    	        }
+	        },
+          "cell": "1-C-4"
+        },
+        {
+          "predicate": "hxl:populationCount",
+          "object": "@cellvalue",
+          "datatype": "xsd:int",
+          "cell": "1-C-3"
+        }
+      ]
+    }
+  }
+};
+
+$hxlHistory.pushState($inititalMapping);';
 
 // load the footer, along with the extra JS required for this page
-getFoot(array("bootstrap-tooltip.js", "bootstrap-popover.js", "bootstrap-dropdown.js",  "hxlator.js", "hxlhistory.js" ));
+getFoot(array("bootstrap-tooltip.js", "bootstrap-popover.js", "bootstrap-dropdown.js",  "hxlator.js" ), $inlineScript);
 
 function makeTableHead($sheetData){
 	echo"
