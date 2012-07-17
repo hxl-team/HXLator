@@ -35,6 +35,33 @@ function sparqlQuery($query){
   	}
 }
 
+// this function implements the URI patterns documented at 
+// https://docs.google.com/document/d/1-9OoF5vz71qPtPRo3WoaMH4S5J1O41ITszT3arQ5VLs/edit
+// depending on the $type, the function will pick the corresponding pattern and return a valid URI. 
+// if the $type requires further properties to be known, these have to be passed on 
+// as an associative array in $properties; dig into the code to see which patterns support which properties:
+function makeURI($type, $properties = null){
+	
+	$base = "http://hxl.humanitarianresponse.info/data/";
+	
+	if($type == "hxl:DataContainer"){
+		
+		$time = gettimeofday();
+		$id = $time['sec'].'.'.$time['usec'];
+		
+		$org = "";
+		
+		if($properties["org"]){
+			$org = $properties["org"]."/";
+		}
+		
+		return $base."datacontainers/".$org.$id;
+	} // todo: other patterns
+}
+
+
+
+
 // generates the head for all pages, including highlighting of the activr page in the nav bar
 function getHead($activePage = "index.php"){  
 

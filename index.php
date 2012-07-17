@@ -12,7 +12,9 @@ getHead();
 include('sparqlQueries.php');
 
 $user_name = "John Doe";
+$user_uri = "http://hxl.humanitarianresponse.info/data/persons/unhcr/john_doe";
 $user_organisation = "UNHCR";
+$user_organisation_uri = "http://hxl.humanitarianresponse.info/data/orgs/unhcr";
 
 emmergencyQuery();
 ?>
