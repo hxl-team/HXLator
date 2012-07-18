@@ -17,8 +17,8 @@ $hxlHistory.pushState = function($mapping){
 	// set pointer to the last element in the array, i.e., the one we just added:
 	$hxlHistory.currentState = $hxlHistory.states.length-1;
 	console.log($mapping);
-	console.log($hxlHistory.states);
-	console.log($hxlHistory.currentState);
+//	console.log($hxlHistory.states);
+//	console.log($hxlHistory.currentState);
 }
 
 // go one step back and revert to the last stored stage of the mapping
@@ -62,6 +62,25 @@ window.onbeforeunload = function (e) {
 
 $('ul#topnav').append('<li class="historynav"><a href="#" id="back">&laquo; Back</a></li><li class="historynav"><a href="#" id="forward">Forward &raquo;</a></li>');
 
+
+// ---------------------------------------------------
+// RDF generation
+// ---------------------------------------------------
+
+// processes a mapping and generates RDF from it
+generateRDF = function ($mapping){
+	$turtle = "@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> . \n@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> . \n@prefix owl:  <http://www.w3.org/2002/07/owl#> . \n@prefix foaf: <http://xmlns.com/foaf/0.1/> . \n@prefix dc:   <http://purl.org/dc/terms/> . \n@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> . \n@prefix skos: <http://www.w3.org/2004/02/skos/core#> . \n@prefix hxl:  <http://hxl.humanitarianresponse.info/ns/#> . \n@prefix geo:  <http://www.opengis.net/geosparql#> . \n@prefix label: <http://www.wasab.dk/morten/2004/03/label#> . \n \n";
+	$.each($mapping.templates, function($uri, $triples){
+		$.each($triples["triples"], function($i, $triple){
+			$datatype = "";
+			if ($triple["datatype"] != undefined){
+				$datatype  = "^^" + $triple["datatype"];
+			}
+			$turtle += $uri + " " + $triple["predicate"] + " " + $triple["object"] + $datatype + " .\n";
+		});
+	});
+	return $turtle;
+}
 
 
 // ---------------------------------------------------

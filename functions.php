@@ -52,7 +52,7 @@ function makeURI($type, $properties = null){
 		$org = "";
 		
 		if($properties["org"]){
-			$org = $properties["org"]."/";
+			$org = strtolower($properties["org"])."/";
 		}
 		
 		return $base."datacontainers/".$org.$id;
@@ -63,7 +63,7 @@ function makeURI($type, $properties = null){
 		$id = $time['sec'].'.'.$time['usec'];
 		
 		return "http://example.com/".$id;
-		error_log("Dummy URI generated for unknown resource type");
+		error_log("Dummy URI generated for unknown resource type ".$type);
 	}
 }
 

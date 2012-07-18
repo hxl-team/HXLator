@@ -239,7 +239,7 @@ $inlineScript = '$initMapping = {
         },
         {
           "predicate": "hxl:date",
-          "object": "'.date("Y-m-d").'",
+          "object": "\"'.date("Y-m-d").'\"",
           "datatype": "xsd:date"          
         }
       ]
@@ -247,7 +247,8 @@ $inlineScript = '$initMapping = {
   }
 };
 
-$hxlHistory.pushState($initMapping);';
+$hxlHistory.pushState($initMapping);
+generateRDF($initMapping);';
 
 // load the footer, along with the extra JS required for this page
 getFoot(array("bootstrap-tooltip.js", "bootstrap-popover.js", "bootstrap-dropdown.js",  "hxlator.js" ), $inlineScript);
