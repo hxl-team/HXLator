@@ -1,0 +1,30 @@
+{
+  "templates": {
+    "<http://hxl.humanitarianresponse.info/data/populations/bka/deou/f-0-4>": {
+      "triples": [
+        {
+          "predicate": "rdf:type",
+          "object": "hxl:RefugeesAsylumSeekers"
+        },
+		{
+          "predicate": "hxl:ageGroup",
+          "object": "<http://hxl.humanitarianresponse.info/data/agegroups/unhcr/0-4>"
+        },
+        {
+          "predicate": "hxl:sexCategory",
+          "object": "hxl:Female"
+        },
+		{
+          "predicate": "hxl:currentLocation",
+          "object": "<http://hxl.humanitarianresponse.info/data/locations/admin/bfa/BFA050004/>"
+        },
+        {
+          "predicate": "hxl:populationCount",
+          "object": "@cellvalue",
+          "datatype": "xsd:int",
+          "cell": "1-E-5"
+        }
+      ]
+    }
+  }
+}

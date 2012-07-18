@@ -4,14 +4,12 @@
       "triples": [
         {
           "predicate": "rdf:type",
-          "object": 
-            { 
-              "@replacecellvalue": 
-                {
-      		      "REF": "hxl:RefugeesAsylumSeekers",
-      		      "IDP": "hxl:IDP"
-    	        }
-	        },
+          "object": {
+            "@replacecellvalue": {
+              "REF": "hxl:RefugeesAsylumSeekers",
+              "IDP": "hxl:IDP"
+            }
+          },
           "cell": "1-C-4"
         },
         {
