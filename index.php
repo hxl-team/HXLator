@@ -16,7 +16,6 @@ $user_uri = "http://hxl.humanitarianresponse.info/data/persons/unhcr/john_doe";
 $user_organisation = "UNHCR";
 $user_organisation_uri = "http://hxl.humanitarianresponse.info/data/orgs/unhcr";
 
-emmergencyQuery();
 ?>
 
 <div class="container">
@@ -31,10 +30,12 @@ emmergencyQuery();
         <form class="alert" enctype="multipart/form-data" action="hxlate.php#" method="POST">
 
             <input type="hidden" name="user_name" value="<?php echo $user_name; ?>">
+            <input type="hidden" name="user_uri" value="<?php echo $user_uri; ?>">
             <input type="hidden" name="user_organisation" value="<?php echo $user_organisation; ?>">
+            <input type="hidden" name="user_organisation_uri" value="<?php echo $user_organisation_uri; ?>">
 
             <label for="tags">Emergency: </label>
-            <input type="text" id="tags" name="emergency" /> Start to type in and select among available items.
+            <input type="text" id="tags" name="emergency" /> Start to type and select from the emergencies list.
 
             <label >Report category: </label>
             <select name="report_category" >
@@ -57,5 +58,8 @@ emmergencyQuery();
 
 
 <?php 
-getFoot(array('jquery-ui-1.8.21.custom.min.js', 'emergency_list.js'));
+	$customJS = emergencyQuery();
+	getFoot(array('jquery-ui-1.8.21.custom.min.js'), $customJS ); 
+
+
 ?>

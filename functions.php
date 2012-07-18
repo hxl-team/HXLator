@@ -56,7 +56,15 @@ function makeURI($type, $properties = null){
 		}
 		
 		return $base."datacontainers/".$org.$id;
-	} // todo: other patterns
+
+	} else {   // todo: other patterns
+	
+		$time = gettimeofday();
+		$id = $time['sec'].'.'.$time['usec'];
+		
+		return "http://example.com/".$id;
+		error_log("Dummy URI generated for unknown resource type");
+	}
 }
 
 

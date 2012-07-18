@@ -3,33 +3,42 @@
 include_once('functions.php');
 
 /*
- * Send a sparqk query to retreive the emergencies names and hide the result
+ * Send a sparql query to retreive the emergencies names and hide the result
  * in a span as a * splitable string.
  */
-function emmergencyQuery()
+function emergencyQuery()
 {
-    $emergencies = sparqlQuery('SELECT ?label WHERE {
+    $emergencies = sparqlQuery('SELECT DISTINCT ?uri ?label WHERE {
         GRAPH <http://hxl.humanitarianresponse.info/data/reference/fts-emergencies-2012> {
-            ?uri <http://hxl.humanitarianresponse.info/ns/#commonTitle> ?label .
+            ?uri hxl:commonTitle ?label .
         }
     }');
-
-    echo '<span id="emergency_list" style="display:none;" >
-    ';
-	
+    
     $label = "label";
-    $i = 0;
+    $uri   = "uri";
+
+	$elist = '
+	
+	/*
+	 * Provides the autocomplete function with an array of emergency names itself
+	 * provided by the emergency query php function.
+	 */
+	
+	$("#tags").autocomplete({
+	    source:[ ';
+	     
     foreach($emergencies as $emergency){
-        $i++;
-
-        print $emergency->$label;
-
-        if ($i != count($emergencies)) {                
-            echo '*';
-        }		  		
+        $elist .= ' { label: "'.$emergency->$label.'", value: "'.$emergency->$uri.'"}, ' ;                 
     }
+    
+    // remove trailing comma:
+	//	$elist = substr($emergencies, 0, -2);    
              
-    echo "</span>";
+    $elist .= ' {} ]
+    	});
+    ';
+    
+    return $elist;
 }
 
 ?>

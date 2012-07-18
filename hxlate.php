@@ -210,28 +210,20 @@ function createReaderForFile($pFilename) {
     	 
 	}	//	function createReaderForFile()
 
+$orgPost = null;
+if($_POST["user_organisation"]){
+	$orgPost = array("org" => $_POST["user_organisation"]);
+} 
+
+$containerURI = makeURI("hxl:DataContainer", $orgPost);
 
 $inlineScript = '$inititalMapping = {
   "templates": {
-    "<http://hxl.humanitarianresponse.info/data/population/bka/deou/>": {
+    "<'.$containerURI.'>": {
       "triples": [
         {
-          "predicate": "rdf:type",
-          "object": 
-            { 
-              "@replacecellvalue": 
-                {
-      		      "REF": "hxl:RefugeesAsylumSeekers",
-      		      "IDP": "hxl:IDP"
-    	        }
-	        },
-          "cell": "1-C-4"
-        },
-        {
-          "predicate": "hxl:populationCount",
-          "object": "@cellvalue",
-          "datatype": "xsd:int",
-          "cell": "1-C-3"
+          "predicate": "hxl:aboutEmergency",
+          "object": "<>",          
         }
       ]
     }
