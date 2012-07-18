@@ -69,9 +69,9 @@ $links = array("index.php" => "HXLate",
 			   "guide.php" => "Quick Start Guide",
 			   "faq.php" => "FAQ",
 			   "contact.php" => "Contact"); 
-?>
 
-<!DOCTYPE html>
+
+echo'<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
@@ -99,7 +99,7 @@ $links = array("index.php" => "HXLate",
           <span class="brand"><img src="img/logo.png" /></span>
           <div class="nav-hxlator">
             <ul class="nav" id="topnav">
-<?php 
+'; 
 
 foreach($links as $link => $text){
 	if($link === $activePage){
@@ -110,22 +110,25 @@ foreach($links as $link => $text){
 			<li><a href="'.$link.'">'.$text.'</a></li>';	
 	}
 }
-?>           
+
+echo'           
             </ul>
           </div>
       </div>
     </div>    
 
-<?php } 
+'; 
+
+} 
 
 
 // creates the footer for the page, including the JS to load
 // $extraJS can point to any extra js plugins in the /js folder 
 // that are required by the page that loads this header
 // amd an option to include an inline $script
-function getFoot($extraJS = null, $script = null){ ?>
+function getFoot($extraJS = null, $script = null){ 
 
-	<div class="container footer">
+	echo'	<div class="container footer">
 		<div class="row">
 		  <div class="span3"><strong>Contact</strong><br />
 		  This site is part of the HumanitarianResponse network. Write to 
@@ -140,12 +143,12 @@ function getFoot($extraJS = null, $script = null){ ?>
 		</div>
 	</div>
 	
-    <script src="js/jquery.js"></script>
-    <?php if($extraJS){
+    <script src="js/jquery.js"></script> 
+  ';
     
+    if($extraJS){
     	foreach ($extraJS as $js) {
-    		
-	    	echo '
+ 	    	echo '
     		<script src="js/'.$js.'"></script>
     		';    
     	}
@@ -158,11 +161,10 @@ function getFoot($extraJS = null, $script = null){ ?>
     	'.$script.'
     	</script>';
     }
-    ?>
-	
-  </body>
-</html>
+ 	
+	echo'  
+	</body>
+</html>';
 
-
-<?php } ?>
+} ?>
 
