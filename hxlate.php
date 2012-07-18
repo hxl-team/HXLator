@@ -217,20 +217,37 @@ if($_POST["user_organisation"]){
 
 $containerURI = makeURI("hxl:DataContainer", $orgPost);
 
-$inlineScript = '$inititalMapping = {
+$inlineScript = '$initMapping = {
   "templates": {
     "<'.$containerURI.'>": {
       "triples": [
         {
           "predicate": "hxl:aboutEmergency",
-          "object": "<>",          
+          "object": "<'.$_POST["emergency"].'>",          
+        },
+        {
+          "predicate": "hxl:reportCateogry",
+          "object": "<'.$_POST["report_category"].'>",          
+        },
+        {
+          "predicate": "hxl:reportedBy",
+          "object": "<'.$_POST["user_uri"].'>",          
+        },
+        {
+          "predicate": "hxl:reportedBy",
+          "object": "<'.$_POST["user_organisation_uri"].'>",          
+        },
+        {
+          "predicate": "hxl:date",
+          "object": "'.date("Y-m-d").'",
+          "datatype": "xsd:date"          
         }
       ]
     }
   }
 };
 
-$hxlHistory.pushState($inititalMapping);';
+$hxlHistory.pushState($initMapping);';
 
 // load the footer, along with the extra JS required for this page
 getFoot(array("bootstrap-tooltip.js", "bootstrap-popover.js", "bootstrap-dropdown.js",  "hxlator.js" ), $inlineScript);
