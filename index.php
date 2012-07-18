@@ -39,10 +39,10 @@ $user_organisation_uri = "http://hxl.humanitarianresponse.info/data/orgs/unhcr";
 
             <label >Report category: </label>
             <select name="report_category" >
-                <option value="cluster1">Cluster 1</option>
-                <option value="cluster2">Cluster 2</option>
-                <option value="humanitarian profile">Humanitarian profile</option>
-                <option value="security">Security</option>
+                <option value="http://hxl.humanitarianresponse.info/data/reportcategories/cluster1">Cluster 1</option>
+                <option value="http://hxl.humanitarianresponse.info/data/reportcategories/cluster2">Cluster 2</option>
+                <option value="http://hxl.humanitarianresponse.info/data/reportcategories/humanitarian profile">Humanitarian profile</option>
+                <option value="http://hxl.humanitarianresponse.info/data/reportcategories/security">Security</option>
             </select> 
 
             Upload the spreadsheet here:<br />
