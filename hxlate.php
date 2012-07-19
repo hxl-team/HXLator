@@ -3,7 +3,7 @@ header("Access-Control-Allow-Origin: *");
 
 include_once('functions.php');
 
-getHead("index.php"); 
+getHead("index.php", $_POST["user_name"], $_POST["user_organisation"]); 
 
 
 //  5MB maximum file size 
@@ -60,11 +60,12 @@ if($isMove === true) {
 	
 	// using IOFactory to identify the format
 	$workbook = load($uploadfile);
-	
-	echo '<div class="container">
+	loadModal();
+	echo '
+	<div class="container">
 			<div class="row">
 			<div class="span12">
-			<h1><img src="img/loader.gif" id="loader" align="right" style="display: none" />HXLating <em>'.$_FILES["userfile"]["name"].'</em></h1>
+			<h1><img src="img/loader.gif" id="loader" align="right" style="display: none" />HXLating <em>'.$_FILES["userfile"]["name"].'</em> <a class="btn btn-info pull-right" data-toggle="modal" href="#hxlPreview">Preview HXL</a></h1>
 			</div>
 			</div>
 			</div>
@@ -251,7 +252,7 @@ $hxlHistory.pushState($initMapping);
 generateRDF($initMapping);';
 
 // load the footer, along with the extra JS required for this page
-getFoot(array("bootstrap-tooltip.js", "bootstrap-popover.js", "bootstrap-dropdown.js",  "hxlator.js" ), $inlineScript);
+getFoot(array("bootstrap-tooltip.js", "bootstrap-popover.js", "bootstrap-dropdown.js", "bootstrap-modal.js", "bootstrap-transition.js",  "hxlator.js" ), $inlineScript);
 
 function makeTableHead($sheetData){
 	echo"

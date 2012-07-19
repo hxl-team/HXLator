@@ -177,5 +177,32 @@ function getFoot($extraJS = null, $script = null){
 	</body>
 </html>';
 
-} ?>
+} 
+
+
+// Generates the empty modal (see http://twitter.github.com/bootstrap/javascript.html#modals ) that 
+// we'll be using to preview the HXL code
+function loadModal(){
+	echo '
+	<div id="hxlPreview" class="modal hide fade">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">×</button>
+              <h3>HXL Preview<img src="img/nakedturtle.png" class="pull-right"></h3>
+              <p>A preview of the HXL code generated from your spread sheet in <a href="http://en.wikipedia.org/wiki/Turtle_(syntax)">Turtle syntax</a>.</p>
+            </div>
+            <div class="modal-body">
+              <code>
+              	<pre id="nakedturtle"></pre>
+              </code>
+            </div>
+            <div class="modal-footer">
+              <a href="#" class="btn" data-dismiss="modal">Close</a>
+              </div>
+          </div>
+	';
+}
+
+
+
+?>
 

@@ -67,7 +67,7 @@ $('ul#topnav').append('<li class="historynav"><a href="#" id="back">&laquo; Back
 // RDF generation
 // ---------------------------------------------------
 
-// processes a mapping and generates RDF from it
+// processes a mapping, generates RDF from it and updates the preview modal
 generateRDF = function ($mapping){
 	$turtle = "@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> . \n@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> . \n@prefix owl:  <http://www.w3.org/2002/07/owl#> . \n@prefix foaf: <http://xmlns.com/foaf/0.1/> . \n@prefix dc:   <http://purl.org/dc/terms/> . \n@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> . \n@prefix skos: <http://www.w3.org/2004/02/skos/core#> . \n@prefix hxl:  <http://hxl.humanitarianresponse.info/ns/#> . \n@prefix geo:  <http://www.opengis.net/geosparql#> . \n@prefix label: <http://www.wasab.dk/morten/2004/03/label#> . \n \n";
 	$.each($mapping.templates, function($uri, $triples){
@@ -79,6 +79,7 @@ generateRDF = function ($mapping){
 			$turtle += $uri + " " + $triple["predicate"] + " " + $triple["object"] + $datatype + " .\n";
 		});
 	});
+	$('#nakedturtle').html(htmlentities($turtle, 0));
 	return $turtle;
 }
 
@@ -241,7 +242,6 @@ function enableHXLmapping(){
 	});
 }
 
-
 // ---------------------------------------------------
 // Convenience functions
 // ---------------------------------------------------
@@ -273,5 +273,37 @@ function lookup(sparqlQuery){
 	    	console.log(textStatus);
 	    }	   
 	});	
+}
+
+
+// turns our turtle code into something we can show to the user:
+// courtesy of http://murphys-world.dyndns.org/pages/javascript-htmlentities.php
+function htmlentities(str,typ) {
+  if(typeof str=="undefined") str="";
+  if(typeof typ!="number") typ=2;
+  typ=Math.max(0,Math.min(3,parseInt(typ)));
+  var html=new Array();
+  html[38]="amp"; html[60]="lt"; html[62]="gt";
+  if(typ==1 || typ==3) html[39]="#039";
+  if(typ==2 || typ==3) html[34]="quot";
+  for(var i in html)
+    eval("str=str.replace(/"+String.fromCharCode(i)+"/g,\"&"+html[i]+";\");");
+  var entity=new Array(
+    "nbsp","iexcl","cent","pound","curren","yen","brvbar","sect",
+    "uml","copy","ordf","laquo","not","shy","reg","macr",
+    "deg","plusmn","sup2","sup3","acute","micro","para","middot",
+    "cedil","sup1","ordm","raquo","frac14","frac12","frac34","iquest",
+    "Agrave","Aacute","Acirc","Atilde","Auml","Aring","AElig","Ccedil",
+    "Egrave","Eacute","Ecirc","Euml","Igrave","Iacute","Icirc","Iuml",
+    "ETH","Ntilde","Ograve","Oacute","Ocirc","Otilde","Ouml","times",
+    "Oslash","Ugrave","Uacute","Ucirc","Uuml","Yacute","THORN","szlig",
+    "agrave","aacute","acirc","atilde","auml","aring","aelig","ccedil",
+    "egrave","eacute","ecirc","euml","igrave","iacute","icirc","iuml",
+    "eth","ntilde","ograve","oacute","ocirc","otilde","ouml","divide",
+    "oslash","ugrave","uacute","ucirc","uuml","yacute","thorn","yuml"
+  );
+  for(var i in entity)
+    eval("str=str.replace(/"+String.fromCharCode(i*1+160)+"/g,\"&"+entity[i]+";\");");
+  return str;
 }
 
