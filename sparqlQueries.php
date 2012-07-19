@@ -17,6 +17,7 @@ function emergencyQuery()
     $label = "label";
     $uri   = "uri";
 
+	// we'll return the whole JS code here - if we only return the array of emergencies, PHP renders the array as a table instead of simply passing on the string :/
 	$elist = '
 	
 	/*

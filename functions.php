@@ -71,7 +71,7 @@ function makeURI($type, $properties = null){
 
 
 // generates the head for all pages, including highlighting of the activr page in the nav bar
-function getHead($activePage = "index.php"){  
+function getHead($activePage = "index.php", $user = null, $org = null){  
 
 $links = array("index.php" => "HXLate", 
 			   "guide.php" => "Quick Start Guide",
@@ -118,6 +118,9 @@ foreach($links as $link => $text){
 			<li><a href="'.$link.'">'.$text.'</a></li>';	
 	}
 }
+
+echo '
+			<li class="logininfo"><a href="#">Logged in as '.$user.', '.$org.'</a></li>';
 
 echo'           
             </ul>

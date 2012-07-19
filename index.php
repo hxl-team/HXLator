@@ -5,16 +5,15 @@ set_time_limit(0);
 
 date_default_timezone_set('Europe/London');
 
-
-include_once('functions.php');
-getHead(); 
-
-include('sparqlQueries.php');
-
 $user_name = "John Doe";
 $user_uri = "http://hxl.humanitarianresponse.info/data/persons/unhcr/john_doe";
 $user_organisation = "UNHCR";
 $user_organisation_uri = "http://hxl.humanitarianresponse.info/data/orgs/unhcr";
+
+include_once('functions.php');
+getHead("index.php", $user_name, $user_organisation); 
+
+include('sparqlQueries.php');
 
 ?>
 
@@ -23,9 +22,6 @@ $user_organisation_uri = "http://hxl.humanitarianresponse.info/data/orgs/unhcr";
         <a href="https://sites.google.com/site/hxlproject/"><img src="img/hxl-logo-s.png" align="right" /></a>
         <h1>HXLator</h1>
         <p style="margin-top:  1.5em; margin-bottom:  1.5em">A simple online tool to convert <em>any</em> spreadsheet into the Humanitarian eXchange Langue (HXL). Take a look at our <a href="guide.php">quick start guide</a> or start by uploading your spreadsheet here:</p>	    
-
-        <p>Welcome <?php echo $user_name; ?> from <?php echo $user_organisation; ?>, you are logged in.</p>
-        <p>Please, specify below the emergency you are working on, select a report category and eventually upload the file.</p>
         
         <form class="alert" enctype="multipart/form-data" action="hxlate.php#" method="POST">
 
@@ -33,19 +29,37 @@ $user_organisation_uri = "http://hxl.humanitarianresponse.info/data/orgs/unhcr";
             <input type="hidden" name="user_uri" value="<?php echo $user_uri; ?>">
             <input type="hidden" name="user_organisation" value="<?php echo $user_organisation; ?>">
             <input type="hidden" name="user_organisation_uri" value="<?php echo $user_organisation_uri; ?>">
+			
+			<div class="control-group">
+            	<label for="tags">Emergency: </label>
+            	<div class="controls">
+            		<input type="text" id="tags" name="emergency" /> <span style="margin-left: 20px;"><em>Start typing and select from the emergencies list.</em></span>
+            	</div>
+            </div>
 
-            <label for="tags">Emergency: </label>
-            <input type="text" id="tags" name="emergency" /> Start to type and select from the emergencies list.
-
-            <label >Report category: </label>
-            <select name="report_category" >
-                <option value="http://hxl.humanitarianresponse.info/data/reportcategories/cluster1">Cluster 1</option>
-                <option value="http://hxl.humanitarianresponse.info/data/reportcategories/cluster2">Cluster 2</option>
-                <option value="http://hxl.humanitarianresponse.info/data/reportcategories/humanitarian profile">Humanitarian profile</option>
-                <option value="http://hxl.humanitarianresponse.info/data/reportcategories/security">Security</option>
-            </select> 
-
-            Upload the spreadsheet here:<br />
+			<div class="control-group">	
+            	<label  class="control-label" for="report_category" >Report category:</label>
+            	<div class="controls">
+		            <select id="report_category" name="report_category">
+        		        <option value="http://hxl.humanitarianresponse.info/data/reportcategories/cluster1">Cluster 1</option>
+                		<option value="http://hxl.humanitarianresponse.info/data/reportcategories/cluster2">Cluster 2</option>
+                		<option value="http://hxl.humanitarianresponse.info/data/reportcategories/humanitarian profile">Humanitarian profile</option>
+                		<option value="http://hxl.humanitarianresponse.info/data/reportcategories/security">Security</option>                		
+	            	</select> 
+	           	</div>
+	        </div>
+			
+			<div class="control-group">
+			    <label class="control-label" for="translator">HXL translator:</label>
+			        <div class="controls">
+			           <select id="translator" name="translator">
+			              <option value="new">Create new HXL translator</option>
+			              <option><em>TODO: List user's existing translators</em></option>			               
+			        </select>
+				</div>
+			</div>
+			
+            Select the spreadsheet to HXLate:<br />
             <input type="hidden" name="MAX_FILE_SIZE" value="5242880"><!-- 5MB -->
             <input name="userfile" type="file"><br />
             <br />
