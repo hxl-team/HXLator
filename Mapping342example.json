@@ -1,6 +1,6 @@
 {
   "templates": {
-    "<http://hxl.humanitarianresponse.info/data/populations/bka/deou/f-0-4>": {
+    "<http://hxl.humanitarianresponse.info/data/populations/bfa/BFA050004/f-0-4>": {
       "triples": [
         {
           "predicate": "rdf:type",
