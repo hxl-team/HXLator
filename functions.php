@@ -187,13 +187,31 @@ function loadModal(){
 	<div id="hxlPreview" class="modal hide fade">
             <div class="modal-header">
               <button type="button" class="close" data-dismiss="modal">×</button>
-              <h3>HXL Preview<img src="img/nakedturtle.png" class="pull-right"></h3>
-              <p>A preview of the HXL code generated from your spread sheet in <a href="http://en.wikipedia.org/wiki/Turtle_(syntax)">Turtle syntax</a>.</p>
+              <h3>HXL Preview</h3>              
             </div>
             <div class="modal-body">
-              <code>
-              	<pre id="nakedturtle"></pre>
-              </code>
+            
+            <div class="tabbable" style="margin-bottom: 18px;">
+                    <ul class="nav nav-tabs">
+                      <li><a href="#previewtaboverview" data-toggle="tab">Overview</a></li>
+                      <li><a href="#previewtabtable" data-toggle="tab">Table</a></li>
+                      <li class="active"><a href="#previewtabturtle" data-toggle="tab">Turtle</a></li>
+                    </ul>
+                    <div class="tab-content" style="padding-bottom: 9px; border-bottom: 1px solid #ddd;">
+                      <div class="tab-pane" id="previewtaboverview">
+                        <p>TBD</p>
+                      </div>
+                      <div class="tab-pane" id="previewtabtable">
+                        <p>TBD</p>
+                      </div>
+                      <div class="tab-pane active" id="previewtabturtle">
+                      	<p>Preview in <a href="http://en.wikipedia.org/wiki/Turtle_(syntax)">Turtle syntax</a>:</p>
+                        <code>
+                        	<pre id="nakedturtle"></pre>
+                        </code>
+                      </div>
+                    </div>
+                  </div>            
             </div>
             <div class="modal-footer">
               <a href="#" class="btn" data-dismiss="modal">Close</a>
