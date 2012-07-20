@@ -90,10 +90,10 @@ if($isMove === true) {
 	echo '<div class="tabbable" style="margin-bottom: 18px;">
 	          <ul class="nav nav-tabs">';
 	
-	$tabno = 0; 
+	$tabno = 1; 
 	foreach ($workbook->getWorksheetIterator() as $worksheet) {    
-		if($tabno === 0){  // make the first tab active
-	   		echo '   <li class="active"><a href="#tab0" data-toggle="tab">'.$worksheet->getTitle().'</a></li>';
+		if($tabno === 1){  // make the first tab active
+	   		echo '   <li class="active"><a href="#tab1" data-toggle="tab">'.$worksheet->getTitle().'</a></li>';
 	    }else{
 		   	echo '   <li><a href="#tab'.$tabno.'" data-toggle="tab">'.$worksheet->getTitle().'</a></li>';		   
 	    }
@@ -104,14 +104,14 @@ if($isMove === true) {
 	          <div class="tab-content" style="padding-bottom: 9px; border-bottom: 1px solid #ddd;">';
 	            
 	
-	$tabno = 0;
+	$tabno = 1;
 	// iterate through all sheets in this file
 	foreach ($workbook->getWorksheetIterator() as $worksheet) {
 		//$sheetData = $workbook->getActiveSheet()->toArray(null,true,true,true); 
 		$sheetData = $worksheet->toArray(null,true,true,true); 
 	
-		if ($tabno === 0){
-			echo '<div class="tab-pane active" id="tab0">';
+		if ($tabno === 1){
+			echo '<div class="tab-pane active" id="tab1">';
 		}else{
 			echo '<div class="tab-pane" id="tab'.$tabno.'">';
 		}
@@ -119,7 +119,7 @@ if($isMove === true) {
 		
 			<table class='table table-striped table-bordered table-condensed'>";
 	
-		renderTable($sheetData);				
+		renderTable($sheetData, $tabno);				
 	
 		echo"
 			  </table>
@@ -253,46 +253,51 @@ generateRDF($initMapping);';
 // load the footer, along with the extra JS required for this page
 getFoot(array("bootstrap-tab.js", "bootstrap-tooltip.js", "bootstrap-popover.js", "bootstrap-dropdown.js", "bootstrap-modal.js", "bootstrap-transition.js",  "hxlator.js" ), $inlineScript);
 
-function renderTable($sheetData){
+// renders the given $sheetData as an HTML table
+// $sheetIndex is the index of the given sheet in the containing workbook
+function renderTable($sheetData, $sheetIndex){
 	$bodyOpen = false;
 	foreach ($sheetData as $rownumber => $rowcontents) {
+
+		// show the header (A B ...) above the first row
 		if($rownumber == 1){ // header row
-			echo "
+			echo '
 				<thead>
-					<tr class='hxlatorrow'>
-						<th class='hxlatorcell'>".$rownumber."</th>";		
-			foreach ($rowcontents as $cell => $cellvalue) {
-				echo "
-						<th class='hxlatorcell'>".$cellvalue."</th>";	
+					<tr class="hxlatorrow">
+						<th class="hxlatorcell"> </th>';		
+			foreach ($rowcontents as $cellid => $cellvalue) {
+				echo '
+						<th class="hxlatorcell">'.$cellid.'</th>';	
 			}		
 			
-			echo "
+			echo '
 					</tr>
-				</head>";		
-		}else{ // table contents
-
-			if(!$bodyOpen){
-				echo"
-				<tbody>";
-				$bodyOpen = true;
-			}
-
-			echo "
-					<tr class='hxlatorrow'>";
-				echo "
-						<th class='hxlatorcell'>".$rownumber."</th>";		
-			foreach ($rowcontents as $cell => $cellvalue) {
-				echo "
-						<td class='hxlatorcell'>".$cellvalue."</td>";	
-			}		
-			
-			echo "
-					</tr>";	
+				</head>';					
 		}
+
+		// show the row contents
+		if(!$bodyOpen){
+			echo '
+			<tbody>';
+			$bodyOpen = true;
+		}
+
+		echo '
+				<tr class="hxlatorrow">';
+			echo '
+					<th class="hxlatorcell">'.$rownumber.'</th>';		
+		foreach ($rowcontents as $cellid => $cellvalue) {
+			echo '
+					<td class="hxlatorcell" data-cellid="'.$sheetIndex.'-'.$cellid.'-'.$rownumber.'">'.$cellvalue.'</td>';	
+		}							
+		
+		echo '
+				</tr>';	
+	
 	}
 	
-	echo "
-			</tbody>";	
+	echo '
+			</tbody>';	
 		
 }
 
