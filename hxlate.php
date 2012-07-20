@@ -119,8 +119,7 @@ if($isMove === true) {
 		
 			<table class='table table-striped table-bordered table-condensed'>";
 	
-		makeTableHead($sheetData);				
-		makeTableBody($sheetData);		
+		renderTable($sheetData);				
 	
 		echo"
 			  </table>
@@ -254,61 +253,48 @@ generateRDF($initMapping);';
 // load the footer, along with the extra JS required for this page
 getFoot(array("bootstrap-tab.js", "bootstrap-tooltip.js", "bootstrap-popover.js", "bootstrap-dropdown.js", "bootstrap-modal.js", "bootstrap-transition.js",  "hxlator.js" ), $inlineScript);
 
-function makeTableHead($sheetData){
-	echo"
-	<thead>";
-	
-		foreach ($sheetData as $rownumber => $rowcontents) {
-			if($rownumber == 1){
+function renderTable($sheetData){
+	$bodyOpen = false;
+	foreach ($sheetData as $rownumber => $rowcontents) {
+		if($rownumber == 1){ // header row
+			echo "
+				<thead>
+					<tr class='hxlatorrow'>
+						<th class='hxlatorcell'>".$rownumber."</th>";		
+			foreach ($rowcontents as $cell => $cellvalue) {
 				echo "
-						<tr class='hxlatorrow'>";
-					echo "
-							<th class='hxlatorcell'>".$rownumber."</th>";		
-				foreach ($rowcontents as $cell => $cellvalue) {
-					echo "
-							<th class='hxlatorcell'>".$cellvalue."</th>";	
-				}		
-				
-				echo "
-						</tr>";		
-			}else{
-				// we're doing just the first row, then quit:
-				echo "
-						</head>";
-				return; 
+						<th class='hxlatorcell'>".$cellvalue."</th>";	
+			}		
+			
+			echo "
+					</tr>
+				</head>";		
+		}else{ // table contents
+
+			if(!$bodyOpen){
+				echo"
+				<tbody>";
+				$bodyOpen = true;
 			}
+
+			echo "
+					<tr class='hxlatorrow'>";
+				echo "
+						<th class='hxlatorcell'>".$rownumber."</th>";		
+			foreach ($rowcontents as $cell => $cellvalue) {
+				echo "
+						<td class='hxlatorcell'>".$cellvalue."</td>";	
+			}		
+			
+			echo "
+					</tr>";	
 		}
-		
+	}
+	
+	echo "
+			</tbody>";	
 		
 }
-
-function makeTableBody($sheetData){
-	echo"
-	<tbody>";
-	
-		foreach ($sheetData as $rownumber => $rowcontents) {
-			if($rownumber != 1){
-				echo "
-						<tr class='hxlatorrow'>";
-					echo "
-							<th class='hxlatorcell'>".$rownumber."</th>";		
-				foreach ($rowcontents as $cell => $cellvalue) {
-					echo "
-							<td class='hxlatorcell'>".$cellvalue."</td>";	
-				}		
-				
-				echo "
-						</tr>";		
-			}
-		}
-		
-		echo "
-				</tbody>";
-}
-
-
-
-
 
 
 // function to show horziontally stacked pills of the HXL class hierarchy that fold out to the right, 
