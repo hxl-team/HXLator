@@ -108,6 +108,7 @@ if($isMove === true) {
 	// iterate through all sheets in this file
 	foreach ($workbook->getWorksheetIterator() as $worksheet) {
 		//$sheetData = $workbook->getActiveSheet()->toArray(null,true,true,true); 
+		
 		$sheetData = $worksheet->toArray(null,true,true,true); 
 	
 		if ($tabno === 1){
@@ -283,13 +284,12 @@ function renderTable($sheetData, $sheetIndex){
 		}
 
 		echo '
-				<tr class="hxlatorrow">';
-			echo '
+				<tr class="hxlatorrow">
 					<th class="hxlatorcell">'.$rownumber.'</th>';		
 		foreach ($rowcontents as $cellid => $cellvalue) {
 			echo '
-					<td class="hxlatorcell" data-cellid="'.$sheetIndex.'-'.$cellid.'-'.$rownumber.'">'.$cellvalue.'</td>';	
-		}							
+					<td class="hxlatorcell" data-cellid="'.$sheetIndex.'-'.$cellid.'-'.$rownumber.'"'.getDataType($cellvalue).'>'.$cellvalue.'</td>';	
+		}
 		
 		echo '
 				</tr>';	
@@ -299,6 +299,32 @@ function renderTable($sheetData, $sheetIndex){
 	echo '
 			</tbody>';	
 		
+}
+
+// determines a value's xsd datatype and return the correspoding html snippet to annotate the cells in the html table
+// this will allow us to check whether the datatype conforms to the HXL property's range at the point where a users maps a cell to a property
+function getDataType($val = null){
+	if ($val){
+		$date = date_parse($val);
+		if ( is_numeric($val) && !strpos($val, ".") ) {
+			return ' data-type="xsd:int"'; 
+		} else if ( is_numeric($val) && strpos($val, ".") >= 0 ){ // if it has decimals, it's a double
+			return ' data-type="xsd:double"'; 		
+		} else if ( $date["year"] && $date["month"]){			
+			if ( $date["hour"] == 0 && $date["minute"] == 0){ // this is just a date, no time info
+				return ' data-type="xsd:date" data-date="'.$date["year"].'-'.$date["month"].'-'.$date["day"].'"';
+			} else { // date with time:
+				return ' data-type="xsd:dateTime" data-date="'.$date["year"].'-'.$date["month"].'-'.$date["day"].'T'.$date["hour"].':'.$date["minute"].':'.$date["second"].'"';
+			}
+		} elseif (is_string($val)) {
+			return ' data-type="xsd:string"';
+		}else{
+			error_log("Unknown datatype, value: ".$val);
+		}
+	}
+	// if no value given or no matching datatype found:
+	return '';
+	
 }
 
 
