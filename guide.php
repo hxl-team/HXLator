@@ -16,7 +16,7 @@ getHead("guide.php");
 <div class="container">
 	<a href="https://sites.google.com/site/hxlproject/"><img src="img/hxl-logo-s.png" align="right" /></a>
 	<h1>Quick Start Guide <i class="icon-info-sign"></i></h1>
-	<p style="margin-top:  1.5em; margin-bottom:  1.5em">A step-by-step guide for newbies – <span class="label label-warning">TBD</span></p>	 
+	<p style="margin-top:  1.5em; margin-bottom:  1.5em">Select <a href="index.php">HXLate</a> to get started!</p>	 
 </div> <!-- /container -->
 
 <?php getFoot(); ?>

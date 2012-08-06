@@ -5,6 +5,13 @@ set_include_path('Classes/');
 require_once "EasyRdf.php";
 require_once "html_tag_helpers.php";
 
+//handle the logins data TODO: fake for now, needs to be revised:
+session_start();
+if(isset($_POST["user_name"]) && isset($_POST["user_organisation"])){
+	$_SESSION["user_name"] = $_POST["user_name"];
+	$_SESSION["user_organisation"] = $_POST["user_organisation"];
+}
+
 // fires the $query against our SPARQL endpoint and returns a EasyRDF Sparql_Result object 
 // (see http://www.aelius.com/njh/easyrdf/docs/EasyRdf/EasyRdf_Sparql_Result.html),
 // which is basically an ArrayIterator with some extras
@@ -71,11 +78,11 @@ function makeURI($type, $properties = null){
 
 
 // generates the head for all pages, including highlighting of the activr page in the nav bar
-function getHead($activePage = "index.php", $user = null, $org = null){  
+function getHead($activePage = "index.php"){  
 
 $links = array("index.php" => "HXLate", 
+			   "manage.php" => "Manage Translators",
 			   "guide.php" => "Quick Start Guide",
-			   "faq.php" => "FAQ",
 			   "contact.php" => "Contact"); 
 
 
@@ -120,7 +127,7 @@ foreach($links as $link => $text){
 }
 
 echo '
-			<li class="logininfo"><a href="#">Logged in as '.$user.', '.$org.'</a></li>';
+			<li class="logininfo"><a href="#">Logged in as '.$_SESSION["user_name"].', '.$_SESSION["user_organisation"].'</a></li>';
 
 echo'           
             </ul>

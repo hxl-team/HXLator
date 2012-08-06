@@ -60,6 +60,7 @@ window.onbeforeunload = function (e) {
 	return message;
 };
 
+// display forward / backward links
 $('ul#topnav').append('<li class="historynav"><a href="#" id="back">&laquo; Back</a></li><li class="historynav"><a href="#" id="forward">Forward &raquo;</a></li>');
 
 
@@ -113,7 +114,7 @@ $('.hxlclass-selectable').click(function(){
 	$plural    = $(this).attr('plural');
 	$classURI  = $(this).attr('classuri');
 	step2($className, $plural, $classURI);
-	hxlHistory.pushState(null);
+	hxlHistory.pushState(null); // TODO 
 });
 
 // click handler to expand the subclasses of a given HXL class:

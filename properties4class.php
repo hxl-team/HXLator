@@ -1,5 +1,7 @@
 <?php 
-
+	// returns the properties for the class passed via $_GET['classuri'] as HTML
+	// to be called via AJAX
+	
 	include_once('functions.php');
 	
 	$props = sparqlQuery('SELECT DISTINCT ?domain ?range ?proplabel ?description ?prop WHERE {  
