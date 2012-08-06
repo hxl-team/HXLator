@@ -2,8 +2,18 @@
 
 	include_once('functions.php');
 	
+	echo '<div class="step1">
+	<p class="lead">What is the data in this spreadsheet <em>primarily</em> about? Hover for explanations: </p>
+	<div class="row">';
+	
 	echo getClassPills();
 	
+	echo '
+		</div>
+	</div>';
+	
+	// function to show horziontally stacked pills of the HXL class hierarchy that fold out to the right, 
+	// revealing a classes' subclasses when the corresponding pill is clicked
 	function getClassPills($superclass = null, $superclassLabel = null, $superclassLabelPlural = null){
 		
 		$recursionClasses = array();

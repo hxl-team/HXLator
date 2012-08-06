@@ -65,22 +65,13 @@ if($isMove === true) {
 	<div class="container">
 			<div class="row">
 			<div class="span12">
-			<h1><img src="img/loader.gif" id="loader" align="right" style="display: none" />HXLating <em>'.$_FILES["userfile"]["name"].'</em> <a class="btn btn-info pull-right" data-toggle="modal" href="#hxlPreview">Preview HXL</a></h1>
+			<h1>HXLating <em>'.$_FILES["userfile"]["name"].'</em> <a class="btn btn-info pull-right" data-toggle="modal" href="#hxlPreview">Preview HXL</a></h1>
 			</div>
 			</div>
 			</div>
-			<div class="shortguide container">
-			<div class="step1">
-			<p class="lead">What is the data in this spreadsheet <em>primarily</em> about? Hover for explanations: </p>
-						
-			<div class="row">';
-		
-	include("classpills.php");
+			<div class="shortguide container">';
 		
 	echo '
-		</div>
-		</div>
-		<!--<div class="span4"><div class="well" id="mappings" style="display: none"><h2 style="margin-bottom: 15px">Mappings to HXL</h2></div></div>-->
 		</div> <!-- shortguide -->
 		<div class="container">
 		';
@@ -328,25 +319,10 @@ function getDataType($val = null){
 }
 
 
-// function to show horziontally stacked pills of the HXL class hierarchy that fold out to the right, 
-// revealing a classes' subclasses when the corresponding pill is clicked
-
-
-
-
-
-
-
-// ------- some convenience functions
-
-function shorten($uri){
-	$parts = explode("#", $uri);
-	return "hxl:".$parts[1];
-}
-
-
-function showError($msg){
-	echo '<div class="container"><div class="alert alert-error"><h2>Oops.</h2>'.$msg.'</div>';
-}
-
 ?>
+
+
+
+
+
+

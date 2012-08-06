@@ -15,10 +15,12 @@ $hxlHistory.pushState = function($mapping){
 	$('li.historynav > a').css('display', 'block');
 	$hxlHistory.states.push($mapping);				
 	// set pointer to the last element in the array, i.e., the one we just added:
-	$hxlHistory.currentState = $hxlHistory.states.length-1;
-	console.log($mapping);
+	$hxlHistory.currentState = $hxlHistory.states.length-1;	
 //	console.log($hxlHistory.states);
 //	console.log($hxlHistory.currentState);
+
+	$hxlHistory.processMapping($mapping);
+
 }
 
 // go one step back and revert to the last stored stage of the mapping
@@ -31,6 +33,7 @@ $hxlHistory.back = function(){
 	}	
 }
 
+// if the user has gone back in the the mapping process, this function allows him to go forward again:
 $hxlHistory.foward = function(){
 	if($hxlHistory.currentState < $hxlHistory.states.length-1){
 		$hxlHistory.currentState++;	
@@ -40,11 +43,77 @@ $hxlHistory.foward = function(){
 	}			
 }
 
+// TODO: this is where the magic happens...
+// Depending on the state of the mapping, this function decides what is shown to the user
 $hxlHistory.processMapping = function($mapping){
-	console.log("Processing mapping:");
+	
+	$('#loading').show();
+	
+	console.log('Processing mapping:');
 	console.log($mapping);
 	
-	// todo: this is where the magic happens...
+	// if the class has not been set yet, show the class pills:
+	if(typeof $mapping.classuri == 'undefined'){
+		selectClass($mapping);	
+	}else if (typeof $mapping.samplerow == 'undefined') {
+		selectRow($mapping);
+	}				
+}
+
+
+// shows the class selection pills:
+function selectClass($mapping){
+
+	$('.shortguide').load('classpills.php', function() {
+		// hover handler to show class/property definitions in a popover
+		$('.hxlclass').each(function() {
+		    $(this).popover({
+		        html: true,
+		        placement: 'bottom'
+		    });    
+		}); 
+		
+		// click handler for the class buttons - step1
+		$('.hxlclass-selectable').click(function(){
+			$mapping.classuri = $(this).attr('classuri');
+			$mapping.classsingular = $(this).attr('singular');
+			$mapping.classplural = $(this).attr('plural');
+			$hxlHistory.pushState($mapping); 
+		});
+		
+		// click handler to expand the subclasses of a given HXL class:
+		$('.hxlclass-expandable').click(function(){
+			// 'un-highlight' all other LIs in this UL and hide the sub-class div
+			
+			$(this).parent().siblings('.solo').each(function(){
+				$(this).removeClass('active');	
+				$subclassesof = $(this).children().first().attr('classuri');
+				$('div[subclassesof*="'+$subclassesof+'"]').addClass('hxl-hidden');
+			});
+			
+			// highlight the clicked one:
+			$(this).parent().addClass('active');
+			
+			// show the div containing the subclasses:
+			$subclassesof = $(this).attr('classuri');
+			$('div[subclassesof*="'+$subclassesof+'"]').removeClass('hxl-hidden');	
+		});
+		
+		$('#loading').hide();
+			
+	});	
+}
+
+// pick the first row with data
+function selectRow($mapping){
+	$('.popover').hide();
+	$('.shortguide').slideUp(function(){		
+		$('.step1').remove();
+		$('.shortguide').html('<div class="step2"><p class="lead selectedclass" style="visibility: none">Please click on the <strong>first</strong> row that contains data about a '+$mapping.classsingular+'/'+ $mapping.classplural +'.</p></div>');	
+		$('.shortguide').slideDown();
+	});
+	$('#loading').hide();
+	//step3($className, $classURI);	
 }
 
 // finally, make sure the user doesn't go back through the browser's back button:
@@ -69,7 +138,7 @@ $('ul#topnav').append('<li class="historynav"><a href="#" id="back">&laquo; Back
 // ---------------------------------------------------
 
 // processes a mapping, generates RDF from it and updates the preview modal
-generateRDF = function ($mapping){
+function generateRDF($mapping){
 	$turtle = "@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> . \n@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> . \n@prefix owl:  <http://www.w3.org/2002/07/owl#> . \n@prefix foaf: <http://xmlns.com/foaf/0.1/> . \n@prefix dc:   <http://purl.org/dc/terms/> . \n@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> . \n@prefix skos: <http://www.w3.org/2004/02/skos/core#> . \n@prefix hxl:  <http://hxl.humanitarianresponse.info/ns/#> . \n@prefix geo:  <http://www.opengis.net/geosparql#> . \n@prefix label: <http://www.wasab.dk/morten/2004/03/label#> . \n \n";
 	$.each($mapping.templates, function($uri, $triples){
 		$.each($triples["triples"], function($i, $triple){
@@ -85,18 +154,6 @@ generateRDF = function ($mapping){
 }
 
 
-// ---------------------------------------------------
-// Popovers
-// ---------------------------------------------------
-
-
-// hover handler to show class/property definitions in a popover
-$('.hxlclass').each(function() {
-    $(this).popover({
-        html: true,
-        placement: 'bottom'
-    });    
-}); 
 
 // Testing the lookup function:
 // var jason = lookup('SELECT * WHERE { ?a ?b ?c . } LIMIT 10');
@@ -108,45 +165,6 @@ $('.hxlclass').each(function() {
 // ---------------------------------------------------
 
 
-// click handler for the class buttons - step1
-$('.hxlclass-selectable').click(function(){
-	$className = $(this).attr('singular');
-	$plural    = $(this).attr('plural');
-	$classURI  = $(this).attr('classuri');
-	step2($className, $plural, $classURI);
-	hxlHistory.pushState(null); // TODO 
-});
-
-// click handler to expand the subclasses of a given HXL class:
-$('.hxlclass-expandable').click(function(){
-	// 'un-highlight' all other LIs in this UL and hide the sub-class div
-	
-	// TODO this only works for going one "level" back so far 
-	$(this).parent().siblings('.solo').each(function(){
-		$(this).removeClass('active');	
-		$subclassesof = $(this).children().first().attr('classuri');
-		$('div[subclassesof*="'+$subclassesof+'"]').addClass('hxl-hidden');
-	});
-	
-	// highlight the clicked one:
-	$(this).parent().addClass('active');
-	
-	// show the div containing the subclasses:
-	$subclassesof = $(this).attr('classuri');
-	$('div[subclassesof*="'+$subclassesof+'"]').removeClass('hxl-hidden');	
-});
-
-// pick the first row with data
-function step2($className, $plural, $classURI){
-	$('.popover').hide();
-	$('.shortguide').slideUp(function(){		
-		$('.step1').remove();
-		$('.shortguide').append('<div class="step2"><p class="lead selectedclass" style="visibility: none">Please click on the <strong>first</strong> row that contains data about a '+$className+'/'+ $plural +'.</p></div>');	
-		$('.shortguide').slideDown();
-	});
-	
-	step3($className, $classURI);	
-}
 
 
 // pick the last row with data
@@ -183,7 +201,6 @@ function step5($className, $classURI){
 			$('.step3').remove();
 			$('.shortguide').append('<div class="step5"><p class="lead">In HXL, any '+$className+' can have the following properties:</p>');	
 			
-			$('#loader').show();
 			$.get('properties4class.php?classuri='+$classURI, function(data){
 				$('.shortguide').append(data);	
 				$('.hxlclass').each(function() {
@@ -191,7 +208,6 @@ function step5($className, $classURI){
 				        html: true,
 				    });    
 				}); 
-				$('#loader').hide();
 				$('.shortguide').append('<p class="lead">Please select a </p><p class="lead" id="furtherinstructions"></p></div>');
 				$('.shortguide').slideDown();
 				enableHXLmapping();
@@ -249,29 +265,29 @@ function enableHXLmapping(){
 
 
 // a generic error display for hxlate.php. Will show $msg in a red alert box on top of the page
+// TODO put this in a modal
 function hxlError($msg){
 	$('.shortguide').prepend('<p class="alert alert-error">'+$msg+'</p>');
-	$('#loader').hide();
 }
 
 
 // Generic SPARQL lookup function, returns JS object 
-function lookup(sparqlQuery){
-	console.log(sparqlQuery);
-	var endpoint = "http://hxl.humanitarianresponse.info/sparql";	
+function lookup($sparqlQuery){
+	console.log($sparqlQuery);
+	var $endpoint = "http://hxl.humanitarianresponse.info/sparql";	
 	return $.ajax({
-	    url: endpoint,
+	    url: $endpoint,
 	    headers: {
 	    	Accept: "application/sparql-results+json", 
 	    },
 	    data: { 
-	    	query: sparqlQuery 
+	    	query: $sparqlQuery 
 	    },	    
-	    success: function(json) {
-	    	return json;
+	    success: function($json) {
+	    	return $json;
 	    },
-	    error: function(jqXHR, textStatus, errorThrown){
-	    	console.log(textStatus);
+	    error: function($jqXHR, $textStatus, $errorThrown){
+	    	console.log($textStatus);
 	    }	   
 	});	
 }

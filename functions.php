@@ -111,7 +111,7 @@ echo'<!DOCTYPE html>
 
     <div class="navbar navbar-fixed-top">
         <div class="container">
-          <span class="brand"><img src="img/logo.png" /></span>
+          <span class="brand"><img src="img/loader.gif" id="loading" class="pull-right" /><img src="img/logo.png" /></span>
           <div class="nav-hxlator">
             <ul class="nav" id="topnav">
 '; 
@@ -228,6 +228,16 @@ function loadModal(){
 }
 
 
+// ------- some convenience functions
+
+function shorten($uri){
+	$parts = explode("#", $uri);
+	return "hxl:".$parts[1];
+}
+
+
+function showError($msg){
+	echo '<div class="container"><div class="alert alert-error"><h2>Oops.</h2>'.$msg.'</div>';
+}
 
 ?>
-

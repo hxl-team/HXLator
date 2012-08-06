@@ -1,4 +1,8 @@
 {
+  "classuri": "hxl:Population" ,
+  "classsingular": "Population" ,
+  "classplural": "Populations" ,
+  "samplerow": "1-C" ,
   "templates": {
     "<http://hxl.humanitarianresponse.info/data/population/bka/deou/>": {
       "triples": [

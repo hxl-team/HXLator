@@ -13,7 +13,6 @@ $user_organisation_uri = "http://hxl.humanitarianresponse.info/data/orgs/unhcr";
 include_once('functions.php');
 getHead("index.php", $user_name, $user_organisation); 
 
-include('sparqlQueries.php');
 
 ?>
 
