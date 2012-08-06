@@ -275,7 +275,7 @@ function renderTable($sheetData, $sheetIndex){
 		}
 
 		echo '
-				<tr class="hxlatorrow">
+				<tr class="hxlatorrow" data-rowid="'.$sheetIndex.'-'.$rownumber.'">
 					<th class="hxlatorcell">'.$rownumber.'</th>';		
 		foreach ($rowcontents as $cellid => $cellvalue) {
 			echo '

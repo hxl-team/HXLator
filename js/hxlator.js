@@ -108,9 +108,16 @@ function selectClass($mapping){
 function selectRow($mapping){
 	$('.popover').hide();
 	$('.shortguide').slideUp(function(){		
-		$('.step1').remove();
 		$('.shortguide').html('<div class="step2"><p class="lead selectedclass" style="visibility: none">Please click on the <strong>first</strong> row that contains data about a '+$mapping.classsingular+'/'+ $mapping.classplural +'.</p></div>');	
 		$('.shortguide').slideDown();
+		// put a click listener on the table rows:
+		$('.hxlatorrow').click(function(){
+			$(this).addClass('highlight');
+			$(this).addClass('first');
+			$('.hxlatorrow').unbind('click'); //only allow one click
+			$mapping.samplerow = $(this).attr('data-rowid'); 
+			$hxlHistory.pushState($mapping); 
+		});
 	});
 	$('#loading').hide();
 	//step3($className, $classURI);	
@@ -154,20 +161,7 @@ function generateRDF($mapping){
 }
 
 
-
-// Testing the lookup function:
-// var jason = lookup('SELECT * WHERE { ?a ?b ?c . } LIMIT 10');
-// console.log(jason);
-
-
-// ---------------------------------------------------
-// User interaction handling
-// ---------------------------------------------------
-
-
-
-
-// pick the last row with data
+// pick cells that identify instances of the selected class
 function step3($className, $classURI){
 	$('.hxlatorrow').click(function(){
 		$(this).addClass('highlight');
