@@ -239,8 +239,7 @@ $inlineScript = '$initMapping = {
   }
 };
 
-$hxlHistory.pushState($initMapping);
-generateRDF($initMapping);';
+$hxlHistory.pushState($initMapping);';
 
 // load the footer, along with the extra JS required for this page
 getFoot(array("bootstrap-tab.js", "bootstrap-tooltip.js", "bootstrap-popover.js", "bootstrap-dropdown.js", "bootstrap-modal.js", "bootstrap-transition.js",  "hxlator.js" ), $inlineScript);

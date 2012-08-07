@@ -1,3 +1,10 @@
+// Array Remove - By John Resig (MIT Licensed)
+Array.prototype.remove = function(from, to) {
+  var rest = this.slice((to || from) + 1 || this.length);
+  this.length = from < 0 ? this.length + from : from;
+  return this.push.apply(this, rest);
+};
+
 // ---------------------------------------------------
 // The history/undo stuff
 // ---------------------------------------------------
@@ -7,63 +14,90 @@ $hxlHistory = new Object();
 
 // this is the stack of mapping objects (see MappingTemplate.json for an example)
 $hxlHistory.states = new Array();
-$hxlHistory.currentState = 0; // pointer to where we are in the array with the mapping currently in use
+$hxlHistory.currentState = -1; // pointer to where we are in the array with the mapping currently in use
 
 // adds a new state (aka. mapping xls->hxl) to the history stack:
-$hxlHistory.pushState = function($mapping){
-	// enable back/forward links:
-	$('li.historynav > a').css('display', 'block');
-	$hxlHistory.states.push($mapping);				
+$hxlHistory.pushState = function($inputMapping){
+	// clone the mapping object before we push it to the array
+	// otherwise, we would store references to the same mapping over and over again 
+	var $clone = $.extend(true, {}, $inputMapping);
+	
+	// if the pointer to the currentState is *not* at the end of the states array,
+	// the user has changed something after going back. In this case, we delete all 
+	// states *after* the current one before we add the new state to the array:
+	if($hxlHistory.currentState < $hxlHistory.states.length-1){
+		$deleteFrom = $hxlHistory.currentState + 1 ;
+		$deleteTo   = $hxlHistory.states.length - 1 ;
+		$hxlHistory.states.remove($deleteFrom, $deleteTo);
+	}
+	
+	$hxlHistory.states.push($clone);				
 	// set pointer to the last element in the array, i.e., the one we just added:
 	$hxlHistory.currentState = $hxlHistory.states.length-1;	
-//	console.log($hxlHistory.states);
-//	console.log($hxlHistory.currentState);
-
-	$hxlHistory.processMapping($mapping);
-
-}
-
-// go one step back and revert to the last stored stage of the mapping
-$hxlHistory.back = function(){
 	if($hxlHistory.currentState > 0){
-		$hxlHistory.currentState--;	
-		$thisState = $hxlHistory.states[$hxlHistory.currentState];
-		$hxlHistory.processMapping($thisState);
-		// todo: enable forward link
-	}	
-}
+		$('a#back').unbind();
+		// enable backward links:
+		$('a#back').click(function() {
+			$hxlHistory.back();
+		});
+		$('a#back').removeClass('disabled');
+	}
+	
+	$hxlHistory.processMapping();
 
-// if the user has gone back in the the mapping process, this function allows him to go forward again:
-$hxlHistory.foward = function(){
-	if($hxlHistory.currentState < $hxlHistory.states.length-1){
-		$hxlHistory.currentState++;	
-		$thisState = $hxlHistory.states[$hxlHistory.currentState];
-		$hxlHistory.processMapping($thisState);
-		// todo: disable back link of we are at the first element in the array
-	}			
 }
 
 // TODO: this is where the magic happens...
 // Depending on the state of the mapping, this function decides what is shown to the user
-$hxlHistory.processMapping = function($mapping){
-	
+// no arguments required, since the method will figure out automatically what the current state is
+$hxlHistory.processMapping = function(){
 	$('#loading').show();
 	
-	console.log('Processing mapping:');
-	console.log($mapping);
+	console.log($hxlHistory.currentState);
+	console.log($hxlHistory.states);
+	
+	var $mapping = $hxlHistory.states[$hxlHistory.currentState];
 	
 	// if the class has not been set yet, show the class pills:
 	if(typeof $mapping.classuri == 'undefined'){
 		selectClass($mapping);	
 	}else if (typeof $mapping.samplerow == 'undefined') {
 		selectRow($mapping);
-	}				
+	}	
+	
+	generateRDF($mapping);		
+}
+
+
+// go one step back and revert to the last stored stage of the mapping
+$hxlHistory.back = function(){
+	if($hxlHistory.currentState > 0){
+		$hxlHistory.currentState--;	
+		$hxlHistory.processMapping();
+		// enable forward link
+		$('a#forward').removeClass('disabled');		
+	} else {
+		// disable backward link
+		$('a#back').addClass('disabled');		
+	}
+}
+
+// if the user has gone back in the the mapping process, this function allows him to go forward again:
+$hxlHistory.foward = function(){
+	if($hxlHistory.currentState < $hxlHistory.states.length-1){
+		$hxlHistory.currentState++;	
+		$hxlHistory.processMapping();	
+		$('a#back').removeClass('disabled');			
+	} else {
+		$('a#forward').addClass('disabled');				
+	}
 }
 
 
 // shows the class selection pills:
-function selectClass($mapping){
-
+function selectClass($inputMapping){
+	// make sure we don't modify the original array entry:
+	var $mapping = $.extend(true, {}, $inputMapping);
 	$('.shortguide').load('classpills.php', function() {
 		// hover handler to show class/property definitions in a popover
 		$('.hxlclass').each(function() {
@@ -73,6 +107,7 @@ function selectClass($mapping){
 		    });    
 		}); 
 		
+		$('.hxlclass-selectable').unbind();
 		// click handler for the class buttons - step1
 		$('.hxlclass-selectable').click(function(){
 			$mapping.classuri = $(this).attr('classuri');
@@ -81,6 +116,7 @@ function selectClass($mapping){
 			$hxlHistory.pushState($mapping); 
 		});
 		
+		$('.hxlclass-expandable').unbind();
 		// click handler to expand the subclasses of a given HXL class:
 		$('.hxlclass-expandable').click(function(){
 			// 'un-highlight' all other LIs in this UL and hide the sub-class div
@@ -105,11 +141,17 @@ function selectClass($mapping){
 }
 
 // pick the first row with data
-function selectRow($mapping){
+function selectRow($inputMapping){
+	// make sure we don't modify the original array entry:
+	var $mapping = $.extend(true, {}, $inputMapping);
+
 	$('.popover').hide();
+	$('.hxlatorrow').removeClass('highlight'); // in case the method is called again after going back
+	
 	$('.shortguide').slideUp(function(){		
 		$('.shortguide').html('<div class="step2"><p class="lead selectedclass" style="visibility: none">Please click on the <strong>first</strong> row that contains data about a '+$mapping.classsingular+'/'+ $mapping.classplural +'.</p></div>');	
 		$('.shortguide').slideDown();
+		$('.hxlatorrow').unbind();
 		// put a click listener on the table rows:
 		$('.hxlatorrow').click(function(){
 			$(this).addClass('highlight');
@@ -119,25 +161,12 @@ function selectRow($mapping){
 			$hxlHistory.pushState($mapping); 
 		});
 	});
-	$('#loading').hide();
-	//step3($className, $classURI);	
+	$('#loading').hide();	
 }
 
-// finally, make sure the user doesn't go back through the browser's back button:
-window.onbeforeunload = function (e) {
-  var message = "You are about to leave this page and lose your current HXL mapping. If you have made a mistake in your mapping process, you can go back to the previous step by clicking the HXL back button at the top left.",
-    e = e || window.event;
-	  // For IE and Firefox
-	if (e) {
-	    e.returnValue = message;
-	}
-	
-	// For Safari
-	return message;
-};
 
 // display forward / backward links
-$('ul#topnav').append('<li class="historynav"><a href="#" id="back">&laquo; Back</a></li><li class="historynav"><a href="#" id="forward">Forward &raquo;</a></li>');
+$('div.nav-hxlator').append('<span class="historynav pull-right"><a href="#" id="back" class="btn btn-mini disabled">&laquo; Back</a><a href="#" id="forward" class="btn btn-small disabled">Forward &raquo;</a></span>');
 
 
 // ---------------------------------------------------
@@ -146,10 +175,10 @@ $('ul#topnav').append('<li class="historynav"><a href="#" id="back">&laquo; Back
 
 // processes a mapping, generates RDF from it and updates the preview modal
 function generateRDF($mapping){
-	$turtle = "@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> . \n@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> . \n@prefix owl:  <http://www.w3.org/2002/07/owl#> . \n@prefix foaf: <http://xmlns.com/foaf/0.1/> . \n@prefix dc:   <http://purl.org/dc/terms/> . \n@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> . \n@prefix skos: <http://www.w3.org/2004/02/skos/core#> . \n@prefix hxl:  <http://hxl.humanitarianresponse.info/ns/#> . \n@prefix geo:  <http://www.opengis.net/geosparql#> . \n@prefix label: <http://www.wasab.dk/morten/2004/03/label#> . \n \n";
+	var $turtle = "@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> . \n@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> . \n@prefix owl:  <http://www.w3.org/2002/07/owl#> . \n@prefix foaf: <http://xmlns.com/foaf/0.1/> . \n@prefix dc:   <http://purl.org/dc/terms/> . \n@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> . \n@prefix skos: <http://www.w3.org/2004/02/skos/core#> . \n@prefix hxl:  <http://hxl.humanitarianresponse.info/ns/#> . \n@prefix geo:  <http://www.opengis.net/geosparql#> . \n@prefix label: <http://www.wasab.dk/morten/2004/03/label#> . \n \n";
 	$.each($mapping.templates, function($uri, $triples){
 		$.each($triples["triples"], function($i, $triple){
-			$datatype = "";
+			var $datatype = "";
 			if ($triple["datatype"] != undefined){
 				$datatype  = "^^" + $triple["datatype"];
 			}
@@ -163,6 +192,7 @@ function generateRDF($mapping){
 
 // pick cells that identify instances of the selected class
 function step3($className, $classURI){
+	$('.hxlatorrow').unbind();
 	$('.hxlatorrow').click(function(){
 		$(this).addClass('highlight');
 		$(this).addClass('first');
@@ -186,6 +216,7 @@ function step4($className, $classURI){
 
 // show properties for class and start mapping process
 function step5($className, $classURI){
+	$('.hxlatorrow').unbind();
 	$('.hxlatorrow').click(function(){
 		// go back to the top of the page:
 		$('body').scrollTop(0);		
@@ -233,10 +264,13 @@ function highlightSpreadsheetBlock(){
 
 // adds the click listeners to the property buttons and table cells to enable the mapping
 function enableHXLmapping(){
+	$('.hxlprop').unbind();
 	// click listener for the property buttons:
 	$('.hxlprop').click(function(){
 		$('.hxlprop').unbind('click'); //only allow one click
 		$(this).addClass('btn-warning');
+
+		$('.hxlatorcell').unbind();
 		// add click listener to the table cells:
 		$('.hxlatorcell').click(function(){
 			$('.hxlatorcell').unbind('click'); //only allow one click
@@ -318,3 +352,16 @@ function htmlentities(str,typ) {
   return str;
 }
 
+
+// finally, make sure the user doesn't go back through the browser's back button:
+window.onbeforeunload = function (e) {
+  var message = "You are about to leave this page and lose your current HXL mapping. If you have made a mistake in your mapping process, you can go back to the previous step by clicking the HXL back button at the top left.",
+    e = e || window.event;
+	  // For IE and Firefox
+	if (e) {
+	    e.returnValue = message;
+	}
+	
+	// For Safari
+	return message;
+};
