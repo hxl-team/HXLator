@@ -34,17 +34,8 @@ $hxlHistory.pushState = function($inputMapping){
 	$hxlHistory.states.push($clone);				
 	// set pointer to the last element in the array, i.e., the one we just added:
 	$hxlHistory.currentState = $hxlHistory.states.length-1;	
-	if($hxlHistory.currentState > 0){
-		$('a#back').unbind();
-		// enable backward links:
-		$('a#back').click(function() {
-			$hxlHistory.back();
-		});
-		$('a#back').removeClass('disabled');
-	}
 	
 	$hxlHistory.processMapping();
-
 }
 
 // TODO: this is where the magic happens...
@@ -64,35 +55,54 @@ $hxlHistory.processMapping = function(){
 	}else if (typeof $mapping.samplerow == 'undefined') {
 		selectRow($mapping);
 	}	
-	
+
+	$hxlHistory.checkLinks();
 	generateRDF($mapping);		
 }
 
 
 // go one step back and revert to the last stored stage of the mapping
 $hxlHistory.back = function(){
-	if($hxlHistory.currentState > 0){
-		$hxlHistory.currentState--;	
-		$hxlHistory.processMapping();
-		// enable forward link
-		$('a#forward').removeClass('disabled');		
-	} else {
-		// disable backward link
-		$('a#back').addClass('disabled');		
-	}
+	$hxlHistory.currentState--;	
+	$hxlHistory.processMapping();		
 }
 
 // if the user has gone back in the the mapping process, this function allows him to go forward again:
-$hxlHistory.foward = function(){
-	if($hxlHistory.currentState < $hxlHistory.states.length-1){
-		$hxlHistory.currentState++;	
-		$hxlHistory.processMapping();	
-		$('a#back').removeClass('disabled');			
-	} else {
-		$('a#forward').addClass('disabled');				
-	}
+$hxlHistory.forward = function(){
+	$hxlHistory.currentState++;	
+	$hxlHistory.processMapping();		
 }
 
+// enables/disables the back/forward links depeding on the states array and currentState pointer
+$hxlHistory.checkLinks = function(){
+	
+	//remove event listeners to avoid events being triggered multiple times:
+	$('a#back').unbind();
+	$('a#forward').unbind();
+	
+	// check back link
+	if( $hxlHistory.currentState > 0 ){		
+		// enable backward links:
+		$('a#back').click(function() {
+			$hxlHistory.back();
+		});
+		$('a#back').removeClass('disabled');
+	}else{
+		$('a#back').addClass('disabled');
+	}
+	
+	// check forward link
+	if( $hxlHistory.currentState < $hxlHistory.states.length -1 ){
+		// enable backward links:
+		$('a#forward').click(function() {
+			$hxlHistory.forward();
+		});
+		$('a#forward').removeClass('disabled');
+	}else{
+		$('a#forward').addClass('disabled');
+	}
+	
+}
 
 // shows the class selection pills:
 function selectClass($inputMapping){
