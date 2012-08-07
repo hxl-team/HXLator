@@ -106,6 +106,10 @@ $hxlHistory.checkLinks = function(){
 
 // shows the class selection pills:
 function selectClass($inputMapping){
+	$('.hxlclass').unbind();
+	$('.hxlclass-selectable').unbind();
+	$('.hxlclass-expandable').unbind();
+	
 	// make sure we don't modify the original array entry:
 	var $mapping = $.extend(true, {}, $inputMapping);
 	$('.shortguide').load('classpills.php', function() {
@@ -117,7 +121,6 @@ function selectClass($inputMapping){
 		    });    
 		}); 
 		
-		$('.hxlclass-selectable').unbind();
 		// click handler for the class buttons - step1
 		$('.hxlclass-selectable').click(function(){
 			$mapping.classuri = $(this).attr('classuri');
@@ -126,7 +129,6 @@ function selectClass($inputMapping){
 			$hxlHistory.pushState($mapping); 
 		});
 		
-		$('.hxlclass-expandable').unbind();
 		// click handler to expand the subclasses of a given HXL class:
 		$('.hxlclass-expandable').click(function(){
 			// 'un-highlight' all other LIs in this UL and hide the sub-class div
@@ -334,31 +336,31 @@ function lookup($sparqlQuery){
 // turns our turtle code into something we can show to the user:
 // courtesy of http://murphys-world.dyndns.org/pages/javascript-htmlentities.php
 function htmlentities(str,typ) {
-  if(typeof str=="undefined") str="";
-  if(typeof typ!="number") typ=2;
-  typ=Math.max(0,Math.min(3,parseInt(typ)));
-  var html=new Array();
-  html[38]="amp"; html[60]="lt"; html[62]="gt";
-  if(typ==1 || typ==3) html[39]="#039";
-  if(typ==2 || typ==3) html[34]="quot";
-  for(var i in html)
-    eval("str=str.replace(/"+String.fromCharCode(i)+"/g,\"&"+html[i]+";\");");
-  var entity=new Array(
-    "nbsp","iexcl","cent","pound","curren","yen","brvbar","sect",
-    "uml","copy","ordf","laquo","not","shy","reg","macr",
-    "deg","plusmn","sup2","sup3","acute","micro","para","middot",
-    "cedil","sup1","ordm","raquo","frac14","frac12","frac34","iquest",
-    "Agrave","Aacute","Acirc","Atilde","Auml","Aring","AElig","Ccedil",
-    "Egrave","Eacute","Ecirc","Euml","Igrave","Iacute","Icirc","Iuml",
-    "ETH","Ntilde","Ograve","Oacute","Ocirc","Otilde","Ouml","times",
-    "Oslash","Ugrave","Uacute","Ucirc","Uuml","Yacute","THORN","szlig",
-    "agrave","aacute","acirc","atilde","auml","aring","aelig","ccedil",
-    "egrave","eacute","ecirc","euml","igrave","iacute","icirc","iuml",
-    "eth","ntilde","ograve","oacute","ocirc","otilde","ouml","divide",
-    "oslash","ugrave","uacute","ucirc","uuml","yacute","thorn","yuml"
-  );
-  for(var i in entity)
-    eval("str=str.replace(/"+String.fromCharCode(i*1+160)+"/g,\"&"+entity[i]+";\");");
+//  if(typeof str=="undefined") str="";
+//  if(typeof typ!="number") typ=2;
+//  typ=Math.max(0,Math.min(3,parseInt(typ)));
+//  var html=new Array();
+//  html[38]="amp"; html[60]="lt"; html[62]="gt";
+//  if(typ==1 || typ==3) html[39]="#039";
+//  if(typ==2 || typ==3) html[34]="quot";
+//  for(var i in html)
+//    eval("str=str.replace(/"+String.fromCharCode(i)+"/g,\"&"+html[i]+";\");");
+//  var entity=new Array(
+//    "nbsp","iexcl","cent","pound","curren","yen","brvbar","sect",
+//    "uml","copy","ordf","laquo","not","shy","reg","macr",
+//    "deg","plusmn","sup2","sup3","acute","micro","para","middot",
+//    "cedil","sup1","ordm","raquo","frac14","frac12","frac34","iquest",
+//    "Agrave","Aacute","Acirc","Atilde","Auml","Aring","AElig","Ccedil",
+//    "Egrave","Eacute","Ecirc","Euml","Igrave","Iacute","Icirc","Iuml",
+//    "ETH","Ntilde","Ograve","Oacute","Ocirc","Otilde","Ouml","times",
+//    "Oslash","Ugrave","Uacute","Ucirc","Uuml","Yacute","THORN","szlig",
+//    "agrave","aacute","acirc","atilde","auml","aring","aelig","ccedil",
+//    "egrave","eacute","ecirc","euml","igrave","iacute","icirc","iuml",
+//    "eth","ntilde","ograve","oacute","ocirc","otilde","ouml","divide",
+//    "oslash","ugrave","uacute","ucirc","uuml","yacute","thorn","yuml"
+//  );
+//  for(var i in entity)
+//    eval("str=str.replace(/"+String.fromCharCode(i*1+160)+"/g,\"&"+entity[i]+";\");");
   return str;
 }
 
