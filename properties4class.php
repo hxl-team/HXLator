@@ -31,7 +31,7 @@
 	  
   	  foreach($props as $row){
 	  	
-	  	print '	<li><a class="btn hxlclass hxlprop" href="#" rel="popover" title="'.$row->$label.'" data-content="'.$row->$description.'">'.$row->$label.' <b class="icon-info-sign"></b></a></li>
+	  	print '	<li><a class="btn hxlclass hxlprop" href="#" rel="popover" title="'.$row->$label.'" data-content="'.$row->$description.'">'.$row->$label.'</a></li>
 	  		';
 	  			  		
 	  }

@@ -1,9 +1,7 @@
-// Array Remove - By John Resig (MIT Licensed)
-Array.prototype.remove = function(from, to) {
-  var rest = this.slice((to || from) + 1 || this.length);
-  this.length = from < 0 ? this.length + from : from;
-  return this.push.apply(this, rest);
-};
+console.log("Welcome to the HXLator switchboard. If you see any error messages below, we're terribly sorry. Please let us know at http://hxl.humanitarianresponse.info/hxlator/contact.php");
+
+// add forward / backward buttons to the navigation
+$('div.nav-hxlator').append('<span class="historynav pull-right"><a href="#" id="back" class="btn btn-mini disabled">&laquo; Back</a><a href="#" id="forward" class="btn btn-small disabled">Forward &raquo;</a></span>');
 
 // ---------------------------------------------------
 // The history/undo stuff
@@ -54,6 +52,8 @@ $hxlHistory.processMapping = function(){
 		selectClass($mapping);	
 	}else if (typeof $mapping.samplerow == 'undefined') {
 		selectRow($mapping);
+	}else {
+		mapProperty($mapping);
 	}	
 
 	$hxlHistory.checkLinks();
@@ -161,7 +161,7 @@ function selectRow($inputMapping){
 	$('.hxlatorrow').removeClass('highlight'); // in case the method is called again after going back
 	
 	$('.shortguide').slideUp(function(){		
-		$('.shortguide').html('<div class="step2"><p class="lead selectedclass" style="visibility: none">Please click on the <strong>first</strong> row that contains data about a '+$mapping.classsingular+'/'+ $mapping.classplural +'.</p></div>');	
+		$('.shortguide').html('<p class="lead selectedclass" style="visibility: none">Please click on the <strong>first</strong> row that contains data about a '+$mapping.classsingular+'/'+ $mapping.classplural +'.</p>');	
 		$('.shortguide').slideDown();
 		$('.hxlatorrow').unbind();
 		// put a click listener on the table rows:
@@ -176,9 +176,48 @@ function selectRow($inputMapping){
 	$('#loading').hide();	
 }
 
-
-// display forward / backward links
-$('div.nav-hxlator').append('<span class="historynav pull-right"><a href="#" id="back" class="btn btn-mini disabled">&laquo; Back</a><a href="#" id="forward" class="btn btn-small disabled">Forward &raquo;</a></span>');
+// show properties for class and start mapping process
+function mapProperty($inputMapping){
+	$('#loading').show();	
+	// make sure we don't modify the original array entry:
+	var $mapping = $.extend(true, {}, $inputMapping);
+	
+	$('.hxlatorrow').unbind();
+		
+	//next step: show properties: 
+	$('.shortguide').slideUp(function(){
+		$('.shortguide').html('<p class="lead">In HXL, any '+$mapping.classsingular+' can have the following properties (hover for explanations):</p>');	
+			
+		$.get('properties4class.php?classuri='+$mapping.classuri, function(data){
+			$('.shortguide').append(data);	
+			$('.shortguide').append('<p class="lead">Pick a cell or set of cells that provide some information about one of the HXL properties listed. Use <code>ctrl</code> and <code>shift</code> for multiple selection. Then click all the properties to which the data in this cell applies. Note that a given cell (or set of cells) may address several properties. ');
+			
+			$('.shortguide').slideDown();
+			
+			//explanation popovers for hxl properties:
+			$('.hxlprop').each(function() {
+			    $(this).popover({
+			        html: true,
+			        placement: 'bottom'
+			    });    
+			});
+			
+			// handle selection on the highlighted table row
+			$('tr.highlight > td.hxlatorcell').click(function(e) { 
+			  if(e.shiftKey) {
+			    hxlError("shift click");
+			  }else if(e.ctrlKey) {
+			    hxlError("ctrl click");
+			  }			  
+			});
+			
+			}).error(function() { 
+				hxlError('Our server has some hiccups. We will look into that as soon as possible.');
+		});
+	});	
+	
+	$('#loading').hide();	
+}
 
 
 // ---------------------------------------------------
@@ -202,59 +241,6 @@ function generateRDF($mapping){
 }
 
 
-// pick cells that identify instances of the selected class
-function step3($className, $classURI){
-	$('.hxlatorrow').unbind();
-	$('.hxlatorrow').click(function(){
-		$(this).addClass('highlight');
-		$(this).addClass('first');
-		$('.hxlatorrow').unbind('click'); //only allow one click
-		
-		$('.shortguide').slideUp(function(){
-			$('.step2').remove();
-			$('.shortguide').append('<div class="step3"><p class="lead selectedclass" style="visibility: none">Please click <strong>all</strong> cells in this row that identify a '+$className+'. If the whole row is about <em>one</em> '+$className+', please click the row number on the very left. </p></div>');	
-			$('.shortguide').slideDown();		
-			
-			step4($className, $classURI);				
-		});
-	});
-}
-
-// select the cells in the first data row that identify instances of the selected class 
-function step4($className, $classURI){
-	// TODO: highlight leftmost cell!
-	step5($className, $classURI);
-}
-
-// show properties for class and start mapping process
-function step5($className, $classURI){
-	$('.hxlatorrow').unbind();
-	$('.hxlatorrow').click(function(){
-		// go back to the top of the page:
-		$('body').scrollTop(0);		
-		
-		//next step: show properties: 
-		$('.shortguide').slideUp(function(){
-			$('.step3').remove();
-			$('.shortguide').append('<div class="step5"><p class="lead">In HXL, any '+$className+' can have the following properties:</p>');	
-			
-			$.get('properties4class.php?classuri='+$classURI, function(data){
-				$('.shortguide').append(data);	
-				$('.hxlclass').each(function() {
-				    $(this).popover({
-				        html: true,
-				    });    
-				}); 
-				$('.shortguide').append('<p class="lead">Please select a </p><p class="lead" id="furtherinstructions"></p></div>');
-				$('.shortguide').slideDown();
-				enableHXLmapping();
-			}).error(function() { 
-				hxlError('<strong>Oh snap!</strong> Our server has some hiccups. We will look into that as soon as possible.');
-			});
-		});	
-	});
-}
-
 // highlights all rows between the selected rows
 function highlightSpreadsheetBlock(){	
 	$hi = false;
@@ -275,29 +261,29 @@ function highlightSpreadsheetBlock(){
 }
 
 // adds the click listeners to the property buttons and table cells to enable the mapping
-function enableHXLmapping(){
-	$('.hxlprop').unbind();
+//function enableHXLmapping(){
+//	$('.hxlprop').unbind();
 	// click listener for the property buttons:
-	$('.hxlprop').click(function(){
-		$('.hxlprop').unbind('click'); //only allow one click
-		$(this).addClass('btn-warning');
-
-		$('.hxlatorcell').unbind();
+//	$('.hxlprop').click(function(){
+//		$('.hxlprop').unbind('click'); //only allow one click
+//		$(this).addClass('btn-warning');
+//
+//		$('.hxlatorcell').unbind();
 		// add click listener to the table cells:
-		$('.hxlatorcell').click(function(){
-			$('.hxlatorcell').unbind('click'); //only allow one click
-			$(this).addClass('selected');	
-			$('#furtherinstructions').html('Please repeat this pairwise maping until you have mapped all cells in your spreadsheet to a property. Note that a cell can also be mapped to several properties, so you might want to map the same cell several times. <a class="btn">Done?</a>');
-			$('#mappings').append('<p><code>This is a mapped triple.</code></p>');
-			$('#mappings').slideDown(); // show the box after the first cell has been mapped
-			$('.hxlprop').removeClass('btn-warning'); 
-			$('.hxlatorcell').removeClass('selected');
-			
+//		$('.hxlatorcell').click(function(){
+//			$('.hxlatorcell').unbind('click'); //only allow one click
+//			$(this).addClass('selected');	
+//			$('#furtherinstructions').html('Please repeat this pairwise maping until you have mapped all cells in your spreadsheet to a property. Note that a cell can also be mapped to several properties, so you might want to map the same cell several times. <a class="btn">Done?</a>');
+//			$('#mappings').append('<p><code>This is a mapped triple.</code></p>');
+//			$('#mappings').slideDown(); // show the box after the first cell has been mapped
+//			$('.hxlprop').removeClass('btn-warning'); 
+//			$('.hxlatorcell').removeClass('selected');
+//			
 			// TODO: add something clever to the table cell to indicate that it already has a mapping
-			enableHXLmapping();	
-		});	
-	});
-}
+//			enableHXLmapping();	
+//		});	
+//	});
+//}
 
 // ---------------------------------------------------
 // Convenience functions
@@ -305,9 +291,8 @@ function enableHXLmapping(){
 
 
 // a generic error display for hxlate.php. Will show $msg in a red alert box on top of the page
-// TODO put this in a modal
 function hxlError($msg){
-	$('.shortguide').prepend('<p class="alert alert-error">'+$msg+'</p>');
+	$('.shortguide').prepend('<div class="alert alert-block alert-error fade in"><button type="button" class="close" data-dismiss="alert">×</button><h4 class="alert-heading">'+$msg+'</h4></div>');
 }
 
 
@@ -351,4 +336,12 @@ window.onbeforeunload = function (e) {
 	
 	// For Safari
 	return message;
+};
+
+
+// Array Remove - By John Resig (MIT Licensed)
+Array.prototype.remove = function(from, to) {
+  var rest = this.slice((to || from) + 1 || this.length);
+  this.length = from < 0 ? this.length + from : from;
+  return this.push.apply(this, rest);
 };
