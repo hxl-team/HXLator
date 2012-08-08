@@ -190,7 +190,7 @@ function mapProperty($inputMapping){
 			
 		$.get('properties4class.php?classuri='+$mapping.classuri, function(data){
 			$('.shortguide').append(data);	
-			$('.shortguide').append('<p class="lead">Pick a cell or set of cells that provide some information about one of the HXL properties listed. Use <code>ctrl</code> and <code>shift</code> for multiple selection. Then click all the properties to which the data in this cell applies. Note that a given cell (or set of cells) may address several properties. ');
+			$('.shortguide').append('<p class="lead">Pick a cell or set of cells that provide some information about one of the HXL properties listed. Use <code>shift</code> to select a range of cells. Then click all the properties to which the data in this cell applies. Note that a given cell (or set of cells) may address several properties. ');
 			
 			$('.shortguide').slideDown();
 			
@@ -204,11 +204,49 @@ function mapProperty($inputMapping){
 			
 			// handle selection on the highlighted table row
 			$('tr.highlight > td.hxlatorcell').click(function(e) { 
-			  if(e.shiftKey) {
-			    hxlError("shift click");
-			  }else if(e.ctrlKey) {
-			    hxlError("ctrl click");
-			  }			  
+			  // TODO: if(e.shiftKey) {
+			  //  hxlError("shift click");
+			  //not really required:
+			  //}else if(e.ctrlKey || e.metaKey) {
+			   // hxlError("ctrl/cmd click");
+			  // }else{
+			  	$(this).toggleClass('selected');
+			  	// if (a) the cell has been added to the selection, (b) a cell has been selected before, and 
+			  	// (c) the shift key has been pressed, mark the whole range between those two as selected 
+			  	if( $(this).hasClass('selected') && $('.hxlatorcell').hasClass('lastselected') && e.shiftKey ){
+			  		$('.lastselected').addClass('range');
+			  		$(this).addClass('range');
+	
+					// iterate through that row and mark all cells between the two .range cells as selected:
+					var $mark = false;
+					$('tr.highlight > td.hxlatorcell').each(function() {
+						// flip selection switch at the .range cells:
+						if( $(this).hasClass('range') ){
+							if($mark == true){
+								$mark = false;
+							} else {
+								$mark = true;
+							}
+						}
+						
+						if ($mark == true){
+							$(this).addClass('selected');
+						}
+					});
+					
+					// clean up
+				  	$('.hxlatorcell').removeClass('range');
+			  	}
+			  	
+			  	//mark last selected cell to enable range selection via shift-click:
+			  	$('.hxlatorcell').removeClass('lastselected');
+			  	$(this).addClass('lastselected');
+			  	
+			  // }	
+			  		
+			  // click handling for the properties button:
+			  
+			  
 			});
 			
 			}).error(function() { 
