@@ -60,7 +60,10 @@ if($isMove === true) {
 	
 	// using IOFactory to identify the format
 	$workbook = load($uploadfile);
-	loadModal();
+
+	loadHXLPreviewModal();
+	loadMappingModal();
+
 	echo '
 	<div class="container">
 			<div class="row">

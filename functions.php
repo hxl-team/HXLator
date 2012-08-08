@@ -189,7 +189,7 @@ function getFoot($extraJS = null, $script = null){
 
 // Generates the empty modal (see http://twitter.github.com/bootstrap/javascript.html#modals ) that 
 // we'll be using to preview the HXL code
-function loadModal(){
+function loadHXLPreviewModal(){
 	echo '
 	<div id="hxlPreview" class="modal hide fade">
             <div class="modal-header">
@@ -224,6 +224,23 @@ function loadModal(){
               <a href="#" class="btn" data-dismiss="modal">Close</a>
               </div>
           </div>
+	';
+}
+
+
+// Generates the empty mapping modal (see http://twitter.github.com/bootstrap/javascript.html#modals ) that 
+// we'll be using to for the user interaction during the mapping process
+function loadMappingModal(){
+	echo '
+	<div id="mappingModal" class="modal hide fade">
+            <div class="modal-header">
+            <h3>Here goes the mapping magic...</h3>
+            </div>
+
+            <div class="modal-body"></div>
+
+            <div class="modal-footer"></div>
+    </div>     
 	';
 }
 
