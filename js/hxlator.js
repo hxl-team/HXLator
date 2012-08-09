@@ -157,8 +157,14 @@ function selectRow($inputMapping){
 	// make sure we don't modify the original array entry:
 	var $mapping = $.extend(true, {}, $inputMapping);
 
+	// fixing a little UI flux:
 	$('.popover').hide();
-	$('.hxlatorrow').removeClass('highlight'); // in case the method is called again after going back
+	
+	// in case the method is called again after going back
+	$('.hxlatorrow').removeClass('highlight'); 
+	$('.hxlatorrow').unbind();
+	$('.hxlatorcell').removeClass('selected');
+	$('.hxlatorcell').unbind();
 	
 	$('.shortguide').slideUp(function(){		
 		$('.shortguide').html('<p class="lead selectedclass" style="visibility: none">Please click on the <strong>first</strong> row that contains data about a '+$mapping.classsingular+'/'+ $mapping.classplural +'.</p>');	
@@ -190,7 +196,7 @@ function mapProperty($inputMapping){
 			
 		$.get('properties4class.php?classuri='+$mapping.classuri, function(data){
 			$('.shortguide').append(data);	
-			$('.shortguide').append('<p class="lead">Pick a cell or set of cells that provide some information about one of the HXL properties listed. Use <code>shift</code> to select a range of cells. Then click all the properties to which the data in this cell applies. Note that a given cell (or set of cells) may address several properties. ');
+			$('.shortguide').append('<p class="lead">Pick a cell or set of cells that provide some information about one of the HXL properties listed. Use <code>shift</code> to select a range of cells. Then click the property to which the data in this cell applies. Note that a given cell (or set of cells) may address several properties. ');
 			
 			$('.shortguide').slideDown();
 			
@@ -204,48 +210,52 @@ function mapProperty($inputMapping){
 			
 			// handle selection on the highlighted table row
 			$('tr.highlight > td.hxlatorcell').click(function(e) { 
-			  // TODO: if(e.shiftKey) {
-			  //  hxlError("shift click");
-			  //not really required:
-			  //}else if(e.ctrlKey || e.metaKey) {
-			   // hxlError("ctrl/cmd click");
-			  // }else{
 			  	$(this).toggleClass('selected');
 			  	// if (a) the cell has been added to the selection, (b) a cell has been selected before, and 
 			  	// (c) the shift key has been pressed, mark the whole range between those two as selected 
-			  	if( $(this).hasClass('selected') && $('.hxlatorcell').hasClass('lastselected') && e.shiftKey ){
-			  		$('.lastselected').addClass('range');
-			  		$(this).addClass('range');
-	
-					// iterate through that row and mark all cells between the two .range cells as selected:
-					var $mark = false;
-					$('tr.highlight > td.hxlatorcell').each(function() {
-						// flip selection switch at the .range cells:
-						if( $(this).hasClass('range') ){
-							if($mark == true){
-								$mark = false;
-							} else {
-								$mark = true;
+			  	if( $(this).hasClass('selected') ) {
+			  		if ( $('.hxlatorcell').hasClass('lastselected') && e.shiftKey ){
+				  		$('.lastselected').addClass('range');
+				  		$(this).addClass('range');
+		
+						// iterate through that row and mark all cells between the two .range cells as selected:
+						var $mark = false;
+						$('tr.highlight > td.hxlatorcell').each(function() {
+							// flip selection switch at the .range cells:
+							if( $(this).hasClass('range') ){
+								if($mark == true){
+									$mark = false;
+								} else {
+									$mark = true;
+								}
 							}
-						}
+							
+							if ($mark == true){
+								$(this).addClass('selected');
+							}
+						});
 						
-						if ($mark == true){
-							$(this).addClass('selected');
-						}
-					});
-					
-					// clean up
-				  	$('.hxlatorcell').removeClass('range');
+						// clean up
+					  	$('.hxlatorcell').removeClass('range');
+					 }
+					 
+					 //mark last selected cell to enable range selection via shift-click:
+					 $('.hxlatorcell').removeClass('lastselected');
+					 $(this).addClass('lastselected');
+					 
 			  	}
 			  	
-			  	//mark last selected cell to enable range selection via shift-click:
-			  	$('.hxlatorcell').removeClass('lastselected');
-			  	$(this).addClass('lastselected');
-			  	
-			  // }	
+			  	// enable the property buttons and click listener if any cell is selected, disable if not:
+			  	if ( $('tr.highlight > td.hxlatorcell').hasClass('selected') ){
+			  		$('.hxlprop').removeClass('disabled');
+			  		$('.hxlprop').click(function() {
+			  			mappingModal($mapping, $(this).attr('data-original-title'), $(this).attr('data-hxl-uri'));	
+			  		});
+			  	} else {
+				  	$('.hxlprop').addClass('disabled');
+				  	$('.hxlprop').unbind();
+			  	}
 			  		
-			  // click handling for the properties button:
-			  
 			  
 			});
 			
@@ -255,6 +265,24 @@ function mapProperty($inputMapping){
 	});	
 	
 	$('#loading').hide();	
+}
+
+// shows and fills the mapping modal
+function mappingModal($inputMapping, $propName, $propURI){
+	// make sure we don't modify the original array entry:
+	var $mapping = $.extend(true, {}, $inputMapping);
+	
+	
+	var $numCells = $('td.selected').length;
+	
+	$('#mappingModal > .modal-header > h3').html('Mapping '+$numCells+' cells to the <em>'+$propName+'</em> property');
+	
+	$('#mappingModal > .modal-body').html('<p>The logic to distinguish data properties from object properties is till missing here. Let\'s do data properties for now:</p>');
+	$('#mappingModal > .modal-body').append('<form class="form-horizontal"><fieldset><div class="control-group"><label class="control-label" for="mapping-type">Map to…</label><div class="controls"><select id="mapping-type"><option>Cell value</option><option>Manual input (same value for all)</option><option>Manual input (individual values)</option></select></div></div></fieldset></form>');
+	
+	$('#mappingModal > .modal-footer').html('<a href="#" class="btn btn-primary">Store mapping (doesn\'t do anything yet)</a><a href="#" class="btn" data-dismiss="modal">Cancel</a>');
+	
+	$('#mappingModal').modal('show');
 }
 
 

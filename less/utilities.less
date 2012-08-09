@@ -61,7 +61,8 @@ tr.highlight{
 	background-color: #DFF0D8 !important;
 }
 
-td.selected {
+.table tbody tr:hover td.selected,
+.table tbody tr td.selected {
 	color: @red;
 	background-color: #FAA732;
 }
@@ -114,4 +115,9 @@ a#back, a#forward{
 
 #loading{
 	display: none;
+}
+
+.table tbody tr:hover td,
+.table tbody tr:hover th {
+  background-color: transparent;
 }
