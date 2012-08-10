@@ -167,7 +167,7 @@ function selectRow($inputMapping){
 	$('.hxlatorcell').unbind();
 	
 	$('.shortguide').slideUp(function(){		
-		$('.shortguide').html('<p class="lead selectedclass" style="visibility: none">Please click on the <strong>first</strong> row that contains <span class="label label-important" style="font-size: 1em">data</span> about a '+$mapping.classsingular+'/'+ $mapping.classplural +'.</p>');	
+		$('.shortguide').html('<p class="lead selectedclass" style="visibility: none">Please click on the <strong>first</strong> row that contains <span class="label label-important" style="font-size: 1em">data</span> about a '+$mapping.classsingular+'/'+ $mapping.classplural +'.</p><p align="right"><i class="icon-hand-right"></i> That\'s <em>not</em> not the header row, but usually the first row containing numbers.</p>');	
 		$('.shortguide').slideDown();
 		$('.hxlatorrow').unbind();
 		// put a click listener on the table rows:
@@ -196,7 +196,7 @@ function mapProperty($inputMapping){
 			
 		$.get('properties4class.php?classuri='+$mapping.classuri, function(data){
 			$('.shortguide').append(data);	
-			$('.shortguide').append('<p class="lead">Pick a cell or set of cells from this row that provide some information about one of the HXL properties listed. Use <code>shift</code> to select a range of cells. Then click the property to which the data in this cell applies. Note that a given cell (or set of cells) may address several properties. ');
+			$('.shortguide').append('<p class="lead">Pick a cell or set of cells from this row that provide some information about one of the HXL properties listed. Then click the property to which the data in this cell applies. Note that a given cell (or set of cells) may address several properties.</p><p align="right"><i class="icon-hand-right"></i> Use <code>shift</code> to select a range of cells.</p>');
 			
 			$('.shortguide').slideDown();
 			
@@ -241,23 +241,10 @@ function mapProperty($inputMapping){
 			            below = isWithinBounds(elementBelow);
 			            left = isWithinBounds(elementLeft);
 			            right = isWithinBounds(elementRight);
-			            if (above) {
-			              return "top";
-			            } else {
-			              if (below) {
-			                return "bottom";
-			              } else {
-			                if (left) {
-			                  return "left";
-			                } else {
-			                  if (right) {
-			                    return "right";
-			                  } else {
-			                    return "right";
-			                  }
-			                }
-			              }
-			            }
+			            if (below) return "bottom";
+			            else if (above) return "top";
+			            else if (left) return "left";
+			            else return "right";
 			          }
 			        });
 			
