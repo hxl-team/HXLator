@@ -117,3 +117,16 @@ a#back, a#forward{
 .table tbody tr:hover th {
   background-color: transparent;
 }
+
+// disable browser text highlighting on the selected row in the table:
+.highlight > .hxlatorcell::selection {
+	background-color: transparent;
+}
+
+.highlight > .hxlatorcell::-moz-selection {
+	background-color: transparent;
+}
+
+.highlight > .hxlatorcell::-webkit-selection {
+	background-color: transparent;
+}
