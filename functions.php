@@ -108,8 +108,8 @@ echo'<!DOCTYPE html>
   </head>
 
   <body>
-
-    <div class="navbar navbar-fixed-top">
+	<div class="container">
+	<div class="navbar">
         <div class="container">
           <span class="brand"><img src="img/loader.gif" id="loading" class="pull-right" /><img src="img/logo.png" /></span>
           <div class="nav-hxlator">
@@ -146,7 +146,8 @@ echo'
 // amd an option to include an inline $script
 function getFoot($extraJS = null, $script = null){ 
 
-	echo'	<div class="container footer">
+	echo'	</div> <!-- /container -->
+	<div class="container footer">
 		<div class="row">
 		  <div class="span3"><strong>Contact</strong><br />
 		  This site is part of the HumanitarianResponse network. Write to 
@@ -155,7 +156,7 @@ function getFoot($extraJS = null, $script = null){
 		  <a href="https://sites.google.com/site/hxlproject/">HXL Project</a><br />
 		  <a href="http://hxl.humanitarianresponse.info/">HXL Standard</a></div>
 		  <div class="span3"><strong>Follow HXL</strong><br />
-		  TBD</div>
+		  <span class="label label-warning">TBD</span></div>
 		  <div class="span3"><strong>Legal</strong><br />
 		  &copy; 2012 UNOCHA</div>
 		</div>
@@ -206,10 +207,10 @@ function loadHXLPreviewModal(){
                     </ul>
                     <div class="tab-content" style="padding-bottom: 9px; border-bottom: 1px solid #ddd;">
                       <div class="tab-pane" id="previewtaboverview">
-                        <p>TBD</p>
+                        <p><span class="label label-warning">TBD</span></p>
                       </div>
                       <div class="tab-pane" id="previewtabtable">
-                        <p>TBD</p>
+                        <p><span class="label label-warning">TBD</span></p>
                       </div>
                       <div class="tab-pane active" id="previewtabturtle">
                       	<p>Preview in <a href="http://en.wikipedia.org/wiki/Turtle_(syntax)">Turtle syntax</a>:</p>

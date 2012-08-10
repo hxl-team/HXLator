@@ -65,7 +65,6 @@ if($isMove === true) {
 	loadMappingModal();
 
 	echo '
-	<div class="container">
 			<div class="row">
 			<div class="span12">
 			<h1>HXLating <em>'.$_FILES["userfile"]["name"].'</em> <a class="btn btn-info pull-right" data-toggle="modal" href="#hxlPreview">Preview HXL</a></h1>

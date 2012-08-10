@@ -16,7 +16,6 @@ getHead("index.php", $user_name, $user_organisation);
 
 ?>
 
-<div class="container">
     <div class="hero-unit">	    
         <a href="https://sites.google.com/site/hxlproject/"><img src="img/hxl-logo-s.png" align="right" /></a>
         <h1>HXLator</h1>
