@@ -196,17 +196,70 @@ function mapProperty($inputMapping){
 			
 		$.get('properties4class.php?classuri='+$mapping.classuri, function(data){
 			$('.shortguide').append(data);	
-			$('.shortguide').append('<p class="lead">Pick a cell or set of cells that provide some information about one of the HXL properties listed. Use <code>shift</code> to select a range of cells. Then click the property to which the data in this cell applies. Note that a given cell (or set of cells) may address several properties. ');
+			$('.shortguide').append('<p class="lead">Pick a cell or set of cells from this row that provide some information about one of the HXL properties listed. Use <code>shift</code> to select a range of cells. Then click the property to which the data in this cell applies. Note that a given cell (or set of cells) may address several properties. ');
 			
 			$('.shortguide').slideDown();
 			
 			//explanation popovers for hxl properties:
-			$('.hxlprop').each(function() {
-			    $(this).popover({
+			// placement function makes sure the popover stay within the page, via http://stackoverflow.com/questions/10238089/how-can-you-ensure-twitter-bootstrap-popover-windows-are-visible
+			// if we need this placement function for other popovers, we might want to pull it out into a separate function
+			$('.hxlprop').popover({
 			        html: true,
-			        placement: 'bottom'
-			    });    
-			});
+			        placement: function(tip, element) {
+			            var $element, above, actualHeight, actualWidth, below, boundBottom, boundLeft, boundRight, boundTop, elementAbove, elementBelow, elementLeft, elementRight, isWithinBounds, left, pos, right;
+			            isWithinBounds = function(elementPosition) {
+			              return boundTop < elementPosition.top && boundLeft < elementPosition.left && boundRight > (elementPosition.left + actualWidth) && boundBottom > (elementPosition.top + actualHeight);
+			            };
+			            $element = $(element);
+			            pos = $.extend({}, $element.offset(), {
+			              width: element.offsetWidth,
+			              height: element.offsetHeight
+			            });
+			            actualWidth = 283;
+			            actualHeight = 117;
+			            boundTop = $(document).scrollTop();
+			            boundLeft = $(document).scrollLeft();
+			            boundRight = boundLeft + $(window).width();
+			            boundBottom = boundTop + $(window).height();
+			            elementAbove = {
+			              top: pos.top - actualHeight,
+			              left: pos.left + pos.width / 2 - actualWidth / 2
+			            };
+			            elementBelow = {
+			              top: pos.top + pos.height,
+			              left: pos.left + pos.width / 2 - actualWidth / 2
+			            };
+			            elementLeft = {
+			              top: pos.top + pos.height / 2 - actualHeight / 2,
+			              left: pos.left - actualWidth
+			            };
+			            elementRight = {
+			              top: pos.top + pos.height / 2 - actualHeight / 2,
+			              left: pos.left + pos.width
+			            };
+			            above = isWithinBounds(elementAbove);
+			            below = isWithinBounds(elementBelow);
+			            left = isWithinBounds(elementLeft);
+			            right = isWithinBounds(elementRight);
+			            if (above) {
+			              return "top";
+			            } else {
+			              if (below) {
+			                return "bottom";
+			              } else {
+			                if (left) {
+			                  return "left";
+			                } else {
+			                  if (right) {
+			                    return "right";
+			                  } else {
+			                    return "right";
+			                  }
+			                }
+			              }
+			            }
+			          }
+			        });
 			
 			// handle selection on the highlighted table row
 			$('tr.highlight > td.hxlatorcell').click(function(e) { 
