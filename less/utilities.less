@@ -119,6 +119,7 @@ a#back, a#forward{
 }
 
 // disable browser text highlighting on the selected row in the table:
+// via http://www.kirupa.com/html5/changing_selection_color_using_css.htm
 .highlight > .hxlatorcell::selection {
 	background-color: transparent;
 }
@@ -129,4 +130,10 @@ a#back, a#forward{
 
 .highlight > .hxlatorcell::-webkit-selection {
 	background-color: transparent;
+}
+
+#tablebox{
+	height: 400px;
+	overflow: scroll;
+
 }

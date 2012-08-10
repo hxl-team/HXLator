@@ -75,7 +75,7 @@ if($isMove === true) {
 		
 	echo '
 		</div> <!-- shortguide -->
-		<div class="container">
+		<div class="container" id="tablebox">
 		';
 	
 	// Let's show the spreadsheet"
