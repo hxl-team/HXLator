@@ -320,7 +320,7 @@ function mappingModal($inputMapping, $propName, $propURI){
 	$('#mappingModal > .modal-body').html('<p>The logic to distinguish data properties from object properties is till missing here. Let\'s do data properties for now:</p>');
 	$('#mappingModal > .modal-body').append('<form class="form-horizontal"><fieldset><div class="control-group"><label class="control-label" for="mapping-type">Map to…</label><div class="controls"><select id="mapping-type"><option>Cell value</option><option>Manual input (same value for all)</option><option>Manual input (individual values)</option></select></div></div></fieldset></form>');
 	
-	$('#mappingModal > .modal-footer').html('<a href="#" class="btn btn-primary">Store mapping (doesn\'t do anything yet)</a><a href="#" class="btn" data-dismiss="modal">Cancel</a>');
+	$('#mappingModal > .modal-footer').html('<i class="icon-hand-right"></i> Don\'t worry about doing anything wrong here, you can always go back to fix it later.</p><a href="#" class="btn btn-primary">Store mapping (doesn\'t do anything yet)</a><a href="#" class="btn" data-dismiss="modal">Cancel</a>');
 	
 	$('#mappingModal').modal('show');
 }

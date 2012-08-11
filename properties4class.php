@@ -4,13 +4,15 @@
 	
 	include_once('functions.php');
 	
-	$props = sparqlQuery('SELECT DISTINCT ?proplabel ?prop ?description ?domain ?range WHERE {
-'.$_GET['classuri'].' rdfs:subClassOf* ?domain  .
-?prop rdfs:domain ?domain ;
-	  rdfs:range ?range ;
-	  rdfs:comment ?description ;
-	  skos:prefLabel ?proplabel .	
+	$props = sparqlQuery('SELECT DISTINCT ?proplabel ?prop ?type ?description ?domain ?range WHERE {
+   '.$_GET['classuri'].' rdfs:subClassOf* ?domain  .
+   ?prop rdfs:domain ?domain ;
+        a ?type ; 
+	rdfs:range ?range ;
+	rdfs:comment ?description ;
+	skos:prefLabel ?proplabel .	
 MINUS { ?subprop rdfs:subPropertyOf ?prop }	
+FILTER ( regex(str(?type),"http://www.w3.org/2002/07/owl") )
 } ORDER BY ?proplabel');
 	
 	echo '<div class="step4"><ul class="nav nav-pills properties">
@@ -20,10 +22,11 @@ MINUS { ?subprop rdfs:subPropertyOf ?prop }
 	  $prop = "prop";
 	  $description = "description";	  		  	
 	  $range = "range"; 
+	  $type = "type";
 	  
   	  foreach($props as $row){
 	  	
-	  	print '	<li><a class="btn hxlclass hxlprop disabled" data-hxl-uri="'.$row->$prop.'" href="#" rel="popover" title="'.$row->$label.'" data-content="'.$row->$description.'">'.$row->$label.'</a></li>
+	  	print '	<li><a class="btn hxlclass hxlprop disabled" data-hxl-uri="'.$row->$prop.'" data-hxl-propertytype="'.$row->$type.'" data-hxl-range="'.$row->$range.'" href="#" rel="popover" title="'.$row->$label.'" data-content="'.$row->$description.'">'.$row->$label.'</a></li>
 	  		';
 	  			  		
 	  }
