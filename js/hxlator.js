@@ -289,7 +289,7 @@ function mapProperty($inputMapping){
 			  	if ( $('tr.highlight > td.hxlatorcell').hasClass('selected') ){
 			  		$('.hxlprop').removeClass('disabled');
 			  		$('.hxlprop').click(function() {
-			  			mappingModal($mapping, $(this).attr('data-original-title'), $(this).attr('data-hxl-uri'));	
+			  			mappingModal($mapping, $(this).attr('data-original-title'), $(this).attr('data-hxl-uri'), $(this).attr('data-hxl-propertytype'), $(this).attr('data-hxl-range') );	
 			  		});
 			  	} else {
 				  	$('.hxlprop').addClass('disabled');
@@ -308,7 +308,7 @@ function mapProperty($inputMapping){
 }
 
 // shows and fills the mapping modal
-function mappingModal($inputMapping, $propName, $propURI){
+function mappingModal($inputMapping, $propName, $propURI, $propType, $propRange){
 	// make sure we don't modify the original array entry:
 	var $mapping = $.extend(true, {}, $inputMapping);
 	
@@ -317,8 +317,13 @@ function mappingModal($inputMapping, $propName, $propURI){
 	
 	$('#mappingModal > .modal-header > h3').html('Mapping '+$numCells+' cells to the <em>'+$propName+'</em> property');
 	
-	$('#mappingModal > .modal-body').html('<p>The logic to distinguish data properties from object properties is till missing here. Let\'s do data properties for now:</p>');
-	$('#mappingModal > .modal-body').append('<form class="form-horizontal"><fieldset><div class="control-group"><label class="control-label" for="mapping-type">Map to…</label><div class="controls"><select id="mapping-type"><option>Cell value</option><option>Manual input (same value for all)</option><option>Manual input (individual values)</option></select></div></div></fieldset></form>');
+	if($propType == 'http://www.w3.org/2002/07/owl#DataProperty'){
+		$('#mappingModal > .modal-body').html('<form class="form-horizontal"><fieldset><div class="control-group"><label class="control-label" for="mapping-type">Map to…</label><div class="controls"><select id="mapping-type"><option>Cell value</option><option>Manual input (same value for all)</option><option>Manual input (individual values)</option></select></div></div></fieldset></form>');
+	} else if ($propType == 'http://www.w3.org/2002/07/owl#ObjectProperty'){
+		$('#mappingModal > .modal-body').html('<p>Object properties aren\'t done yet...</p>');
+	} else {
+		$('#mappingModal > .modal-body').html('<p>We can\'t handle the property type '+$propType+'</p>');
+	}
 	
 	$('#mappingModal > .modal-footer').html('<i class="icon-hand-right"></i> Don\'t worry about doing anything wrong here, you can always go back to fix it later.</p><a href="#" class="btn btn-primary">Store mapping (doesn\'t do anything yet)</a><a href="#" class="btn" data-dismiss="modal">Cancel</a>');
 	
