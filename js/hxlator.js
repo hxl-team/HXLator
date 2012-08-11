@@ -318,7 +318,23 @@ function mappingModal($inputMapping, $propName, $propURI, $propType, $propRange)
 	$('#mappingModal > .modal-header > h3').html('Mapping '+$numCells+' cells to the <em>'+$propName+'</em> property');
 	
 	if($propType == 'http://www.w3.org/2002/07/owl#DataProperty'){
-		$('#mappingModal > .modal-body').html('<form class="form-horizontal"><fieldset><div class="control-group"><label class="control-label" for="mapping-type">Map to…</label><div class="controls"><select id="mapping-type"><option>Cell value</option><option>Manual input (same value for all)</option><option>Manual input (individual values)</option></select></div></div></fieldset></form>');
+		$('#mappingModal > .modal-body').html('<form class="form-horizontal"><fieldset><div class="control-group"><label class="control-label" for="mapping-type">Map to…</label><div class="controls"><select id="mapping-type"><option></option><option>Cell value</option><option id="manual-one">Manual input (same value for all)</option><option id="manual-multiple">Manual input (individual values)</option></select></div></div></fieldset></form><div id="value-input"></div>');
+		
+		$("select").change(function () {
+		  var str = "";
+		  $("select#mapping-type option:selected").each(function () {
+		     if($(this).text() == "Cell value"){
+		     	$('#value-input').html('Cell value clicked');
+		     }else if($(this).text() == "Manual input (same value for all)"){
+		     	$('#value-input').html('Same value clicked');
+		     }else if($(this).text() == "Manual input (individual values)"){
+		       $('#value-input').html('Individual values clicked');
+		     }else {
+		       $('#value-input').html('');
+		     }
+		  });		  
+		});
+		
 	} else if ($propType == 'http://www.w3.org/2002/07/owl#ObjectProperty'){
 		$('#mappingModal > .modal-body').html('<p>Object properties aren\'t done yet...</p>');
 	} else {
