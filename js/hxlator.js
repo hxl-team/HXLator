@@ -324,10 +324,14 @@ function mappingModal($inputMapping, $propName, $propURI, $propType, $propRange)
 		$('#mappingModal > .modal-body').html('<p>You can either <a href="#" class="btn" id="mapCellValues">map each cell to the value it contains</a> or <a href="#" class="btn" id="mapDifferentValues">map it to a different value</a>.</p><div id="value-input" style="display: none"></div>');
 		
 		$('#mapCellValues').click(function(){
+			$(this).addClass('btn-info');
+			$('#mapDifferentValues').removeClass('btn-info');
 			mapCellValues($inputMapping, $propName, $propURI, $propType, $propRange);
 		});
 		
 		$('#mapDifferentValues').click(function(){
+			$(this).addClass('btn-info');
+			$('#mapCellValues').removeClass('btn-info');
 			mapDifferentValues($inputMapping, $propName, $propURI, $propType, $propRange);
 		});
 		
@@ -347,52 +351,30 @@ function mapDifferentValues($inputMapping, $propName, $propURI, $propType, $prop
 
 	// make sure we don't modify the original array entry:
 	var $mapping = $.extend(true, {}, $inputMapping);
-	var $first = true;
 	
 	$('#value-input').slideUp(function(){
 		// TODO: show value(s) in input field(s) if already stored in mapping
+		// (e.g. after going back)
 		$('#value-input').html('');
 		$('.selected').each(function(){
-			// TODO: come up with a clever URI generation...
-			//console.log($(this).attr('data-cellid')+' <'+$propURI+'> '+'"'+$userInput+'"');			
-			$('#value-input').append('<hr /><p>Is the value of property <em>'+$propName+'</em> for cell <code>'+$(this).attr('data-cellid')+'</code><br><a href="#" class="btn cell-input" data-cellid="'+$(this).attr('data-cellid')+'">somewhere on this spread sheet</a> or do you want to <a href="#" class="btn manual-input" data-cellid="'+$(this).attr('data-cellid')+'">put it in manually</a>?');	
+			$('#value-input').append('<hr /><p><em>'+$propName+'</em> for cell <code>'+$(this).attr('data-cellid')+'</code><br><input type="text" class="value-input" placeholder="Enter value here" id="valuefor-'+$(this).attr('data-cellid')+'"> or <a href="#" class="btn btn-small cell-input" data-cellid="'+$(this).attr('data-cellid')+'">select from spread sheet</a><br /><a href="#" class="btn btn-small disabled adoptforall">Adopt this value for all cells</a>');	
+
+			  $('.value-input').keyup(function(){
+			    console.log('keyup fired');
+			  	if($(this).val() == ''){
+			  		$(this).parent().children('.adoptforall').addClass('disabled');
+			  	}else{
+			  		$(this).parent().children('.adoptforall').removeClass('disabled');
+			  	}
+			  });			  			  	
 		});
 		
-		// click listeners for the buttons 
-		$('.manual-input').click(function(){
-			var $html = '<p><input type="text" placeholder="Enter value here" ' 
-//			if($first){ 
-//				$html += 'class="first" '; 
-//			}
-			$html += 'id="valuefor-'+$(this).attr('data-cellid')+'"></p>'
-
-//			if($first){
-//				$html += '<p><a href="#" class="btn disabled" id="adoptforall">Adopt this value for all cells</p>';
-//			}
-			
-			$(this).parent().after($html);
-			
-//			if($first){
-//				$('.first').keyup(function(){
-//					if($('.first').val() == ''){
-//						$('#adoptforall').addClass('disabled');
-//					}else{
-//						$('#adoptforall').removeClass('disabled');
-//					}
-//				});
-//				
-//				$('#adoptforall').click(function(){
-//					var $valueforall = $('.first').val();
-//					$('.first').remove();
-					// show input fields for each cell and fill them:
-//					$('.manual-input').each(function(){
-//						if(!$(this).hasClass('first')){
-//							$(this).parent().after('<p><input type="text" value="'+$valueforall+'" id="valuefor-'+$(this).attr('data-cellid')+'"></p>');
-//						}
-//					});
-//				});				
-//				$first = false;
-//			}			
+		$('.adoptforall').click(function(){
+			// copy value to other input fields
+			var $copyVal = $(this).parent().children('.value-input').val();
+			$('.value-input').each(function(){
+				$(this).val($copyVal);
+			})			  	
 		});
 		
 		
@@ -408,7 +390,8 @@ function mapDifferentValues($inputMapping, $propName, $propURI, $propType, $prop
 			var $target = $(this).attr('data-cellid');
 			
 			$('.hxlatorcell').click(function(){
-				$('.currentMapping').parent().after('<p><input type="text" value="'+$(this).html()+' (via cell '+$(this).attr('data-cellid')+')" id="valuefor-'+$target+'"><small></p>');
+				$('.currentMapping').parent().children('.value-input').val($(this).html()+' (via cell '+$(this).attr('data-cellid')+')');
+				$('.currentMapping').parent().children('.value-input').trigger('keyup');
 				$('.currentMapping').removeClass('currentMapping');
 				$('#mappingModal').modal('show');
 				$('.shortguide').slideDown();
