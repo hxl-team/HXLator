@@ -3,6 +3,7 @@ console.log("Welcome to the HXLator switchboard. If you see any error messages b
 // add forward / backward buttons to the navigation
 $('div.nav-hxlator').append('<span class="historynav pull-right"><a href="#" id="back" class="btn btn-mini disabled">&laquo; Back</a><a href="#" id="forward" class="btn btn-small disabled">Forward &raquo;</a></span>');
 
+
 // ---------------------------------------------------
 // The history/undo stuff
 // ---------------------------------------------------
@@ -42,10 +43,12 @@ $hxlHistory.pushState = function($inputMapping){
 $hxlHistory.processMapping = function(){
 	$('#loading').show();
 	
-	console.log($hxlHistory.currentState);
-	console.log($hxlHistory.states);
+	//console.log($hxlHistory.currentState);
+	// console.log($hxlHistory.states);
 	
 	var $mapping = $hxlHistory.states[$hxlHistory.currentState];
+	//console.log(JSON.stringify($mapping));
+	console.log($mapping);
 	
 	// if the class has not been set yet, show the class pills:
 	if(typeof $mapping.classuri == 'undefined'){
@@ -318,33 +321,127 @@ function mappingModal($inputMapping, $propName, $propURI, $propType, $propRange)
 	$('#mappingModal > .modal-header > h3').html('Mapping '+$numCells+' cells to the <em>'+$propName+'</em> property');
 	
 	if($propType == 'http://www.w3.org/2002/07/owl#DataProperty'){
-		$('#mappingModal > .modal-body').html('<form class="form-horizontal"><fieldset><div class="control-group"><label class="control-label" for="mapping-type">Map to…</label><div class="controls"><select id="mapping-type"><option></option><option>Cell value</option><option id="manual-one">Manual input (same value for all)</option><option id="manual-multiple">Manual input (individual values)</option></select></div></div></fieldset></form><div id="value-input"></div>');
+		$('#mappingModal > .modal-body').html('<p>You can either <a href="#" class="btn" id="mapCellValues">map each cell to the value it contains</a> or <a href="#" class="btn" id="mapDifferentValues">map it to a different value</a>.</p><div id="value-input" style="display: none"></div>');
 		
-		$("select").change(function () {
-		  var str = "";
-		  $("select#mapping-type option:selected").each(function () {
-		     if($(this).text() == "Cell value"){
-		     	$('#value-input').html('Cell value clicked');
-		     }else if($(this).text() == "Manual input (same value for all)"){
-		     	$('#value-input').html('Same value clicked');
-		     }else if($(this).text() == "Manual input (individual values)"){
-		       $('#value-input').html('Individual values clicked');
-		     }else {
-		       $('#value-input').html('');
-		     }
-		  });		  
+		$('#mapCellValues').click(function(){
+			mapCellValues($inputMapping, $propName, $propURI, $propType, $propRange);
+		});
+		
+		$('#mapDifferentValues').click(function(){
+			mapDifferentValues($inputMapping, $propName, $propURI, $propType, $propRange);
 		});
 		
 	} else if ($propType == 'http://www.w3.org/2002/07/owl#ObjectProperty'){
 		$('#mappingModal > .modal-body').html('<p>Object properties aren\'t done yet...</p>');
-	} else {
+	} else { // Something's going wrong...
 		$('#mappingModal > .modal-body').html('<p>We can\'t handle the property type '+$propType+'</p>');
 	}
 	
-	$('#mappingModal > .modal-footer').html('<i class="icon-hand-right"></i> Don\'t worry about doing anything wrong here, you can always go back to fix it later.</p><a href="#" class="btn btn-primary">Store mapping (doesn\'t do anything yet)</a><a href="#" class="btn" data-dismiss="modal">Cancel</a>');
+	$('#mappingModal > .modal-footer').html('<i class="icon-hand-right"></i> Don\'t worry about doing anything wrong here, you can always go back to fix it later.</p><a href="#" id="storeMapping" class="btn btn-primary">Store mapping</a><a href="#" class="btn" data-dismiss="modal">Cancel</a>');
 	
 	$('#mappingModal').modal('show');
 }
+
+
+function mapDifferentValues($inputMapping, $propName, $propURI, $propType, $propRange){
+
+	// make sure we don't modify the original array entry:
+	var $mapping = $.extend(true, {}, $inputMapping);
+	var $first = true;
+	
+	$('#value-input').slideUp(function(){
+		// TODO: show value(s) in input field(s) if already stored in mapping
+		$('#value-input').html('');
+		$('.selected').each(function(){
+			// TODO: come up with a clever URI generation...
+			//console.log($(this).attr('data-cellid')+' <'+$propURI+'> '+'"'+$userInput+'"');			
+			$('#value-input').append('<hr /><p>Is the value of property <em>'+$propName+'</em> for cell <code>'+$(this).attr('data-cellid')+'</code><br><a href="#" class="btn cell-input" data-cellid="'+$(this).attr('data-cellid')+'">somewhere on this spread sheet</a> or do you want to <a href="#" class="btn manual-input" data-cellid="'+$(this).attr('data-cellid')+'">put it in manually</a>?');	
+		});
+		
+		// click listeners for the buttons 
+		$('.manual-input').click(function(){
+			var $html = '<p><input type="text" placeholder="Enter value here" ' 
+//			if($first){ 
+//				$html += 'class="first" '; 
+//			}
+			$html += 'id="valuefor-'+$(this).attr('data-cellid')+'"></p>'
+
+//			if($first){
+//				$html += '<p><a href="#" class="btn disabled" id="adoptforall">Adopt this value for all cells</p>';
+//			}
+			
+			$(this).parent().after($html);
+			
+//			if($first){
+//				$('.first').keyup(function(){
+//					if($('.first').val() == ''){
+//						$('#adoptforall').addClass('disabled');
+//					}else{
+//						$('#adoptforall').removeClass('disabled');
+//					}
+//				});
+//				
+//				$('#adoptforall').click(function(){
+//					var $valueforall = $('.first').val();
+//					$('.first').remove();
+					// show input fields for each cell and fill them:
+//					$('.manual-input').each(function(){
+//						if(!$(this).hasClass('first')){
+//							$(this).parent().after('<p><input type="text" value="'+$valueforall+'" id="valuefor-'+$(this).attr('data-cellid')+'"></p>');
+//						}
+//					});
+//				});				
+//				$first = false;
+//			}			
+		});
+		
+		
+		$('.cell-input').click(function(){			
+			$('.hxlatorcell').unbind();
+			$(this).addClass('currentMapping');
+			
+			// hide the modal and allow the user to select the cell:
+			$('#mappingModal').modal('hide');
+			$('.shortguide').slideUp();
+			$('.shortguide').after('<div class="container cell-instructions"><div class="alert alert-info">Please click the cell that contains the value for the <em>'+$propName+'</em> property of cell <code>'+$(this).attr('data-cellid')+'</code>. We will then take you back to the mapping window.</div></div>');
+			
+			var $target = $(this).attr('data-cellid');
+			
+			$('.hxlatorcell').click(function(){
+				$('.currentMapping').parent().after('<p><input type="text" value="'+$(this).html()+' (via cell '+$(this).attr('data-cellid')+')" id="valuefor-'+$target+'"><small></p>');
+				$('.currentMapping').removeClass('currentMapping');
+				$('#mappingModal').modal('show');
+				$('.shortguide').slideDown();
+				$('.cell-instructions').remove();
+				$('.hxlatorcell').unbind();				
+			});
+			
+		});
+		
+		
+		$('#value-input').slideDown();
+				
+	});	
+	
+}
+
+
+// automatically generates triple objects for the selected property from the selected cells
+function mapCellValues($inputMapping, $propName, $propURI, $propType, $propRange){
+	
+	// make sure we don't modify the original array entry:
+	var $mapping = $.extend(true, {}, $inputMapping);
+	
+	$('#value-input').slideUp(function(){
+		$('#value-input').html('<hr />mapping to cell values... TBD');
+		$('#value-input').slideDown();
+		
+	});
+	
+	// TODO: click listener on submit button!
+}
+
+
 
 
 // ---------------------------------------------------
@@ -425,7 +522,7 @@ function hxlError($msg){
 
 // Generic SPARQL lookup function, returns JS object 
 function lookup($sparqlQuery){
-	console.log($sparqlQuery);
+	//console.log($sparqlQuery);
 	var $endpoint = "http://hxl.humanitarianresponse.info/sparql";	
 	return $.ajax({
 	    url: $endpoint,

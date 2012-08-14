@@ -163,6 +163,7 @@ function getFoot($extraJS = null, $script = null){
 	</div>
 	
     <script src="js/jquery.js"></script> 
+    <script src="js/json2.js"></script> 
   ';
     
     if($extraJS){
