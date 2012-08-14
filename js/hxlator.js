@@ -416,12 +416,15 @@ function mapCellValues($inputMapping, $propName, $propURI, $propType, $propRange
 	var $mapping = $.extend(true, {}, $inputMapping);
 	
 	$('#value-input').slideUp(function(){
-		$('#value-input').html('<hr />mapping to cell values... TBD');
+		$('#value-input').html('');
+		
+		$('.selected').each(function(){
+			$('#value-input').append('<hr /><p><em>'+$propName+'</em> for cell <code>'+$(this).attr('data-cellid')+'</code><br><input type="text" class="value-input" readonly value="'+$(this).html()+' (via cell '+$(this).attr('data-cellid')+')" id="valuefor-'+$(this).attr('data-cellid')+'">');	
+		});
+		
 		$('#value-input').slideDown();
 		
-	});
-	
-	// TODO: click listener on submit button!
+	});	
 }
 
 
