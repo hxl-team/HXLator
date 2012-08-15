@@ -176,7 +176,6 @@ function selectRow($inputMapping){
 		// put a click listener on the table rows:
 		$('.hxlatorrow').click(function(){
 			$(this).addClass('highlight');
-			$(this).addClass('first');
 			$('.hxlatorrow').unbind('click'); //only allow one click
 			$mapping.samplerow = $(this).attr('data-rowid'); 
 			$hxlHistory.pushState($mapping); 
@@ -251,56 +250,7 @@ function mapProperty($inputMapping){
 			          }
 			        });
 			
-			// handle selection on the highlighted table row
-			$('tr.highlight > td.hxlatorcell').click(function(e) { 
-			  	$(this).toggleClass('selected');
-			  	// if (a) the cell has been added to the selection, (b) a cell has been selected before, and 
-			  	// (c) the shift key has been pressed, mark the whole range between those two as selected 
-			  	if( $(this).hasClass('selected') ) {
-			  		if ( $('.hxlatorcell').hasClass('lastselected') && e.shiftKey ){
-				  		$('.lastselected').addClass('range');
-				  		$(this).addClass('range');
-		
-						// iterate through that row and mark all cells between the two .range cells as selected:
-						var $mark = false;
-						$('tr.highlight > td.hxlatorcell').each(function() {
-							// flip selection switch at the .range cells:
-							if( $(this).hasClass('range') ){
-								if($mark == true){
-									$mark = false;
-								} else {
-									$mark = true;
-								}
-							}
-							
-							if ($mark == true){
-								$(this).addClass('selected');
-							}
-						});
-						
-						// clean up
-					  	$('.hxlatorcell').removeClass('range');
-					 }
-					 
-					 //mark last selected cell to enable range selection via shift-click:
-					 $('.hxlatorcell').removeClass('lastselected');
-					 $(this).addClass('lastselected');
-					 
-			  	}
-			  	
-			  	// enable the property buttons and click listener if any cell is selected, disable if not:
-			  	if ( $('tr.highlight > td.hxlatorcell').hasClass('selected') ){
-			  		$('.hxlprop').removeClass('disabled');
-			  		$('.hxlprop').click(function() {
-			  			mappingModal($mapping, $(this).attr('data-original-title'), $(this).attr('data-hxl-uri'), $(this).attr('data-hxl-propertytype'), $(this).attr('data-hxl-range') );	
-			  		});
-			  	} else {
-				  	$('.hxlprop').addClass('disabled');
-				  	$('.hxlprop').unbind();
-			  	}
-			  		
-			  
-			});
+			enableCellSelection($mapping);
 			
 			}).error(function() { 
 				hxlError('Our server has some hiccups. We will look into that as soon as possible.');
@@ -308,6 +258,57 @@ function mapProperty($inputMapping){
 	});	
 	
 	$('#loading').hide();	
+}
+
+function enableCellSelection($mapping){
+	// handle selection on the highlighted table row
+	$('tr.highlight > td.hxlatorcell').click(function(e) { 
+	  	$(this).toggleClass('selected');
+	  	// if (a) the cell has been added to the selection, (b) a cell has been selected before, and 
+	  	// (c) the shift key has been pressed, mark the whole range between those two as selected 
+	  	if( $(this).hasClass('selected') ) {
+	  		if ( $('.hxlatorcell').hasClass('lastselected') && e.shiftKey ){
+		  		$('.lastselected').addClass('range');
+		  		$(this).addClass('range');
+
+				// iterate through that row and mark all cells between the two .range cells as selected:
+				var $mark = false;
+				$('tr.highlight > td.hxlatorcell').each(function() {
+					// flip selection switch at the .range cells:
+					if( $(this).hasClass('range') ){
+						if($mark == true){
+							$mark = false;
+						} else {
+							$mark = true;
+						}
+					}
+					
+					if ($mark == true){
+						$(this).addClass('selected');
+					}
+				});
+				
+				// clean up
+			  	$('.hxlatorcell').removeClass('range');
+			 }
+			 
+			 //mark last selected cell to enable range selection via shift-click:
+			 $('.hxlatorcell').removeClass('lastselected');
+			 $(this).addClass('lastselected');
+			 
+	  	}
+	  	
+	  	// enable the property buttons and click listener if any cell is selected, disable if not:
+	  	if ( $('tr.highlight > td.hxlatorcell').hasClass('selected') ){
+	  		$('.hxlprop').removeClass('disabled');
+	  		$('.hxlprop').click(function() {
+	  			mappingModal($mapping, $(this).attr('data-original-title'), $(this).attr('data-hxl-uri'), $(this).attr('data-hxl-propertytype'), $(this).attr('data-hxl-range') );	
+	  		});
+	  	} else {
+		  	$('.hxlprop').addClass('disabled');
+		  	$('.hxlprop').unbind();
+	  	}	  			  
+	});
 }
 
 // shows and fills the mapping modal
@@ -396,7 +397,9 @@ function mapDifferentValues($inputMapping, $propName, $propURI, $propType, $prop
 				$('#mappingModal').modal('show');
 				$('.shortguide').slideDown();
 				$('.cell-instructions').remove();
+				// unbind all listeners, then bind the select listener for the cells again ('mark orange')
 				$('.hxlatorcell').unbind();				
+				enableCellSelection($mapping);
 			});
 			
 		});
