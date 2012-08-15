@@ -29,9 +29,11 @@ getHead("index.php", $user_name, $user_organisation);
             <input type="hidden" name="user_organisation_uri" value="<?php echo $user_organisation_uri; ?>">
 			
 			<div class="control-group">
-            	<label for="tags">Emergency: </label>
+            	<label for="emergencies">Emergency: </label>
             	<div class="controls">
-            		<input type="text" id="tags" name="emergency" /> <span style="margin-left: 20px;"><em>Start typing and select from the emergencies list.</em></span>
+            		<input type="text" id="emergencies" name="selectemergency" /> <span style="margin-left: 20px;"><em>Start typing and select from the emergencies list.</em></span><br />
+            		<input type="hidden" name="emergency" id="emergency">
+            		<small id="emergencyuri"></small>
             	</div>
             </div>
 
@@ -66,7 +68,7 @@ getHead("index.php", $user_name, $user_organisation);
         </form>  
     </div>	   
 </div> <!-- /container -->
-<script>document.getElementById('tags').focus()</script>
+<script>document.getElementById('emergencies').focus()</script>
 
 
 <?php 
@@ -75,8 +77,7 @@ getHead("index.php", $user_name, $user_organisation);
 
 	
 	/*
-	 * Send a sparql query to retreive the emergencies names and hide the result
-	 * in a span as a * splitable string.
+	 * Generates the autocomplete field for the emergency selection:
 	 */
 	function emergencyQuery()
 	{
@@ -84,7 +85,7 @@ getHead("index.php", $user_name, $user_organisation);
 	        GRAPH <http://hxl.humanitarianresponse.info/data/reference/fts-emergencies-2012> {
 	            ?uri hxl:commonTitle ?label .
 	        }
-	    }');
+	    } ORDER BY ?label');
 	    
 	    $label = "label";
 	    $uri   = "uri";
@@ -97,18 +98,35 @@ getHead("index.php", $user_name, $user_organisation);
 		 * provided by the emergency query php function.
 		 */
 		
-		$("#tags").autocomplete({
-		    source:[ ';
-		     
-	    foreach($emergencies as $emergency){
-	        $elist .= ' { label: "'.$emergency->$label.'", value: "'.$emergency->$uri.'"}, ' ;                 
-	    }
-	    
-	    // remove trailing comma:
-		//	$elist = substr($emergencies, 0, -2);    
-	             
-	    $elist .= ' {} ]
-	    	});
+		var emergencies = [';
+		
+		foreach($emergencies as $emergency){
+		    $elist .= ' { value: "'.$emergency->$label.'", uri: "'.$emergency->$uri.'"}, ' ;                 
+		}
+		
+		
+		// we're customizing the jQuery UI autocomplete a bit
+		// see http://jqueryui.com/demos/autocomplete/ for the documentation
+		$elist .= ' {} ]
+		
+		
+		$("#emergencies").autocomplete({
+			source: function(request, response) {
+		       	var results = $.ui.autocomplete.filter(emergencies, request.term);
+		     	
+	    		response(results);
+            },
+            select: function(event, ui) {
+                $("#emergencyuri").html("URI for this emergency: <a href=\'"+ui.item.uri+"\' target=\'_blank\'>"+ui.item.uri+"</a>");
+                $("#emergency").val(ui.item.uri);
+            }
+        }).data("autocomplete")._renderItem = function(ul, item) {
+            return $("<li></li>")
+            .data("item.autocomplete", item)
+            .append("<a>" + item.label + "<br /></a>")
+            .appendTo(ul);
+        };
+    
 	    ';
 	    
 	    return $elist;
