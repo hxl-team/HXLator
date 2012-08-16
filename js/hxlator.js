@@ -312,14 +312,14 @@ function enableCellSelection($mapping){
 }
 
 // shows and fills the mapping modal
-function mappingModal($inputMapping, $propName, $propURI, $propType, $propRange, $propRangeName = ''){
+function mappingModal($inputMapping, $propName, $propURI, $propType, $propRange, $propRangeName){
 	// make sure we don't modify the original array entry:
 	var $mapping = $.extend(true, {}, $inputMapping);
 	
 	
 	var $numCells = $('td.selected').length;
 	
-	$('#mappingModal > .modal-header > h3').html('Mapping '+$numCells+' cells to the <em>'+$propName+'</em> property');
+	$('#mappingModal > .modal-header > h3').html('<img src="img/loader.gif" id="modal-loading" class="pull-right" />Mapping '+$numCells+' cells to the <em>'+$propName+'</em> property');
 	
 	if($propType == 'http://www.w3.org/2002/07/owl#DataProperty'){
 		$('#mappingModal > .modal-body').html('<p>You can either <a href="#" class="btn" id="mapCellValues">map each cell to the value it contains</a> or <a href="#" class="btn" id="mapDifferentValues">map it to a different value</a>.</p><div id="value-input" style="display: none"></div>');
@@ -337,9 +337,9 @@ function mappingModal($inputMapping, $propName, $propURI, $propType, $propRange,
 		});
 		
 	} else if ($propType == 'http://www.w3.org/2002/07/owl#ObjectProperty'){
-		$('#mappingModal > .modal-body').html('<p>This property should refer to a '+$propRange+' from one of our reference lists.</p><div id="value-input" style="display: none"></div>');
+		$('#mappingModal > .modal-body').html('<p>This property should refer to a <em>'+$propRangeName+' </em> from one of our reference lists.</p><div id="value-input" style="display: none"></div>');
 		
-		mapWithURILookup($inputMapping, $propName, $propURI, $propType, $propRange);
+		mapWithURILookup($inputMapping, $propName, $propURI, $propType, $propRange, $propRangeName);
 		
 		
 		
@@ -353,19 +353,58 @@ function mappingModal($inputMapping, $propName, $propURI, $propType, $propRange,
 }
 
 // generates the modal contents to map object properties (with URI lookup)
-function mapWithURILookup($inputMapping, $propName, $propURI, $propType, $propRange){
+function mapWithURILookup($inputMapping, $propName, $propURI, $propType, $propRange, $propRangeName){
 	// make sure we don't modify the original array entry:
 	var $mapping = $.extend(true, {}, $inputMapping);
 	
 	$('#value-input').slideUp(function(){
 		$('#value-input').html('');
 		$('.selected').each(function(){
-			$('#value-input').append('<hr />WOHOO!');
+			$('#value-input').append('<hr /><p><em>'+$propName+'</em> for cell <code>'+$(this).attr('data-cellid')+'</code><br><input type="text" class="value-input" placeholder="Start typing to search reference list" id="valuefor-'+$(this).attr('data-cellid')+'"> or <a href="#" class="btn btn-small cell-input" data-cellid="'+$(this).attr('data-cellid')+'">map from spread sheet</a>');			
 		});	
+		
+		$query = 'prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> prefix hxl: <http://hxl.humanitarianresponse.info/ns/#> SELECT * WHERE { ?value rdf:type/rdfs:subClassOf* <'+$propRange+'> . OPTIONAL { ?value hxl:featureName ?label } }';
+		//console.log($query);
+		
+		// add autocomplete to the input fields:
+		$('.value-input').autocomplete({
+				source: function( request, response ) {
+					$('#modal-loading').show();
+					$.ajax({
+						url: 'http://hxl.humanitarianresponse.info/sparql',
+						headers: {
+							Accept: 'application/sparql-results+json'
+						},
+						data: { 
+							query: $query 
+						},							
+						success: function( data ) {
+							console.log(data);
+							response( $.map( data.results.bindings, function( result ) {
+								console.log(result);
+								return {
+									label: result.label.value,
+									value: result.value.value
+								}
+							}));
+							$('#modal-loading').hide();
+						},
+						error: function($jqXHR, $textStatus, $errorThrown){
+							console.log($textStatus);
+						}
+					});
+				},
+				minLength: 2,
+				select: function( event, ui ) {
+					
+				}
+			});
+		
 		$('#value-input').slideDown();
 	});
 	
 }
+
 
 // generates the modal contents to map data properties to values other than the cell contents
 function mapDifferentValues($inputMapping, $propName, $propURI, $propType, $propRange){
@@ -492,30 +531,6 @@ function highlightSpreadsheetBlock(){
 	});
 }
 
-// adds the click listeners to the property buttons and table cells to enable the mapping
-//function enableHXLmapping(){
-//	$('.hxlprop').unbind();
-	// click listener for the property buttons:
-//	$('.hxlprop').click(function(){
-//		$('.hxlprop').unbind('click'); //only allow one click
-//		$(this).addClass('btn-warning');
-//
-//		$('.hxlatorcell').unbind();
-		// add click listener to the table cells:
-//		$('.hxlatorcell').click(function(){
-//			$('.hxlatorcell').unbind('click'); //only allow one click
-//			$(this).addClass('selected');	
-//			$('#furtherinstructions').html('Please repeat this pairwise maping until you have mapped all cells in your spreadsheet to a property. Note that a cell can also be mapped to several properties, so you might want to map the same cell several times. <a class="btn">Done?</a>');
-//			$('#mappings').append('<p><code>This is a mapped triple.</code></p>');
-//			$('#mappings').slideDown(); // show the box after the first cell has been mapped
-//			$('.hxlprop').removeClass('btn-warning'); 
-//			$('.hxlatorcell').removeClass('selected');
-//			
-			// TODO: add something clever to the table cell to indicate that it already has a mapping
-//			enableHXLmapping();	
-//		});	
-//	});
-//}
 
 // ---------------------------------------------------
 // Convenience functions
@@ -525,28 +540,6 @@ function highlightSpreadsheetBlock(){
 // a generic error display for hxlate.php. Will show $msg in a red alert box on top of the page
 function hxlError($msg){
 	$('.shortguide').prepend('<div class="alert alert-block alert-error fade in"><button type="button" class="close" data-dismiss="alert">×</button><h4 class="alert-heading">'+$msg+'</h4></div>');
-}
-
-
-// Generic SPARQL lookup function, returns JS object 
-function lookup($sparqlQuery){
-	//console.log($sparqlQuery);
-	var $endpoint = "http://hxl.humanitarianresponse.info/sparql";	
-	return $.ajax({
-	    url: $endpoint,
-	    headers: {
-	    	Accept: "application/sparql-results+json", 
-	    },
-	    data: { 
-	    	query: $sparqlQuery 
-	    },	    
-	    success: function($json) {
-	    	return $json;
-	    },
-	    error: function($jqXHR, $textStatus, $errorThrown){
-	    	console.log($textStatus);
-	    }	   
-	});	
 }
 
 
