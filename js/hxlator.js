@@ -302,7 +302,7 @@ function enableCellSelection($mapping){
 	  	if ( $('tr.highlight > td.hxlatorcell').hasClass('selected') ){
 	  		$('.hxlprop').removeClass('disabled');
 	  		$('.hxlprop').click(function() {
-	  			mappingModal($mapping, $(this).attr('data-original-title'), $(this).attr('data-hxl-uri'), $(this).attr('data-hxl-propertytype'), $(this).attr('data-hxl-range') );	
+	  			mappingModal($mapping, $(this).attr('data-original-title'), $(this).attr('data-hxl-uri'), $(this).attr('data-hxl-propertytype'), $(this).attr('data-hxl-range'), $(this).attr('data-hxl-range-name') );	
 	  		});
 	  	} else {
 		  	$('.hxlprop').addClass('disabled');
@@ -312,7 +312,7 @@ function enableCellSelection($mapping){
 }
 
 // shows and fills the mapping modal
-function mappingModal($inputMapping, $propName, $propURI, $propType, $propRange){
+function mappingModal($inputMapping, $propName, $propURI, $propType, $propRange, $propRangeName = ''){
 	// make sure we don't modify the original array entry:
 	var $mapping = $.extend(true, {}, $inputMapping);
 	
@@ -337,7 +337,12 @@ function mappingModal($inputMapping, $propName, $propURI, $propType, $propRange)
 		});
 		
 	} else if ($propType == 'http://www.w3.org/2002/07/owl#ObjectProperty'){
-		$('#mappingModal > .modal-body').html('<p>Object properties aren\'t done yet...</p>');
+		$('#mappingModal > .modal-body').html('<p>This property should refer to a '+$propRange+' from one of our reference lists.</p><div id="value-input" style="display: none"></div>');
+		
+		mapWithURILookup($inputMapping, $propName, $propURI, $propType, $propRange);
+		
+		
+		
 	} else { // Something's going wrong...
 		$('#mappingModal > .modal-body').html('<p>We can\'t handle the property type '+$propType+'</p>');
 	}
@@ -347,7 +352,22 @@ function mappingModal($inputMapping, $propName, $propURI, $propType, $propRange)
 	$('#mappingModal').modal('show');
 }
 
+// generates the modal contents to map object properties (with URI lookup)
+function mapWithURILookup($inputMapping, $propName, $propURI, $propType, $propRange){
+	// make sure we don't modify the original array entry:
+	var $mapping = $.extend(true, {}, $inputMapping);
+	
+	$('#value-input').slideUp(function(){
+		$('#value-input').html('');
+		$('.selected').each(function(){
+			$('#value-input').append('<hr />WOHOO!');
+		});	
+		$('#value-input').slideDown();
+	});
+	
+}
 
+// generates the modal contents to map data properties to values other than the cell contents
 function mapDifferentValues($inputMapping, $propName, $propURI, $propType, $propRange){
 
 	// make sure we don't modify the original array entry:
@@ -361,8 +381,7 @@ function mapDifferentValues($inputMapping, $propName, $propURI, $propType, $prop
 			$('#value-input').append('<hr /><p><em>'+$propName+'</em> for cell <code>'+$(this).attr('data-cellid')+'</code><br><input type="text" class="value-input" placeholder="Enter value here" id="valuefor-'+$(this).attr('data-cellid')+'"> or <a href="#" class="btn btn-small cell-input" data-cellid="'+$(this).attr('data-cellid')+'">select from spread sheet</a><br /><a href="#" class="btn btn-small disabled adoptforall">Adopt this value for all cells</a>');	
 
 			  $('.value-input').keyup(function(){
-			    console.log('keyup fired');
-			  	if($(this).val() == ''){
+			    if($(this).val() == ''){
 			  		$(this).parent().children('.adoptforall').addClass('disabled');
 			  	}else{
 			  		$(this).parent().children('.adoptforall').removeClass('disabled');

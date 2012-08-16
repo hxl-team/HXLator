@@ -249,11 +249,14 @@ function loadMappingModal(){
 
 // ------- some convenience functions
 
-function shorten($uri){
+function shorten($uri, $prefix){
 	$parts = explode("#", $uri);
-	return "hxl:".$parts[1];
+	if ($prefix == ''){
+		return $parts[1];
+	}else{
+		return $prefix.":".$parts[1];
+	}
 }
-
 
 function showError($msg){
 	echo '<div class="container"><div class="alert alert-error"><h2>Oops.</h2>'.$msg.'</div>';
