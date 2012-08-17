@@ -170,7 +170,7 @@ function selectRow($inputMapping){
 	$('.hxlatorcell').unbind();
 	
 	$('.shortguide').slideUp(function(){		
-		$('.shortguide').html('<p class="lead selectedclass" style="visibility: none">Please click on the <strong>first</strong> row that contains <span class="label label-important" style="font-size: 1em">data</span> about a '+$mapping.classsingular+'/'+ $mapping.classplural +'.</p><p align="right"><i class="icon-hand-right"></i> That\'s <em>not</em> not the header row, but usually the first row containing numbers.</p>');	
+		$('.shortguide').html('<p class="lead selectedclass" style="visibility: none">Please click on the <strong>first</strong> row that contains <span class="label label-important" style="font-size: 1em">data</span> about a '+$mapping.classsingular+'/'+ $mapping.classplural +'.</p><p align="right"><i class="icon-hand-right"></i> That\'s <em>not</em> the header row, but usually the first row containing numbers.</p>');	
 		$('.shortguide').slideDown();
 		$('.hxlatorrow').unbind();
 		// put a click listener on the table rows:
@@ -360,15 +360,17 @@ function mapWithURILookup($inputMapping, $propName, $propURI, $propType, $propRa
 	$('#value-input').slideUp(function(){
 		$('#value-input').html('');
 		$('.selected').each(function(){
-			$('#value-input').append('<hr /><p><em>'+$propName+'</em> for cell <code>'+$(this).attr('data-cellid')+'</code><br><input type="text" class="value-input" placeholder="Start typing to search reference list" id="valuefor-'+$(this).attr('data-cellid')+'"> or <a href="#" class="btn btn-small cell-input" data-cellid="'+$(this).attr('data-cellid')+'">map from spread sheet</a>');			
+			$('#value-input').append('<hr /><p><em>'+$propName+'</em> for cell <code>'+$(this).attr('data-cellid')+'</code><br><input type="text" class="value-input" placeholder="Start typing to search reference list" id="valuefor-'+$(this).attr('data-cellid')+'"> or <a href="#" class="btn btn-small cell-input" data-cellid="'+$(this).attr('data-cellid')+'">map from spread sheet</a><br /><input type="hidden" class="valuefor-'+$(this).attr('data-cellid')+'"><small class="uri valuefor-'+$(this).attr('data-cellid')+'"></small>');			
 		});	
-		
-		$query = 'prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> prefix hxl: <http://hxl.humanitarianresponse.info/ns/#> SELECT * WHERE { ?value rdf:type/rdfs:subClassOf* <'+$propRange+'> . OPTIONAL { ?value hxl:featureName ?label } }';
-		//console.log($query);
 		
 		// add autocomplete to the input fields:
 		$('.value-input').autocomplete({
 				source: function( request, response ) {
+					
+					$query = 'prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> prefix hxl: <http://hxl.humanitarianresponse.info/ns/#> SELECT * WHERE { ?value rdf:type/rdfs:subClassOf* <'+$propRange+'> . ?value hxl:featureName ?label . ?value hxl:atLocation* ?location . ?location a hxl:Country ; hxl:featureName ?country .   FILTER regex(?label, "'+request.term+'", "i") } ORDER BY ?label';
+					console.log($query);
+					
+					
 					$('#modal-loading').show();
 					$.ajax({
 						url: 'http://hxl.humanitarianresponse.info/sparql',
@@ -379,12 +381,10 @@ function mapWithURILookup($inputMapping, $propName, $propURI, $propType, $propRa
 							query: $query 
 						},							
 						success: function( data ) {
-							console.log(data);
 							response( $.map( data.results.bindings, function( result ) {
-								console.log(result);
 								return {
-									label: result.label.value,
-									value: result.value.value
+									value: result.label.value+ ' ('+result.country.value+')',
+									uri: result.value.value
 								}
 							}));
 							$('#modal-loading').hide();
@@ -396,7 +396,9 @@ function mapWithURILookup($inputMapping, $propName, $propURI, $propType, $propRa
 				},
 				minLength: 2,
 				select: function( event, ui ) {
-					
+					// show the URI to the user and store it in a hidden form field for processing later
+					$('small.'+$(this).attr('id')).html(('URI for this '+$propRangeName+': <a href="'+ui.item.uri+'" target="_blank">'+ui.item.uri+'</a>'));
+					$('input.'+$(this).attr('id')).val(ui.item.uri);
 				}
 			});
 		
