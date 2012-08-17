@@ -367,7 +367,29 @@ function mapWithURILookup($inputMapping, $propName, $propURI, $propType, $propRa
 		$('.value-input').autocomplete({
 				source: function( request, response ) {
 					
-					$query = 'prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> prefix hxl: <http://hxl.humanitarianresponse.info/ns/#> SELECT * WHERE { ?value rdf:type/rdfs:subClassOf* <'+$propRange+'> . ?value hxl:featureName ?label . ?value hxl:atLocation* ?location . ?location a hxl:Country ; hxl:featureName ?country .   FILTER regex(?label, "'+request.term+'", "i") } ORDER BY ?label';
+					// select the query based on the range of this property:
+					var $query = '';
+				
+					if($propRange == 'http://hxl.humanitarianresponse.info/ns/#AdminUnit' || $propRange == 'http://hxl.humanitarianresponse.info/ns/#Country' || $propRange == 'http://www.opengis.net/geosparql#Feature'){
+				
+						$query = 'prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> prefix hxl: <http://hxl.humanitarianresponse.info/ns/#> SELECT * WHERE { ?value rdf:type/rdfs:subClassOf* <'+$propRange+'> . ?value hxl:featureName ?label . ?value hxl:atLocation* ?location . ?location a hxl:Country ; hxl:featureName ?country .   FILTER regex(?label, "'+request.term+'", "i") } ORDER BY ?label';
+
+					}else if ($propRange == 'http://hxl.humanitarianresponse.info/ns/#AdminUnitLevel'){
+						
+						$query = 'prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> prefix hxl: <http://hxl.humanitarianresponse.info/ns/#> SELECT * WHERE { ?value rdf:type/rdfs:subClassOf* <'+$propRange+'> . ?value hxl:adminUnitLevelTitle ?label . FILTER regex(?label, "'+request.term+'", "i") } ORDER BY ?label';
+						
+					}else if ($propRange == 'http://hxl.humanitarianresponse.info/ns/#HXLer'){
+
+						$query = 'prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> prefix hxl: <http://hxl.humanitarianresponse.info/ns/#> SELECT * WHERE { ?value rdf:type/rdfs:subClassOf* <'+$propRange+'> . ?value <http://xmlns.com/foaf/0.1/name> ?label . FILTER regex(?label, "'+request.term+'", "i") } ORDER BY ?label';						
+					}else if ($propRange == 'http://hxl.humanitarianresponse.info/ns/#Emergency'){
+
+						$query = 'prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> prefix hxl: <http://hxl.humanitarianresponse.info/ns/#> SELECT * WHERE { ?value rdf:type/rdfs:subClassOf* <'+$propRange+'> . ?value <http://xmlns.com/foaf/0.1/name> ?label . FILTER regex(?label, "'+request.term+'", "i") } ORDER BY ?label';								
+					}else{
+						
+						$query = 'prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> prefix hxl: <http://hxl.humanitarianresponse.info/ns/#> SELECT * WHERE { ?value rdf:type/rdfs:subClassOf* <'+$propRange+'> . ?value hxl:title ?label . FILTER regex(?label, "'+request.term+'", "i") } ORDER BY ?label';		
+
+					}
+					
 					console.log($query);
 					
 					
@@ -382,10 +404,20 @@ function mapWithURILookup($inputMapping, $propName, $propURI, $propType, $propRa
 						},							
 						success: function( data ) {
 							response( $.map( data.results.bindings, function( result ) {
-								return {
-									value: result.label.value+ ' ('+result.country.value+')',
-									uri: result.value.value
+								
+								// special handling of Features to show the country they are in:
+								if($propRange == 'http://hxl.humanitarianresponse.info/ns/#AdminUnit' || $propRange == 'http://hxl.humanitarianresponse.info/ns/#Country' || $propRange == 'http://www.opengis.net/geosparql#Feature'){
+									return {
+										value: result.label.value+ ' ('+result.country.value+')',
+										uri: result.value.value
+									}
+								}else{
+									return {
+										value: result.label.value,
+										uri: result.value.value
+									}
 								}
+								
 							}));
 							$('#modal-loading').hide();
 						},
