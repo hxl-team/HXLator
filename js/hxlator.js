@@ -47,7 +47,8 @@ $hxlHistory.processMapping = function(){
 	// console.log($hxlHistory.states);
 	
 	var $mapping = $hxlHistory.states[$hxlHistory.currentState];
-	//console.log(JSON.stringify($mapping));
+	console.log('Current state of the mapping object:');
+	console.log(JSON.stringify($mapping));
 	console.log($mapping);
 	
 	// if the class has not been set yet, show the class pills:
@@ -191,6 +192,10 @@ function mapProperty($inputMapping){
 	var $mapping = $.extend(true, {}, $inputMapping);
 	
 	$('.hxlatorrow').unbind();
+	$('.hxlatorcell').unbind();
+	
+	// if there are already any cells selected, 'unselect' them first:
+	$('.hxlatorcell').removeClass('selected lastselected');
 		
 	//next step: show properties: 
 	$('.shortguide').slideUp(function(){
@@ -262,7 +267,8 @@ function mapProperty($inputMapping){
 
 function enableCellSelection($mapping){
 	// handle selection on the highlighted table row
-	$('tr.highlight > td.hxlatorcell').click(function(e) { 
+	$('tr.highlight > td.hxlatorcell').click(function(e) {
+		console.log('cell clicked'); 
 	  	$(this).toggleClass('selected');
 	  	// if (a) the cell has been added to the selection, (b) a cell has been selected before, and 
 	  	// (c) the shift key has been pressed, mark the whole range between those two as selected 
@@ -313,9 +319,6 @@ function enableCellSelection($mapping){
 
 // shows and fills the mapping modal
 function mappingModal($inputMapping, $propName, $propURI, $propType, $propRange, $propRangeName){
-	// make sure we don't modify the original array entry:
-	var $mapping = $.extend(true, {}, $inputMapping);
-	
 	
 	var $numCells = $('td.selected').length;
 	
@@ -390,7 +393,7 @@ function mapWithURILookup($inputMapping, $propName, $propURI, $propType, $propRa
 
 					}
 					
-					console.log($query);
+					// console.log($query);
 					
 					
 					$('#modal-loading').show();
@@ -514,10 +517,38 @@ function mapCellValues($inputMapping, $propName, $propURI, $propType, $propRange
 		$('#value-input').html('');
 		
 		$('.selected').each(function(){
-			$('#value-input').append('<hr /><p><em>'+$propName+'</em> for cell <code>'+$(this).attr('data-cellid')+'</code><br><input type="text" class="value-input" readonly value="'+$(this).html()+' (via cell '+$(this).attr('data-cellid')+')" id="valuefor-'+$(this).attr('data-cellid')+'">');	
+			$('#value-input').append('<hr /><p><em>'+$propName+'</em> for cell <code>'+$(this).attr('data-cellid')+'</code><br><input type="text" class="value-input" readonly value="'+$(this).html()+' (via cell '+$(this).attr('data-cellid')+')" data-value-subject="'+$(this).attr('data-cellid')+'" data-value-object="'+$(this).attr('data-cellid')+'" id="valuefor-'+$(this).attr('data-cellid')+'">');	
 		});
 		
 		$('#value-input').slideDown();
+		
+		$('#storeMapping').unbind(); // remove any old listeners
+		$('#storeMapping').click(function(){
+			
+			// iterate through all input fields 
+			$('.value-input').each(function(){
+				var $uri = '@uri '+$(this).attr('data-value-subject');
+				
+				// if there are no mappings for this URI yet, add this node to the JSON tree:
+				if($mapping.templates[$uri] == undefined){
+					$mapping.templates[$uri] = new Object();
+					$mapping.templates[$uri].triples = new Array();					
+				}
+				
+				// add the triples:
+				var $index =  $mapping.templates[$uri].triples.length;
+				$mapping.templates[$uri].triples[$index] = new Object();
+				$mapping.templates[$uri].triples[$index]["predicate"] = $propURI;
+				$mapping.templates[$uri].triples[$index]["object"] = '@value '+$(this).attr('data-value-object');
+											
+			});
+			
+			// push mapping to mapping stack:
+			$hxlHistory.pushState($mapping);
+			
+			// close modal:
+			$('#mappingModal').modal('hide');
+		});
 		
 	});	
 }
