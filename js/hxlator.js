@@ -495,8 +495,11 @@ function mapDifferentValues($inputMapping, $propName, $propURI, $propType, $prop
 		$('.adoptforall').click(function(){
 			// copy value to other input fields
 			var $copyVal = $(this).parent().children('.value-input').val();
+			var $copyObj = $(this).parent().children('.value-input').attr('data-value-object');
+			
 			$('.value-input').each(function(){
 				$(this).val($copyVal);
+				$(this).attr('data-value-object', $copyObj);
 			})			  	
 		});
 		
