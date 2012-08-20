@@ -363,9 +363,34 @@ function mapWithURILookup($inputMapping, $propName, $propURI, $propType, $propRa
 	$('#value-input').slideUp(function(){
 		$('#value-input').html('');
 		$('.selected').each(function(){
-			$('#value-input').append('<hr /><p><em>'+$propName+'</em> for cell <code>'+$(this).attr('data-cellid')+'</code><br><input type="text" class="value-input" placeholder="Start typing to search reference list" id="valuefor-'+$(this).attr('data-cellid')+'"> or <a href="#" class="btn btn-small cell-input" data-cellid="'+$(this).attr('data-cellid')+'">map from spread sheet</a><br /><input type="hidden" class="valuefor-'+$(this).attr('data-cellid')+'"><small class="uri valuefor-'+$(this).attr('data-cellid')+'"></small>');			
+			$('#value-input').append('<hr /><p><em>'+$propName+'</em> for cell <code>'+$(this).attr('data-cellid')+'</code><br><input type="text" class="value-input" placeholder="Start typing to search reference list" id="valuefor-'+$(this).attr('data-cellid')+'"> or <a href="#" class="btn btn-small cell-input disabled" data-cellid="'+$(this).attr('data-cellid')+'">map from spread sheet</a><br /><input type="hidden" class="valuefor-'+$(this).attr('data-cellid')+'"><small class="uri valuefor-'+$(this).attr('data-cellid')+'"></small><br /><a href="#" class="btn btn-small disabled adoptforall valuefor-'+$(this).attr('data-cellid')+'">Adopt this value for all cells</a>');			
+		
+//		$('.value-input').keyup(function(){
+//			    if($(this).val() == ''){
+//			  		$(this).parent().children('.adoptforall').addClass('disabled');
+//			  	}else{
+//			  		$(this).parent().children('.adoptforall').removeClass('disabled');
+//			  	}
+//			  });			  			  	
+//		});
+			
+		});
+		
+		$('.adoptforall').click(function(){
+			// copy value to other input fields
+			var $copyVal = $(this).parent().children('.value-input').val();
+			var $copyURI = $(this).parent().children('small').html();
+			console.log($copyURI);
+			$('.value-input').each(function(){
+				$(this).val($copyVal);
+			});
+				
+			$('.uri').each(function(){
+				$(this).parent().children('small').html($copyURI);
+			});		  	
 		});	
 		
+	
 		// add autocomplete to the input fields:
 		$('.value-input').autocomplete({
 				source: function( request, response ) {
@@ -383,17 +408,18 @@ function mapWithURILookup($inputMapping, $propName, $propURI, $propType, $propRa
 						
 					}else if ($propRange == 'http://hxl.humanitarianresponse.info/ns/#HXLer'){
 
-						$query = 'prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> prefix hxl: <http://hxl.humanitarianresponse.info/ns/#> SELECT * WHERE { ?value rdf:type/rdfs:subClassOf* <'+$propRange+'> . ?value <http://xmlns.com/foaf/0.1/name> ?label . FILTER regex(?label, "'+request.term+'", "i") } ORDER BY ?label';						
+						$query = 'prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> prefix hxl: <http://hxl.humanitarianresponse.info/ns/#> SELECT * WHERE { ?value rdf:type/rdfs:subClassOf* <'+$propRange+'> . ?value <http://xmlns.com/foaf/0.1/name> ?label . FILTER regex(?label, "'+request.term+'", "i") } ORDER BY ?label';		
+										
 					}else if ($propRange == 'http://hxl.humanitarianresponse.info/ns/#Emergency'){
 
-						$query = 'prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> prefix hxl: <http://hxl.humanitarianresponse.info/ns/#> SELECT * WHERE { ?value rdf:type/rdfs:subClassOf* <'+$propRange+'> . ?value <http://xmlns.com/foaf/0.1/name> ?label . FILTER regex(?label, "'+request.term+'", "i") } ORDER BY ?label';								
+						$query = 'prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> prefix hxl: <http://hxl.humanitarianresponse.info/ns/#> SELECT * WHERE { ?value rdf:type/rdfs:subClassOf* <'+$propRange+'> . ?value hxl:commonTitle ?label . FILTER regex(?label, "'+request.term+'", "i") } ORDER BY ?label';								
 					}else{
 						
 						$query = 'prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> prefix hxl: <http://hxl.humanitarianresponse.info/ns/#> SELECT * WHERE { ?value rdf:type/rdfs:subClassOf* <'+$propRange+'> . ?value hxl:title ?label . FILTER regex(?label, "'+request.term+'", "i") } ORDER BY ?label';		
 
 					}
 					
-					// console.log($query);
+					//console.log($query);
 					
 					
 					$('#modal-loading').show();
@@ -434,6 +460,7 @@ function mapWithURILookup($inputMapping, $propName, $propURI, $propType, $propRa
 					// show the URI to the user and store it in a hidden form field for processing later
 					$('small.'+$(this).attr('id')).html(('URI for this '+$propRangeName+': <a href="'+ui.item.uri+'" target="_blank">'+ui.item.uri+'</a>'));
 					$('input.'+$(this).attr('id')).val(ui.item.uri);
+					$('a.'+$(this).attr('id')).removeClass('disabled');
 				}
 			});
 		
