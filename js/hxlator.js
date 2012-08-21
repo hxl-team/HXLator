@@ -374,6 +374,7 @@ function mapWithURILookup($inputMapping, $propName, $propURI, $propType, $propRa
 			console.log($copyURI);
 			$('.value-input').each(function(){
 				$(this).val($copyVal);
+				$(this).attr('data-value-object', $copyURI);
 			});
 				
 			$('.uri').each(function(){
@@ -381,7 +382,7 @@ function mapWithURILookup($inputMapping, $propName, $propURI, $propType, $propRa
 			});		  	
 		});	
 		
-	
+		
 		// add autocomplete to the input fields:
 		$('.value-input').autocomplete({
 				source: function( request, response ) {
