@@ -450,7 +450,7 @@ function mapWithURILookup($inputMapping, $propName, $propURI, $propType, $propRa
 				select: function( event, ui ) {
 					// show the URI to the user and store it in a hidden form field for processing later
 					$('small.'+$(this).attr('id')).html(('URI for this '+$propRangeName+': <a href="'+ui.item.uri+'" target="_blank">'+ui.item.uri+'</a>'));
-					$(this).attr('data-value-object', '<'+ui.item.uri+'>');
+					$(this).attr('data-value-object', ui.item.uri);
 					
 					$('a.'+$(this).attr('id')).removeClass('disabled');
 				}
@@ -557,7 +557,6 @@ function mapCellValues($inputMapping, $propName, $propURI, $propType, $propRange
 function addPropertyMappings($mapping, $propURI){
 
 	$('#storeMapping').unbind(); // remove any old listeners
-	$('#storeMapping').html("STORE ME!!!");
 	$('#storeMapping').click(function(){
 		
 		console.log("Store mapping clicked");
@@ -579,9 +578,17 @@ function addPropertyMappings($mapping, $propURI){
 			
 			// store a mapping to a cell, or just a fixed value that doesn't update?
 			if($(this).attr('data-value-object') == undefined){
+				
 				$mapping.templates[$uri].triples[$index]["object"] = $(this).val();
+				
+			} else if($(this).attr('data-value-object').indexOf('http') == 0){
+			
+				$mapping.templates[$uri].triples[$index]["object"] = '<'+$(this).attr('data-value-object')+'>';
+			
 			} else {
+				
 				$mapping.templates[$uri].triples[$index]["object"] = '@value '+$(this).attr('data-value-object');
+				
 			}
 										
 		});
@@ -602,16 +609,44 @@ function addPropertyMappings($mapping, $propURI){
 
 // processes a mapping, generates RDF from it and updates the preview modal
 function generateRDF($mapping){
-	var $turtle = "@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> . \n@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> . \n@prefix owl:  <http://www.w3.org/2002/07/owl#> . \n@prefix foaf: <http://xmlns.com/foaf/0.1/> . \n@prefix dc:   <http://purl.org/dc/terms/> . \n@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> . \n@prefix skos: <http://www.w3.org/2004/02/skos/core#> . \n@prefix hxl:  <http://hxl.humanitarianresponse.info/ns/#> . \n@prefix geo:  <http://www.opengis.net/geosparql#> . \n@prefix label: <http://www.wasab.dk/morten/2004/03/label#> . \n \n";
+	var $turtle = '@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> . \n@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> . \n@prefix owl:  <http://www.w3.org/2002/07/owl#> . \n@prefix foaf: <http://xmlns.com/foaf/0.1/> . \n@prefix dc:   <http://purl.org/dc/terms/> . \n@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> . \n@prefix skos: <http://www.w3.org/2004/02/skos/core#> . \n@prefix hxl:  <http://hxl.humanitarianresponse.info/ns/#> . \n@prefix geo:  <http://www.opengis.net/geosparql#> . \n@prefix label: <http://www.wasab.dk/morten/2004/03/label#> . \n \n';
 	$.each($mapping.templates, function($uri, $triples){
-		$.each($triples["triples"], function($i, $triple){
-			var $datatype = "";
-			if ($triple["datatype"] != undefined){
-				$datatype  = "^^" + $triple["datatype"];
+	
+		// generate a URI if the $uri is not there yet (tagged with "@uri")
+		if($uri.indexOf('@uri') == 0){
+		
+			// go through all properties of the resource and generate a URI based on our URI patterns document:
+			// https://docs.google.com/document/d/1-9OoF5vz71qPtPRo3WoaMH4S5J1O41ITszT3arQ5VLs/edit
+			// TODO !!			
+			$uri = '<http://example.org/>';
+		}
+	
+		$.each($triples['triples'], function($i, $triple){
+			
+			// handling the object; check whether we need to pull the value from the spreadsheet:
+			var $object = '';
+			if($triple['object'].indexOf('@value') == 0){
+				var $cell = $triple['object'].substr(7);
+				$object = '"'+$('td[data-cellid="'+$cell+'"]').html()+'"';
+			}else{
+				if($triple['object'].indexOf('<http') == 0){ // object property
+					$object = $triple['object'];
+				}else{ // data property
+					$object = '"'+$triple['object']+'"';
+				}
 			}
-			$turtle += $uri + " " + $triple["predicate"] + " " + $triple["object"] + $datatype + " .\n";
+			
+			var $datatype = '';
+			if ($triple['datatype'] != undefined){
+				$datatype  = '^^' + $triple['datatype'];
+			}
+			
+			// add the triple:			
+			$turtle += $uri + ' ' + $triple['predicate'] + ' ' + $object + $datatype + ' .\n';
+
 		});
 	});
+	// update the preview modal:
 	$('#nakedturtle').html(htmlentities($turtle, 0));
 	return $turtle;
 }
