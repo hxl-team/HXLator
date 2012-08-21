@@ -324,6 +324,8 @@ function mappingModal($inputMapping, $propName, $propURI, $propType, $propRange,
 	
 	$('#mappingModal > .modal-header > h3').html('<img src="img/loader.gif" id="modal-loading" class="pull-right" />Mapping '+$numCells+' cells to the <em>'+$propName+'</em> property');
 	
+	$('#mappingModal > .modal-footer').html('<i class="icon-hand-right"></i> Don\'t worry about doing anything wrong here, you can always go back to fix it later.</p><a href="#" id="storeMapping" class="btn btn-primary">Store mapping</a><a href="#" class="btn" data-dismiss="modal">Cancel</a>');
+	
 	if($propType == 'http://www.w3.org/2002/07/owl#DataProperty'){
 		$('#mappingModal > .modal-body').html('<p>You can either <a href="#" class="btn" id="mapCellValues">map each cell to the value it contains</a> or <a href="#" class="btn" id="mapDifferentValues">map it to a different value</a>.</p><div id="value-input" style="display: none"></div>');
 		
@@ -349,9 +351,7 @@ function mappingModal($inputMapping, $propName, $propURI, $propType, $propRange,
 	} else { // Something's going wrong...
 		$('#mappingModal > .modal-body').html('<p>We can\'t handle the property type '+$propType+'</p>');
 	}
-	
-	$('#mappingModal > .modal-footer').html('<i class="icon-hand-right"></i> Don\'t worry about doing anything wrong here, you can always go back to fix it later.</p><a href="#" id="storeMapping" class="btn btn-primary">Store mapping</a><a href="#" class="btn" data-dismiss="modal">Cancel</a>');
-	
+		
 	$('#mappingModal').modal('show');
 }
 
@@ -363,16 +363,7 @@ function mapWithURILookup($inputMapping, $propName, $propURI, $propType, $propRa
 	$('#value-input').slideUp(function(){
 		$('#value-input').html('');
 		$('.selected').each(function(){
-			$('#value-input').append('<hr /><p><em>'+$propName+'</em> for cell <code>'+$(this).attr('data-cellid')+'</code><br><input type="text" class="value-input" placeholder="Start typing to search reference list" id="valuefor-'+$(this).attr('data-cellid')+'"> or <a href="#" class="btn btn-small cell-input disabled" data-cellid="'+$(this).attr('data-cellid')+'">map from spread sheet</a><br /><input type="hidden" class="valuefor-'+$(this).attr('data-cellid')+'"><small class="uri valuefor-'+$(this).attr('data-cellid')+'"></small><br /><a href="#" class="btn btn-small disabled adoptforall valuefor-'+$(this).attr('data-cellid')+'">Adopt this value for all cells</a>');			
-		
-//		$('.value-input').keyup(function(){
-//			    if($(this).val() == ''){
-//			  		$(this).parent().children('.adoptforall').addClass('disabled');
-//			  	}else{
-//			  		$(this).parent().children('.adoptforall').removeClass('disabled');
-//			  	}
-//			  });			  			  	
-//		});
+			$('#value-input').append('<hr /><p><em>'+$propName+'</em> for cell <code>'+$(this).attr('data-cellid')+'</code><br><input type="text" class="value-input" placeholder="Start typing to search reference list" id="valuefor-'+$(this).attr('data-cellid')+'" data-value-subject="'+$(this).attr('data-cellid')+'"> or <a href="#" class="btn btn-small cell-input disabled" data-cellid="'+$(this).attr('data-cellid')+'">map from spread sheet</a><br /><small class="uri valuefor-'+$(this).attr('data-cellid')+'"></small><br /><a href="#" class="btn btn-small disabled adoptforall valuefor-'+$(this).attr('data-cellid')+'" style="margin-top 7px">Adopt this value for all cells</a>');					
 			
 		});
 		
@@ -459,12 +450,15 @@ function mapWithURILookup($inputMapping, $propName, $propURI, $propType, $propRa
 				select: function( event, ui ) {
 					// show the URI to the user and store it in a hidden form field for processing later
 					$('small.'+$(this).attr('id')).html(('URI for this '+$propRangeName+': <a href="'+ui.item.uri+'" target="_blank">'+ui.item.uri+'</a>'));
-					$('input.'+$(this).attr('id')).val(ui.item.uri);
+					$(this).attr('data-value-object', '<'+ui.item.uri+'>');
+					
 					$('a.'+$(this).attr('id')).removeClass('disabled');
 				}
 			});
 		
 		$('#value-input').slideDown();
+		addPropertyMappings($mapping, $propURI);
+		
 	});
 	
 }
@@ -532,7 +526,7 @@ function mapDifferentValues($inputMapping, $propName, $propURI, $propType, $prop
 		
 		
 		$('#value-input').slideDown();
-		addDataPropertyMappings($mapping, $propURI);
+		addPropertyMappings($mapping, $propURI);		
 				
 	});	
 	
@@ -553,18 +547,20 @@ function mapCellValues($inputMapping, $propName, $propURI, $propType, $propRange
 		});
 		
 		$('#value-input').slideDown();
-		addDataPropertyMappings($mapping, $propURI);
-		
-		
+		addPropertyMappings($mapping, $propURI);				
 	});	
 }
 
 // adds a click listener to the "store mapping" button in the mapping modal,
 // adds the data properties shown in the modal to the mapping
 // and pushes the mapping to the mappings stack
-function addDataPropertyMappings($mapping, $propURI){
+function addPropertyMappings($mapping, $propURI){
+
 	$('#storeMapping').unbind(); // remove any old listeners
+	$('#storeMapping').html("STORE ME!!!");
 	$('#storeMapping').click(function(){
+		
+		console.log("Store mapping clicked");
 		
 		// iterate through all input fields 
 		$('.value-input').each(function(){
@@ -573,7 +569,7 @@ function addDataPropertyMappings($mapping, $propURI){
 			// if there are no mappings for this URI yet, add this node to the JSON tree:
 			if($mapping.templates[$uri] == undefined){
 				$mapping.templates[$uri] = new Object();
-				$mapping.templates[$uri].triples = new Array();					
+				$mapping.templates[$uri].triples = new Array();						
 			}
 			
 			// add the triples:
