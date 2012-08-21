@@ -11,7 +11,7 @@
 			"file": "js/hxlator.js",
 			"settings":
 			{
-				"buffer_size": 29864,
+				"buffer_size": 29914,
 				"line_ending": "Unix"
 			}
 		}
@@ -84,24 +84,25 @@
 					"file": "js/hxlator.js",
 					"settings":
 					{
-						"buffer_size": 29864,
+						"buffer_size": 29914,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								27415,
-								27415
+								27538,
+								27538
 							]
 						],
 						"settings":
 						{
 							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"translate_tabs_to_spaces": false
+							"translate_tabs_to_spaces": false,
+							"word_wrap": true
 						},
-						"translation.x": 7.0,
-						"translation.y": 9238.0,
+						"translation.x": 0.0,
+						"translation.y": 11240.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -161,7 +162,7 @@
 		],
 		"width": 0.0
 	},
-	"show_minimap": true,
+	"show_minimap": false,
 	"show_open_files": false,
 	"show_tabs": true,
 	"side_bar_visible": true,

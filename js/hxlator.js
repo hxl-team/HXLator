@@ -8,7 +8,7 @@ $('div.nav-hxlator').append('<span class="historynav pull-right"><a href="#" id=
 // The history/undo stuff
 // ---------------------------------------------------
 
-// History object – that's what we'll interact with and that's the object stack will store our stack of mapping objects:
+// History object – that's what we'll interact with and that's the object that will store our stack of mapping objects:
 $hxlHistory = new Object();
 
 // this is the stack of mapping objects (see MappingTemplate.json for an example)
@@ -612,14 +612,59 @@ function addPropertyMappings($mapping, $propURI){
 function generateRDF($mapping){
 	var $turtle = '@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> . \n@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> . \n@prefix owl:  <http://www.w3.org/2002/07/owl#> . \n@prefix foaf: <http://xmlns.com/foaf/0.1/> . \n@prefix dc:   <http://purl.org/dc/terms/> . \n@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> . \n@prefix skos: <http://www.w3.org/2004/02/skos/core#> . \n@prefix hxl:  <http://hxl.humanitarianresponse.info/ns/#> . \n@prefix geo:  <http://www.opengis.net/geosparql#> . \n@prefix label: <http://www.wasab.dk/morten/2004/03/label#> . \n \n';
 	$.each($mapping.templates, function($uri, $triples){
-	
+		
+		// this is the case if the URI is already there:
+		$resuri = $uri;
+
 		// generate a URI if the $uri is not there yet (tagged with "@uri")
+		// (overwriting what we had before)
 		if($uri.indexOf('@uri') == 0){
 		
 			// go through all properties of the resource and generate a URI based on our URI patterns document:
 			// https://docs.google.com/document/d/1-9OoF5vz71qPtPRo3WoaMH4S5J1O41ITszT3arQ5VLs/edit
-			// TODO !!			
-			$uri = '<http://example.org/>';
+			
+			var $classslug = $mapping.classplural.toLowerCase().replace( /\s/g, '' );
+
+			// populations:
+			if($mapping.classuri == 'hxl:Population' || $mapping.classuri == 'hxl:AffectedPopulation' || $mapping.classuri == 'hxl:TotalPopulation' || $mapping.classuri == 'hxl:Casualty' || $mapping.classuri == 'hxl:Displaced' || $mapping.classuri == 'hxl:NonDisplaced' || $mapping.classuri == 'hxl:Death' || $mapping.classuri == 'hxl:Injury' || $mapping.classuri == 'hxl:Missing' || $mapping.classuri == 'hxl:IDP' || $mapping.classuri == 'hxl:Others' || $mapping.classuri == 'hxl:RefugeesAsylumSeekers' || $mapping.classuri == 'hxl:HostPopulation' || $mapping.classuri == 'hxl:NonHostPopulation') {
+
+				var $loc = new Date().getTime();
+				var $sex = 'unknown';
+				var $age = 'x-x';
+
+				// check whether location, sex and age categories are set:
+				$.each($triples['triples'], function($i, $triple){
+					if ($triple['predicate'] == 'hxl:currentLocation'){
+						// grab URI and remove < and >
+						var $place = $triple['object'].substr(1, $triple['object'].length-2);
+						// strip the country and p-code from the URI (last two parts of URI):
+						var $placeURIparts = $place.split('/');
+						$loc = $placeURIparts[$placeURIparts.length - 2] + '/' + $placeURIparts[$placeURIparts.length - 1];
+					}else if ($triple['predicate'] == 'hxl:sexCategory'){
+						// grab URI and remove < and >
+						var $sexCategory = $triple['object'].substr(1, $triple['object'].length-2);
+						var $sexCategoryURIparts = $sexCategory.split('/');
+						$sex = $sexCategoryURIparts[$sexCategoryURIparts.length -1];	
+					}else if ($triple['predicate'] == 'hxl:ageGroup'){
+						// grab URI and remove < and >
+						var $ageGroup = $triple['object'].substr(1, $triple['object'].length-2);
+						var $ageGroupURIparts = $ageGroup.split('/');
+						$age = $ageGroupURIparts[$ageGroupURIparts.length -1 ];
+					}
+				});
+
+				var $resuri = '<http://hxl.humanitarianresponse.info/data/' + $classslug + '/'+ $loc + '/'+ $sex + '-'+ $age + '>';
+
+			// } else if($mapping.classuri == 'hxl:Emergency') {
+				
+    		} else {
+    			console.log('Error during URI generation');
+    			$resuri = '<http://some.error/crap>'; 
+    		}
+  
+
+			// type this URI:
+			$turtle += $resuri + ' rdf:type ' + $mapping.classuri + ' .\n';
 		}
 	
 		$.each($triples['triples'], function($i, $triple){
@@ -643,7 +688,7 @@ function generateRDF($mapping){
 			}
 			
 			// add the triple:			
-			$turtle += $uri + ' ' + $triple['predicate'] + ' ' + $object + $datatype + ' .\n';
+			$turtle += $resuri + ' ' + $triple['predicate'] + ' ' + $object + $datatype + ' .\n';
 
 		});
 	});

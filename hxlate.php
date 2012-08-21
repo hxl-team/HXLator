@@ -233,7 +233,7 @@ $inlineScript = '$initMapping = {
         },
         {
           "predicate": "hxl:date",
-          "object": "\"'.date("Y-m-d").'\"",
+          "object": "'.date("Y-m-d").'",
           "datatype": "xsd:date"          
         }
       ]
