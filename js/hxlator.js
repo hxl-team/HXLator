@@ -630,7 +630,7 @@ function generateRDF($mapping){
 
 				var $loc = new Date().getTime();
 				var $sex = 'unknown';
-				var $age = 'x-x';
+				var $age = '';
 
 				// check whether location, sex and age categories are set:
 				$.each($triples['triples'], function($i, $triple){
@@ -649,14 +649,40 @@ function generateRDF($mapping){
 						// grab URI and remove < and >
 						var $ageGroup = $triple['object'].substr(1, $triple['object'].length-2);
 						var $ageGroupURIparts = $ageGroup.split('/');
-						$age = $ageGroupURIparts[$ageGroupURIparts.length -1 ];
+						$age = '-'+$ageGroupURIparts[$ageGroupURIparts.length -1 ];
 					}
 				});
 
-				var $resuri = '<http://hxl.humanitarianresponse.info/data/' + $classslug + '/'+ $loc + '/'+ $sex + '-'+ $age + '>';
+				var $resuri = '<http://hxl.humanitarianresponse.info/data/' + $classslug + '/'+ $loc + '/'+ $sex + $age + '>';
 
-			// } else if($mapping.classuri == 'hxl:Emergency') {
+			} else if($mapping.classuri == 'hxl:Emergency') {
 				
+				// random GLIDE number for now
+				var $glide = 'unknown'-+new Date().getTime();
+
+				// TODO: wait for decision on how to handle GLIDEnumbers
+
+
+    		} else if($mapping.classuri == 'hxl:Camp') {
+
+    			// TODO: wait for decision about renaming to AFL (?)
+
+
+    		} else if($mapping.classuri == 'hxl:Organisation') {
+
+    			// random acronym for now:
+    			var $acro = 'unknown'-+new Date().getTime();
+
+    			// check if the acronym is set:
+    			$.each($triples['triples'], function($i, $triple){
+    				if ($triple['predicate'] == 'hxl:abbreviation'){
+    					// remove blanks, just in case...
+    					$acro = $triple['object'].toLowerCase().replace( /\s/g, '' );;					
+    				}
+    			});
+
+    			var $resuri = '<http://hxl.humanitarianresponse.info/data/' + $classslug + '/'+ $acro + '>';
+
     		} else {
     			console.log('Error during URI generation');
     			$resuri = '<http://some.error/crap>'; 
