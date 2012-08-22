@@ -363,24 +363,59 @@ function mapWithURILookup($inputMapping, $propName, $propURI, $propType, $propRa
 	$('#value-input').slideUp(function(){
 		$('#value-input').html('');
 		$('.selected').each(function(){
-			$('#value-input').append('<hr /><p><em>'+$propName+'</em> for cell <code>'+$(this).attr('data-cellid')+'</code><br><input type="text" class="value-input" placeholder="Start typing to search reference list" id="valuefor-'+$(this).attr('data-cellid')+'" data-value-subject="'+$(this).attr('data-cellid')+'"> or <a href="#" class="btn btn-small cell-input disabled" data-cellid="'+$(this).attr('data-cellid')+'">map from spread sheet</a><br /><small class="uri valuefor-'+$(this).attr('data-cellid')+'"></small><br /><a href="#" class="btn btn-small disabled adoptforall valuefor-'+$(this).attr('data-cellid')+'" style="margin-top 7px">Adopt this value for all cells</a>');					
+			$('#value-input').append('<hr /><em>'+$propName+'</em> for cell <code>'+$(this).attr('data-cellid')+'</code><br><input type="text" class="value-input" placeholder="Start typing to search reference list" id="valuefor-'+$(this).attr('data-cellid')+'" data-value-subject="'+$(this).attr('data-cellid')+'"> or <a href="#" class="btn btn-small cell-input" data-cellid="'+$(this).attr('data-cellid')+'">map from spread sheet</a><br /><small class="uri valuefor-'+$(this).attr('data-cellid')+'"></small>');	
+
+			// show 'copy' button if more than one field is selected:
+			if ( $('.selected').length > 1){
+				$('#value-input').append('<br /><a href="#" class="btn btn-small disabled adoptforall valuefor-'+$(this).attr('data-cellid')+'" style="margin-top 10px">Adopt this value for all cells</a>');
+			}
 			
 		});
 		
-		$('.adoptforall').click(function(){
-			// copy value to other input fields
-			var $copyVal = $(this).parent().children('.value-input').val();
-			var $copyURI = $(this).parent().children('small').html();
-			console.log($copyURI);
-			$('.value-input').each(function(){
-				$(this).val($copyVal);
-				$(this).attr('data-value-object', $copyURI);
+		// copying values over to all input fields:
+		if ( $('.selected').length > 1){
+			$('.adoptforall').click(function(){
+				var $copyVal = $(this).parent().children('.value-input').val();
+				var $copyURI = $(this).parent().children('small').html();
+				$('.value-input').each(function(){
+					$(this).val($copyVal);
+					$(this).attr('data-value-object', $copyURI);
+				});
+					
+				$('.uri').each(function(){
+					$(this).parent().children('small').html($copyURI);
+				});		  	
+			});	
+		}
+			
+
+
+		// enable user to map string values from the spreadsheet to reference URIs:
+		$('.cell-input').click(function(){			
+			$('.hxlatorcell').unbind();
+			$(this).addClass('currentMapping');
+			
+			// hide the modal and allow the user to select the cell:
+			$('#mappingModal').modal('hide');
+			$('.shortguide').slideUp();
+			$('.shortguide').after('<div class="container cell-instructions"><div class="alert alert-info">Please click the cell that contains the value for the <em>'+$propName+'</em> property of cell <code>'+$(this).attr('data-cellid')+'</code>. We will then take you back to the mapping window.</div></div>');
+			
+			var $target = $(this).attr('data-cellid');
+			
+			$('.hxlatorcell').click(function(){
+				$('.currentMapping').parent().children('.value-input').val($(this).html()+' (via cell '+$(this).attr('data-cellid')+')');
+				$('.currentMapping').parent().children('.value-input').attr('data-value-object', $(this).attr('data-cellid'));
+				$('.currentMapping').parent().children('.value-input').trigger('keyup');
+				$('.currentMapping').removeClass('currentMapping');
+				$('#mappingModal').modal('show');
+				$('.shortguide').slideDown();
+				$('.cell-instructions').remove();
+				// unbind all listeners, then bind the select listener for the cells again ('mark orange')
+				$('.hxlatorcell').unbind();				
+				enableCellSelection($mapping);
 			});
-				
-			$('.uri').each(function(){
-				$(this).parent().children('small').html($copyURI);
-			});		  	
-		});	
+			
+		});
 		
 		
 		// add autocomplete to the input fields:
@@ -476,33 +511,44 @@ function mapDifferentValues($inputMapping, $propName, $propURI, $propType, $prop
 		// (e.g. after going back)
 		$('#value-input').html('');
 		$('.selected').each(function(){
-			$('#value-input').append('<hr /><p><em>'+$propName+'</em> for cell <code>'+$(this).attr('data-cellid')+'</code><br><input type="text" class="value-input" placeholder="Enter value here" id="valuefor-'+$(this).attr('data-cellid')+'" data-value-subject="'+$(this).attr('data-cellid')+'"> or <a href="#" class="btn btn-small cell-input" data-cellid="'+$(this).attr('data-cellid')+'">select from spread sheet</a><br /><a href="#" class="btn btn-small disabled adoptforall">Adopt this value for all cells</a>');	
+			$('#value-input').append('<hr /><em>'+$propName+'</em> for cell <code>'+$(this).attr('data-cellid')+'</code><br><input type="text" class="value-input" placeholder="Enter value here" id="valuefor-'+$(this).attr('data-cellid')+'" data-value-subject="'+$(this).attr('data-cellid')+'"> or <a href="#" class="btn btn-small cell-input" data-cellid="'+$(this).attr('data-cellid')+'">select from spread sheet</a>');	
 
-			  $('.value-input').keyup(function(){
-			    if($(this).val() == ''){
-			  		$(this).parent().children('.adoptforall').addClass('disabled');
-			  	}else{
-			  		$(this).parent().children('.adoptforall').removeClass('disabled');
-			  	}
-			  });			  			  	
-		});
+			//show 'copy' button if there is more than one cell selected
+			if($('.selected').length > 1){
+			 	$('#value-input').append('<br /><a href="#" class="btn btn-small disabled adoptforall" data-cellid="'+$(this).attr('data-cellid')+'">Adopt this value for all cells</a>');
+			 
+			 	var $cell = $(this).attr('data-cellid');
+			 	var $selecta = 'input[data-value-subject="'+ $cell +'"]';
+
+				$($selecta).keyup(function(){
+					var $btnselecta = $('a.adoptforall[data-cellid="'+$cell+'"]');
+					console.log($btnselecta);
+				    if($(this).val() == ''){
+				  		$($btnselecta).addClass('disabled');
+				  	}else{
+				  		$($btnselecta).removeClass('disabled');
+				  	}
+			  	});
+
+			  	$('.adoptforall').click(function(){
+					// copy value to other input fields
+
+					var $copyVal = $($selecta).val();
+					var $copyObj = $($selecta).attr('data-value-object');
+
+					$('.value-input').each(function(){
+						$(this).val($copyVal);
+						$(this).attr('data-value-object', $copyObj);
+					})			  	
+				});	
+			}
+		});			
 		
-		$('.adoptforall').click(function(){
-			// copy value to other input fields
-			var $copyVal = $(this).parent().children('.value-input').val();
-			var $copyObj = $(this).parent().children('.value-input').attr('data-value-object');
-			
-			$('.value-input').each(function(){
-				$(this).val($copyVal);
-				$(this).attr('data-value-object', $copyObj);
-			})			  	
-		});
-		
-		
+		// enable value selection from spreadsheet
 		$('.cell-input').click(function(){			
 			$('.hxlatorcell').unbind();
-			$(this).addClass('currentMapping');
-			
+			var $subjectcell = $(this).attr('data-cellid');
+
 			// hide the modal and allow the user to select the cell:
 			$('#mappingModal').modal('hide');
 			$('.shortguide').slideUp();
@@ -511,10 +557,14 @@ function mapDifferentValues($inputMapping, $propName, $propURI, $propType, $prop
 			var $target = $(this).attr('data-cellid');
 			
 			$('.hxlatorcell').click(function(){
-				$('.currentMapping').parent().children('.value-input').val($(this).html()+' (via cell '+$(this).attr('data-cellid')+')');
-				$('.currentMapping').parent().children('.value-input').attr('data-value-object', $(this).attr('data-cellid'));
-				$('.currentMapping').parent().children('.value-input').trigger('keyup');
-				$('.currentMapping').removeClass('currentMapping');
+				
+				// the input field to write into:
+				var $selecta = 'input[data-value-subject="'+$subjectcell+'"]';
+
+				$($selecta).val($(this).html()+' (via cell '+$(this).attr('data-cellid')+')');
+				$($selecta).attr('data-value-object', $(this).attr('data-cellid'));
+				$($selecta).trigger('keyup');
+				
 				$('#mappingModal').modal('show');
 				$('.shortguide').slideDown();
 				$('.cell-instructions').remove();
@@ -609,7 +659,10 @@ function addPropertyMappings($mapping, $propURI){
 // ---------------------------------------------------
 
 // processes a mapping, generates RDF from it and updates the preview modal
-function generateRDF($mapping){
+function generateRDF($inputMapping){
+	// we'll be manipulation the mapping a bit, so we copy it first to make sure the original remains untouched:
+	var $mapping = $.extend(true, {}, $inputMapping);
+	
 	var $turtle = '@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> . \n@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> . \n@prefix owl:  <http://www.w3.org/2002/07/owl#> . \n@prefix foaf: <http://xmlns.com/foaf/0.1/> . \n@prefix dc:   <http://purl.org/dc/terms/> . \n@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> . \n@prefix skos: <http://www.w3.org/2004/02/skos/core#> . \n@prefix hxl:  <http://hxl.humanitarianresponse.info/ns/#> . \n@prefix geo:  <http://www.opengis.net/geosparql#> . \n@prefix label: <http://www.wasab.dk/morten/2004/03/label#> . \n \n';
 	$.each($mapping.templates, function($uri, $triples){
 		
