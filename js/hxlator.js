@@ -363,11 +363,11 @@ function mapWithURILookup($inputMapping, $propName, $propURI, $propType, $propRa
 	$('#value-input').slideUp(function(){
 		$('#value-input').html('');
 		$('.selected').each(function(){
-			$('#value-input').append('<hr /><em>'+$propName+'</em> for cell <code>'+$(this).attr('data-cellid')+'</code><br><input type="text" class="value-input" placeholder="Start typing to search reference list" id="valuefor-'+$(this).attr('data-cellid')+'" data-value-subject="'+$(this).attr('data-cellid')+'"> or <a href="#" class="btn btn-small cell-input" data-cellid="'+$(this).attr('data-cellid')+'">map from spread sheet</a><br /><small class="uri valuefor-'+$(this).attr('data-cellid')+'"></small>');	
+			$('#value-input').append('<hr /><em>'+$propName+'</em> for cell <code>'+$(this).attr('data-cellid')+'</code><br><input type="text" class="value-input" placeholder="Start typing to search reference list" id="valuefor-'+$(this).attr('data-cellid')+'" data-value-subject="'+$(this).attr('data-cellid')+'" data-cellid="'+$(this).attr('data-cellid')+'"> or <a href="#" class="btn btn-small cell-input" data-cellid="'+$(this).attr('data-cellid')+'">map from spread sheet</a><br /><small data-cellid="'+$(this).attr('data-cellid')+'" class="uri valuefor-'+$(this).attr('data-cellid')+'"></small>');	
 
 			// show 'copy' button if more than one field is selected:
 			if ( $('.selected').length > 1){
-				$('#value-input').append('<br /><a href="#" class="btn btn-small disabled adoptforall valuefor-'+$(this).attr('data-cellid')+'" style="margin-top 10px">Adopt this value for all cells</a>');
+				$('#value-input').append('<br /><a href="#" class="btn btn-small disabled adoptforall valuefor-'+$(this).attr('data-cellid')+'" data-cellid="'+$(this).attr('data-cellid')+'" style="margin-top 10px">Adopt this value for all cells</a>');
 			}
 			
 		});
@@ -375,26 +375,33 @@ function mapWithURILookup($inputMapping, $propName, $propURI, $propType, $propRa
 		// copying values over to all input fields:
 		if ( $('.selected').length > 1){
 			$('.adoptforall').click(function(){
-				var $copyVal = $(this).parent().children('.value-input').val();
-				var $copyURI = $(this).parent().children('small').html();
+
+				var $selecta = '.value-input[data-cellid='+$(this).attr('data-cellid')+']';
+
+				var $copyVal      = $($selecta).val();
+				var $copyURI      = $($selecta).attr('data-value-object');
+				var $copyFunction = $($selecta).attr('data-function');
+				var $hint         = $('small[data-cellid='+$(this).attr('data-cellid')+']').html();
+				
 				$('.value-input').each(function(){
 					$(this).val($copyVal);
 					$(this).attr('data-value-object', $copyURI);
+					$(this).attr('data-function', $copyFunction);
 				});
 					
 				$('.uri').each(function(){
-					$(this).parent().children('small').html($copyURI);
+					$(this).html($hint);
 				});		  	
 			});	
 		}
 			
 
 
-		// enable user to map string values from the spreadsheet to reference URIs:
+		// enable value selection from spreadsheet
 		$('.cell-input').click(function(){			
 			$('.hxlatorcell').unbind();
-			$(this).addClass('currentMapping');
-			
+			var $subjectcell = $(this).attr('data-cellid');
+
 			// hide the modal and allow the user to select the cell:
 			$('#mappingModal').modal('hide');
 			$('.shortguide').slideUp();
@@ -403,10 +410,18 @@ function mapWithURILookup($inputMapping, $propName, $propURI, $propType, $propRa
 			var $target = $(this).attr('data-cellid');
 			
 			$('.hxlatorcell').click(function(){
-				$('.currentMapping').parent().children('.value-input').val($(this).html()+' (via cell '+$(this).attr('data-cellid')+')');
-				$('.currentMapping').parent().children('.value-input').attr('data-value-object', $(this).attr('data-cellid'));
-				$('.currentMapping').parent().children('.value-input').trigger('keyup');
-				$('.currentMapping').removeClass('currentMapping');
+				
+				// the input field to write into:
+				var $selecta = 'input[data-value-subject="'+$subjectcell+'"]';
+
+				$($selecta).val($(this).html()+' (via cell '+$(this).attr('data-cellid')+')');
+				// add the @lookup tag to the value to indicate that we'll need to look up the values for these at the end
+				$($selecta).attr('data-value-object', $(this).attr('data-cellid'));
+				$($selecta).attr('data-function', '@lookup');
+				
+				console.log('.adoptforall[data-cellid="'+$subjectcell+'"]');
+				$('.adoptforall[data-cellid="'+$subjectcell+'"]').removeClass('disabled');
+				
 				$('#mappingModal').modal('show');
 				$('.shortguide').slideDown();
 				$('.cell-instructions').remove();
@@ -482,10 +497,11 @@ function mapWithURILookup($inputMapping, $propName, $propURI, $propType, $propRa
 						}
 					});
 				},
-				minLength: 2,
+				minLength: 1,
 				select: function( event, ui ) {
-					// show the URI to the user and store it in a hidden form field for processing later
+					// show the URI to the user 
 					$('small.'+$(this).attr('id')).html(('URI for this '+$propRangeName+': <a href="'+ui.item.uri+'" target="_blank">'+ui.item.uri+'</a>'));
+					// ...and store it in a data attribute of the input field
 					$(this).attr('data-value-object', ui.item.uri);
 					
 					$('a.'+$(this).attr('id')).removeClass('disabled');
@@ -662,7 +678,7 @@ function addPropertyMappings($mapping, $propURI){
 function generateRDF($inputMapping){
 	// we'll be manipulation the mapping a bit, so we copy it first to make sure the original remains untouched:
 	var $mapping = $.extend(true, {}, $inputMapping);
-	
+
 	var $turtle = '@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> . \n@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> . \n@prefix owl:  <http://www.w3.org/2002/07/owl#> . \n@prefix foaf: <http://xmlns.com/foaf/0.1/> . \n@prefix dc:   <http://purl.org/dc/terms/> . \n@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> . \n@prefix skos: <http://www.w3.org/2004/02/skos/core#> . \n@prefix hxl:  <http://hxl.humanitarianresponse.info/ns/#> . \n@prefix geo:  <http://www.opengis.net/geosparql#> . \n@prefix label: <http://www.wasab.dk/morten/2004/03/label#> . \n \n';
 	$.each($mapping.templates, function($uri, $triples){
 		
