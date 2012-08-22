@@ -613,6 +613,14 @@ function generateRDF($mapping){
 	var $turtle = '@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> . \n@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> . \n@prefix owl:  <http://www.w3.org/2002/07/owl#> . \n@prefix foaf: <http://xmlns.com/foaf/0.1/> . \n@prefix dc:   <http://purl.org/dc/terms/> . \n@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> . \n@prefix skos: <http://www.w3.org/2004/02/skos/core#> . \n@prefix hxl:  <http://hxl.humanitarianresponse.info/ns/#> . \n@prefix geo:  <http://www.opengis.net/geosparql#> . \n@prefix label: <http://www.wasab.dk/morten/2004/03/label#> . \n \n';
 	$.each($mapping.templates, function($uri, $triples){
 		
+		// first go through the whole mapping object once and replace all @value occurrences with the actual values from the spreadsheet:
+		$.each($triples['triples'], function($i, $triple){
+			if($triple['object'].indexOf('@value') == 0){
+				var $cell = $triple['object'].substr(7);
+				$triple['object'] = $('td[data-cellid="'+$cell+'"]').html();
+			}
+		});
+
 		// this is the case if the URI is already there:
 		$resuri = $uri;
 
@@ -695,18 +703,14 @@ function generateRDF($mapping){
 	
 		$.each($triples['triples'], function($i, $triple){
 			
-			// handling the object; check whether we need to pull the value from the spreadsheet:
+			// handling the triples object:
 			var $object = '';
-			if($triple['object'].indexOf('@value') == 0){
-				var $cell = $triple['object'].substr(7);
-				$object = '"'+$('td[data-cellid="'+$cell+'"]').html()+'"';
-			}else{
-				if($triple['object'].indexOf('<http') == 0){ // object property
-					$object = $triple['object'];
-				}else{ // data property
-					$object = '"'+$triple['object']+'"';
-				}
+			if($triple['object'].indexOf('<http') == 0){ // object property
+				$object = $triple['object'];
+			}else{ // data property
+				$object = '"'+$triple['object']+'"';
 			}
+		
 			
 			var $datatype = '';
 			if ($triple['datatype'] != undefined){
