@@ -238,8 +238,13 @@ $inlineScript = '$initMapping = {
         }
       ]
     }
-  }
+  },
+  "lookup": {}
 };
+
+
+// "Barani": "<http://example.org/Barani>",
+// "Deou": "<http://example.org/Deou>"
 
 $hxlHistory.pushState($initMapping);';
 

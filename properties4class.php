@@ -15,7 +15,7 @@
 MINUS { ?subprop rdfs:subPropertyOf ?prop }	
 FILTER ( regex(str(?type),"http://www.w3.org/2002/07/owl") )
 } ORDER BY ?proplabel');
-	
+
 	echo '<div class="step4"><ul class="nav nav-pills properties">
 	  ';
 		
@@ -31,7 +31,7 @@ FILTER ( regex(str(?type),"http://www.w3.org/2002/07/owl") )
 	    // shorten properties:
 	    $property = shorten($row->$prop, 'hxl');
 	  	
-	  	if($row->$rangename){
+	  	if(isset($row->$rangename)){
 	  		$rangelabel = $row->$rangename;
 	  	}else{
 	  	 	$rangelabel = shorten($row->$range, '');

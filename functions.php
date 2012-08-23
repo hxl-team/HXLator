@@ -32,7 +32,7 @@ function sparqlQuery($query){
 
   	$sparql = new EasyRdf_Sparql_Client('http://hxl.humanitarianresponse.info/sparql');
   	$query = $prefixes.$query;
-//  	error_log($query);
+  	error_log($query);
   
   	try {
     	$results = $sparql->query($query);      

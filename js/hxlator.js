@@ -47,8 +47,8 @@ $hxlHistory.processMapping = function(){
 	// console.log($hxlHistory.states);
 	
 	var $mapping = $hxlHistory.states[$hxlHistory.currentState];
-	console.log('Current state of the mapping object:');
-	console.log(JSON.stringify($mapping));
+	// console.log('Current state of the mapping object:');
+	// console.log(JSON.stringify($mapping));
 	console.log($mapping);
 	
 	// if the class has not been set yet, show the class pills:
@@ -415,11 +415,11 @@ function mapWithURILookup($inputMapping, $propName, $propURI, $propType, $propRa
 				var $selecta = 'input[data-value-subject="'+$subjectcell+'"]';
 
 				$($selecta).val($(this).html()+' (via cell '+$(this).attr('data-cellid')+')');
+				$('small[data-cellid="'+$subjectcell+'"]').html('We will ask you to select the URI for this term in the next step.');
 				// add the @lookup tag to the value to indicate that we'll need to look up the values for these at the end
 				$($selecta).attr('data-value-object', $(this).attr('data-cellid'));
 				$($selecta).attr('data-function', '@lookup');
 				
-				console.log('.adoptforall[data-cellid="'+$subjectcell+'"]');
 				$('.adoptforall[data-cellid="'+$subjectcell+'"]').removeClass('disabled');
 				
 				$('#mappingModal').modal('show');
@@ -493,7 +493,7 @@ function mapWithURILookup($inputMapping, $propName, $propURI, $propType, $propRa
 							$('#modal-loading').hide();
 						},
 						error: function($jqXHR, $textStatus, $errorThrown){
-							console.log($textStatus);
+							console.error($textStatus);
 						}
 					});
 				},
@@ -626,7 +626,8 @@ function addPropertyMappings($mapping, $propURI){
 	$('#storeMapping').unbind(); // remove any old listeners
 	$('#storeMapping').click(function(){
 		
-		console.log("Store mapping clicked");
+		// store all @lookup values that are not in the lookup table yet in an array:
+		var $nolook = new Array();
 		
 		// iterate through all input fields 
 		$('.value-input').each(function(){
@@ -643,17 +644,33 @@ function addPropertyMappings($mapping, $propURI){
 			$mapping.templates[$uri].triples[$index] = new Object();
 			$mapping.templates[$uri].triples[$index]["predicate"] = $propURI;
 			
-			// store a mapping to a cell, or just a fixed value that doesn't update?
+			// store a mapping depending on input field metadata
 			if($(this).attr('data-value-object') == undefined){
 				
-				$mapping.templates[$uri].triples[$index]["object"] = $(this).val();
+				// data property with direct input
+				$mapping.templates[$uri].triples[$index]['object'] = $(this).val();
 				
 			} else if($(this).attr('data-value-object').indexOf('http') == 0){
 			
-				$mapping.templates[$uri].triples[$index]["object"] = '<'+$(this).attr('data-value-object')+'>';
+				// object property that has already been looked up
+				$mapping.templates[$uri].triples[$index]['object'] = '<'+$(this).attr('data-value-object')+'>';
 			
+			} else if($(this).attr('data-function') == '@lookup'){
+				
+				// object property with lookup at the end of the mapping process
+				$mapping.templates[$uri].triples[$index]["object"] = '@lookup '+$(this).attr('data-value-object');
+
+				// check if the term to look up is already in our lookup dictionary; 
+				// if not, we save the term in an array and send the user to (yet anther) mapping // page where s/he can assign URIs to the terms not in the dictionary so far
+				// check if we already have the term in our lookup "dictionary" (or already in the $nolook array)
+				var $lookupterm = getCellContents($(this).attr('data-value-object'));
+				if($mapping.lookup[$lookupterm] == undefined && $.inArray($lookupterm, $nolook)){
+					$nolook.push($lookupterm)
+				} 
+
 			} else {
 				
+				// data property that takes the value from the spreadsheet
 				$mapping.templates[$uri].triples[$index]["object"] = '@value '+$(this).attr('data-value-object');
 				
 			}
@@ -662,13 +679,177 @@ function addPropertyMappings($mapping, $propURI){
 		
 		// push mapping to mapping stack:
 		$hxlHistory.pushState($mapping);
+			
+		// check the $nolook array: if it's empty, we are good and we can simply store the mapping.
+		// if it does contain any terms, we'll send the user over to a new modal, where s/he can look them up:
+		if($nolook.length == 0){
+			// close modal:
+			$('#mappingModal').modal('hide');
+		} else {
+			// send to lookup modal
+			lookUpModal($mapping, $nolook);
+		}
 		
-		// close modal:
-		$('#mappingModal').modal('hide');
 	});
 }
 
+// generates a modal that allows the user to look up URIs for all terms in $missing and 
+function lookUpModal($inputMapping, $missing){
 
+	// make sure we don't modify the original array entry:
+	var $mapping = $.extend(true, {}, $inputMapping);
+	
+
+	// hide and replace the old modal contents
+	$('#mappingModal > .modal-header > h3').slideUp(function(){
+		var $no = $missing.length;
+		if($no == 1)
+			$no = "one term";
+		else
+			$no += " terms";
+
+		$(this).html('<img src="img/loader.gif" id="modal-loading" class="pull-right" />URI lookup for '+$no);
+		$('#modal-loading').show();
+		$(this).slideDown();
+	});
+	
+	
+	$('#mappingModal > .modal-footer').slideUp(function(){
+		$(this).html('<i class="icon-hand-right"></i> Don\'t worry about doing anything wrong here, you can always go back to fix it later.</p><a href="#" id="storeLookUps" class="btn btn-primary">Store URIs</a><a href="#" class="btn" data-dismiss="modal">Cancel</a>');		
+		$(this).slideDown();
+	});
+	
+	
+	$('#mappingModal > .modal-body').slideUp(function(){
+		$(this).html('<p>Please select one URI from our reference lists for each value that you have selected in your spreadsheet. We try to propose URIs that match the terms; if that does not work, you can also look them up yourself.</p><hr />');
+		$(this).append('<div class="row"><div class="span2"><h3>Term</h3></div><div class="span3"><h3>URI</h3></div></div><hr />');
+
+		$.each($missing, function($i, $term){
+			$('#mappingModal > .modal-body').append('<div class="row"><div class="span2"><h3><code>'+$term+'</code></h3></div><div class="span3" for-term="'+$term+'"></div></div><hr />');
+
+			$query = 'prefix skos: <http://www.w3.org/2004/02/skos/core#> prefix hxl: <http://hxl.humanitarianresponse.info/ns/#> prefix dct: <http://purl.org/dc/terms/>  prefix foaf: <http://xmlns.com/foaf/0.1/> prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> SELECT DISTINCT ?uri ?label ?typelabel WHERE { ?uri a ?type . { ?type skos:prefLabel ?typelabel } UNION { ?type rdfs:label ?typelabel } { ?uri hxl:featureRefName ?label } UNION { ?uri hxl:commonTitle ?label }UNION { ?uri dct:title ?label } UNION { ?uri foaf:name ?label } UNION { ?uri hxl:abbreviation ?label } UNION { ?uri hxl:adminUnitLevelTitle ?label } UNION { ?uri hxl:orgName ?label } UNION { ?uri hxl:title ?label } FILTER regex(?label, "'+$term+'", "i") } ORDER BY ?label';
+				// console.log($query);
+
+			$.ajax({
+				url: 'http://hxl.humanitarianresponse.info/sparql',
+				headers: {
+					Accept: 'application/sparql-results+json'
+				},
+				data: { 
+					query: $query 
+				},							
+				success: function( data ) {
+					console.log(data);
+					$.each(data.results.bindings, function(i, result ) {
+						$('div[for-term="'+$term+'"]').append('<label class="radio"><input type="radio" name="'+$term+'" class="rdio" value="'+result.uri.value+'">'+result.label.value+' ('+result.typelabel.value+')<br /><small><a href="'+result.uri.value+'" target="_blank">'+result.uri.value+'</a></small></label>');
+					});
+
+					// if there are no results:
+					if(data.results.bindings.length == 0){
+						$('div[for-term="'+$term+'"]').append('<p class="'+$term+'">No suggestion found for this term, you can try to find a URI yourself:</p>');
+						$('div[for-term="'+$term+'"]').append('<input type="text" class="uri-search" placeholder="Start typing to search reference list" for-term="'+$term+'" />');
+					}else{
+						$('div[for-term="'+$term+'"]').append('<p class="'+$term+'">If the correct URI is not among the suggestions, you can try to find it yourself:</p>');
+						$('div[for-term="'+$term+'"]').append('<label class="radio"><input type="radio" name="'+$term+'"  class="rdio" value="@userlookup"><input type="text" readonly class="uri-search" placeholder="Start typing to search reference list" for-term="'+$term+'" /></label>');
+					}
+
+					// make the radio buttons next to the input boxes enable the corresponding text input box:
+					$('input[name="'+$term+'"]').change(function(){
+						
+						if($('input[name="'+$term+'"]:checked').val() == '@userlookup'){
+							// if the radio button next to the text box is clicked, toggle readonly:
+							$('input[for-term="'+$term+'"]').attr('readonly', false);
+						}else{
+							$('input[for-term="'+$term+'"]').val('');
+							$('input[for-term="'+$term+'"]').attr('readonly', true);
+						}
+						
+					});
+		
+
+					// add autocomplete to the search field:
+					$('input[for-term="'+$term+'"]').autocomplete({
+						source: function( request, response ) {
+							
+							// select the query based on the range of this property:
+							var $query = 'prefix skos: <http://www.w3.org/2004/02/skos/core#> prefix hxl: <http://hxl.humanitarianresponse.info/ns/#> prefix dct: <http://purl.org/dc/terms/>  prefix foaf: <http://xmlns.com/foaf/0.1/> prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> SELECT DISTINCT ?uri ?label ?typelabel WHERE { ?uri a ?type . { ?type skos:prefLabel ?typelabel } UNION { ?type rdfs:label ?typelabel } { ?uri hxl:featureRefName ?label } UNION { ?uri hxl:commonTitle ?label }UNION { ?uri dct:title ?label } UNION { ?uri foaf:name ?label } UNION { ?uri hxl:abbreviation ?label } UNION { ?uri hxl:adminUnitLevelTitle ?label } UNION { ?uri hxl:orgName ?label } UNION { ?uri hxl:title ?label } FILTER regex(?label, "'+request.term+'", "i") } ORDER BY ?label';
+
+							//console.log($query);
+							
+							
+							$('#modal-loading').show();
+							$.ajax({
+								url: 'http://hxl.humanitarianresponse.info/sparql',
+								headers: {
+									Accept: 'application/sparql-results+json'
+								},
+								data: { 
+									query: $query 
+								},							
+								success: function( data ) {
+									response( $.map( data.results.bindings, function( result ) {
+																				
+										return {
+											value: result.label.value+' ('+result.typelabel.value+')',
+											uri: result.uri.value
+										}
+										
+									}));
+									$('#modal-loading').hide();
+								},
+								error: function($jqXHR, $textStatus, $errorThrown){
+									console.error($textStatus);
+								}
+							});
+						},
+						minLength: 1,
+						select: function( event, ui ) {
+							// Add one option to the radio list and select it:
+							$('<label class="radio"><input type="radio" name="'+$term+'" checked class="rdio" value="'+ui.item.uri+'">'+ui.item.value+'<br /><small><a href="'+ui.item.uri+'" target="_blank">'+ui.item.uri+'</a></small></label>').insertBefore('p.'+$term);
+							// empty and deselect input box by triggering change event
+							$('input[name="'+$term+'"]').change(); 
+
+						}
+					});
+
+							// if this is the last term, hide the loader gif:
+							if($i == $missing.length-1){
+								$('#modal-loading').hide();
+							}							
+						},
+						error: function($jqXHR, $textStatus, $errorThrown){
+							console.error($textStatus);
+						}
+					});
+			
+		});
+
+		
+		$('#storeLookUps').click(function(){
+			// fetch all selected URIs and add them to the mapping object:
+			$('input:checked').each(function(){
+				$mapping.lookup[$(this).attr("name")] = $(this).attr("value");				
+			});
+			
+			// push mapping to mapping stack:
+			$hxlHistory.pushState($mapping);
+		
+			$('#mappingModal').modal('hide');
+		});
+
+		$(this).slideDown();
+	});
+}
+
+// fetches the cell contents from the table cell with id $cellID
+function getCellContents($cellID){
+	if ($('td[data-cellid="'+$cellID+'"]').length == 0){
+		console.error('getCellContents failed: There is no cell with ID '+$cellID);
+		return '';		
+	} else {
+		return $('td[data-cellid="'+$cellID+'"]').html();
+	} 
+}
 
 // ---------------------------------------------------
 // RDF generation
@@ -682,12 +863,25 @@ function generateRDF($inputMapping){
 	var $turtle = '@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> . \n@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> . \n@prefix owl:  <http://www.w3.org/2002/07/owl#> . \n@prefix foaf: <http://xmlns.com/foaf/0.1/> . \n@prefix dc:   <http://purl.org/dc/terms/> . \n@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> . \n@prefix skos: <http://www.w3.org/2004/02/skos/core#> . \n@prefix hxl:  <http://hxl.humanitarianresponse.info/ns/#> . \n@prefix geo:  <http://www.opengis.net/geosparql#> . \n@prefix label: <http://www.wasab.dk/morten/2004/03/label#> . \n \n';
 	$.each($mapping.templates, function($uri, $triples){
 		
-		// first go through the whole mapping object once and replace all @value occurrences with the actual values from the spreadsheet:
+		// first go through the whole mapping object once and replace all @value and @lookup occurrences with the actual values from the spreadsheet:
 		$.each($triples['triples'], function($i, $triple){
-			if($triple['object'].indexOf('@value') == 0){
-				var $cell = $triple['object'].substr(7);
-				$triple['object'] = $('td[data-cellid="'+$cell+'"]').html();
+
+			// values from spreadsheet:
+			if($triple['object'].indexOf('@value') == 0){				
+				$triple['object'] = getCellContents($triple['object'].substr(7));				
 			}
+
+			// values from spreadsheet, then map those to existing URIs:
+			if($triple['object'].indexOf('@lookup') == 0){				
+				var $lookupterm = getCellContents($triple['object'].substr(8));
+
+				// check if we already have the term in our lookup "dictionary"
+				if($mapping.lookup[$lookupterm] == undefined){
+					console.log('No @lookup found for "'+$lookupterm+'"');
+				} else {
+					$triple['object'] = $mapping.lookup[$lookupterm];
+				}
+			}			
 		});
 
 		// this is the case if the URI is already there:
@@ -776,6 +970,8 @@ function generateRDF($inputMapping){
 			var $object = '';
 			if($triple['object'].indexOf('<http') == 0){ // object property
 				$object = $triple['object'];
+			}else if($triple['object'].indexOf('http') == 0){ // object property
+				$object = '<'+$triple['object']+'>';
 			}else{ // data property
 				$object = '"'+$triple['object']+'"';
 			}
