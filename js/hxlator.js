@@ -37,7 +37,7 @@ $hxlHistory.pushState = function($inputMapping){
 	$hxlHistory.processMapping();
 }
 
-// TODO: this is where the magic happens...
+// this is where the magic happens...
 // Depending on the state of the mapping, this function decides what is shown to the user
 // no arguments required, since the method will figure out automatically what the current state is
 $hxlHistory.processMapping = function(){
@@ -62,6 +62,9 @@ $hxlHistory.processMapping = function(){
 
 	$hxlHistory.checkLinks();
 	generateRDF($mapping);		
+
+	
+	
 }
 
 
@@ -205,6 +208,7 @@ function mapProperty($inputMapping){
 			$('.shortguide').append(data);	
 			$('.shortguide').append('<p class="lead">Pick a cell or set of cells from this row that provide some information about one of the HXL properties listed. Then click the property to which the data in this cell applies. Note that a given cell (or set of cells) may address several properties.</p><p align="right"><i class="icon-hand-right"></i> Use <code>shift</code> to select a range of cells.</p>');
 			
+			tagMappedCellsAndProps($mapping);
 			$('.shortguide').slideDown();
 			
 			//explanation popovers for hxl properties:
@@ -262,7 +266,7 @@ function mapProperty($inputMapping){
 		});
 	});	
 	
-	$('#loading').hide();	
+	$('#loading').hide();		
 }
 
 function enableCellSelection($mapping){
@@ -1009,6 +1013,39 @@ function highlightSpreadsheetBlock(){
 				$hi = true;
 			}
 		}				  
+	});
+}
+
+
+
+// Marks all cells and properties that have already been mapped wit a green dot
+function tagMappedCellsAndProps($mapping){
+	
+	// remove all, in case we're coming back:
+	$('td.hxlatorcell').removeClass('mapped');
+	$('a.hxlprop').removeClass('mapped');
+
+	// iterate through mapping and count occurrences of cells and properties:
+	$.each($mapping.templates, function($uri, $triples){
+		
+		// find cell mappings in subject URIs:
+		if($uri.indexOf('@uri') == 0){
+			$('td.hxlatorcell[data-cellid="'+$uri.substr(5)+'"]').addClass('mapped');			
+		}
+
+		// find cell mappings in object URIs, and list properties 
+		$.each($triples['triples'], function($i, $triple){
+
+			console.log($('a.hxlprop').length);
+			console.log($('a.hxlprop[data-hxl-uri="'+$triple['predicate']+'"]').length);
+			$('a.hxlprop[data-hxl-uri="'+$triple['predicate']+'"]').addClass('mapped');
+
+			// values from spreadsheet:
+			if($triple['object'].indexOf('@value') == 0){				
+				$('td.hxlatorcell[data-cellid="'+$triple['object'].substr(7)+'"]').addClass('mapped');							
+			}
+
+		});
 	});
 }
 
