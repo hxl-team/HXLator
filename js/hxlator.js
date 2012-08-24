@@ -271,8 +271,7 @@ function mapProperty($inputMapping){
 
 function enableCellSelection($mapping){
 	// handle selection on the highlighted table row
-	$('tr.highlight > td.hxlatorcell').click(function(e) {
-		console.log('cell clicked'); 
+	$('tr.highlight > td.hxlatorcell').click(function(e) {		
 	  	$(this).toggleClass('selected');
 	  	// if (a) the cell has been added to the selection, (b) a cell has been selected before, and 
 	  	// (c) the shift key has been pressed, mark the whole range between those two as selected 
@@ -542,8 +541,7 @@ function mapDifferentValues($inputMapping, $propName, $propURI, $propType, $prop
 
 				$($selecta).keyup(function(){
 					var $btnselecta = $('a.adoptforall[data-cellid="'+$cell+'"]');
-					console.log($btnselecta);
-				    if($(this).val() == ''){
+					if($(this).val() == ''){
 				  		$($btnselecta).addClass('disabled');
 				  	}else{
 				  		$($btnselecta).removeClass('disabled');
@@ -743,7 +741,6 @@ function lookUpModal($inputMapping, $missing){
 					query: $query 
 				},							
 				success: function( data ) {
-					console.log(data);
 					$.each(data.results.bindings, function(i, result ) {
 						$('div[for-term="'+$term+'"]').append('<label class="radio"><input type="radio" name="'+$term+'" class="rdio" value="'+result.uri.value+'">'+result.label.value+' ('+result.typelabel.value+')<br /><small><a href="'+result.uri.value+'" target="_blank">'+result.uri.value+'</a></small></label>');
 					});
@@ -881,7 +878,7 @@ function generateRDF($inputMapping){
 
 				// check if we already have the term in our lookup "dictionary"
 				if($mapping.lookup[$lookupterm] == undefined){
-					console.log('No @lookup found for "'+$lookupterm+'"');
+					//console.log('No @lookup found for "'+$lookupterm+'"');
 				} else {
 					$triple['object'] = $mapping.lookup[$lookupterm];
 				}
@@ -959,7 +956,7 @@ function generateRDF($inputMapping){
     			var $resuri = '<http://hxl.humanitarianresponse.info/data/' + $classslug + '/'+ $acro + '>';
 
     		} else {
-    			console.log('Error during URI generation');
+    			console.error('Error during URI generation');
     			$resuri = '<http://some.error/crap>'; 
     		}
   
@@ -1036,8 +1033,6 @@ function tagMappedCellsAndProps($mapping){
 		// find cell mappings in object URIs, and list properties 
 		$.each($triples['triples'], function($i, $triple){
 
-			console.log($('a.hxlprop').length);
-			console.log($('a.hxlprop[data-hxl-uri="'+$triple['predicate']+'"]').length);
 			$('a.hxlprop[data-hxl-uri="'+$triple['predicate']+'"]').addClass('mapped');
 
 			// values from spreadsheet:
