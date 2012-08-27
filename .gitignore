@@ -10,3 +10,15 @@ HXLator.esproj/Project.espressostorage
 HXLator.esproj/user.carsten.espressostorage
 
 *.sublime-project
+
+salt.txt
+
+users-clear.txt
+
+users.txt
+
+*.sublime-workspace
+
+HXLator.sublime-workspace
+
+login.php

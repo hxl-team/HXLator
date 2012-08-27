@@ -1,5 +1,4 @@
 <?php 
-
 error_reporting(E_ALL);
 set_time_limit(0);
 
@@ -20,14 +19,12 @@ getHead("index.php", $user_name, $user_organisation);
         <a href="https://sites.google.com/site/hxlproject/"><img src="img/hxl-logo-s.png" align="right" /></a>
         <h1>HXLator</h1>
         <p style="margin-top:  1.5em; margin-bottom:  1.5em">A simple online tool to convert <em>any</em> spreadsheet into the Humanitarian eXchange Langue (HXL). Take a look at our <a href="guide.php">quick start guide</a> or start by uploading your spreadsheet here:</p>	    
+
+
+<?php    if(isset($_SESSION['loggedin'])) {   // show the upload options only if the user is logged in:  ?>
         
         <form class="alert" enctype="multipart/form-data" action="hxlate.php#" method="POST">
 
-            <input type="hidden" name="user_name" value="<?php echo $user_name; ?>">
-            <input type="hidden" name="user_uri" value="<?php echo $user_uri; ?>">
-            <input type="hidden" name="user_organisation" value="<?php echo $user_organisation; ?>">
-            <input type="hidden" name="user_organisation_uri" value="<?php echo $user_organisation_uri; ?>">
-			
 			<div class="control-group">
             	<label for="emergencies">Emergency: </label>
             	<div class="controls">
@@ -66,6 +63,13 @@ getHead("index.php", $user_name, $user_organisation);
             <button type="submit" class="btn">HXLate File</button>
 
         </form>  
+
+<?php 
+} else {
+	show_login_form();
+}
+?>  
+
     </div>	   
 </div> <!-- /container -->
 <script>document.getElementById('emergencies').focus()</script>

@@ -7,9 +7,99 @@ require_once "html_tag_helpers.php";
 
 //handle the logins data TODO: fake for now, needs to be revised:
 session_start();
-if(isset($_POST["user_name"]) && isset($_POST["user_organisation"])){
-	$_SESSION["user_name"] = $_POST["user_name"];
-	$_SESSION["user_organisation"] = $_POST["user_organisation"];
+// if(isset($_POST["user_name"]) && isset($_POST["user_organisation"])){
+// 	$_SESSION["user_name"] = $_POST["user_name"];
+// 	$_SESSION["user_organisation"] = $_POST["user_organisation"];
+// }
+
+// end session and force user to re-login after 60 minutes (3600 sec.):
+if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > 3600)) {
+    // last request was more than 30 minates ago
+    session_destroy();   // destroy session data in storage
+    session_unset();     // unset $_SESSION variable for the runtime
+}
+$_SESSION['LAST_ACTIVITY'] = time(); // update last activity time stamp
+
+
+
+// check login data, if there are any:
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+   
+   if(isset($_POST['logout'])){
+      if($_POST['logout'] == 'logout'){
+         unset($_SESSION['loggedin']);
+         session_destroy();
+      }      
+   }else{
+
+      // you'll need a file with a salt to enable this script to work (see http://www.php.net/manual/de/function.crypt.php).
+      // PLEASE PLACE salt.txt OUTSIDE OF YOUR SERVER DIRECTORY!
+      $salt = file_get_contents('../../salt.txt');
+
+      // open file with passwords:
+
+      // users.txt needs to be structured the following way (each line):
+      // user,encryptedpassword,role,fullname,organisation,useruri
+      // note that there are no spaces after the commas!
+      // PLEASE PLACE users.txt OUTSIDE OF YOUR SERVER DIRECTORY!
+      $row = 1;
+      if (($handle = fopen("../../users.txt", "r")) !== FALSE) {
+         while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+            
+            $row++;
+            for ($c=0; $c < count($data); $c++) {
+               // check user name and password
+               if ($_POST['user'] == $data[0] && $data[1] == substr(crypt($_POST['pass'], $salt), strlen($salt))) {
+                  $_SESSION['loggedin'] = true;
+                  $_SESSION["user_name"] = $data[3];
+                  $_SESSION["user_organisation"] = $data[4];
+                  $_SESSION["user_uri"] = $data[5];
+               }
+            }
+         }
+         fclose($handle);
+      }
+   }
+}
+
+// show the login form, wwith an automatically generated error msg if the user has provided a wrong username/password combination
+function show_login_form() {
+    
+?>
+    
+<form class="form-horizontal" method="POST">
+    
+<?php
+    if(isset($_POST['user']) && isset($_POST['pass']) && !isset($_SESSION['loggedin'])){
+        echo '<legend><p><span class="label label-important" style="font-size: 1em; font-weight: normal">Wrong username or password.</span></p><p>Please try again.</p></legend>';
+    }else if(isset($_POST['logout'])){
+        if($_POST['logout'] == 'logout'){
+            echo '<legend><p><span class="label label-info" style="font-size: 1em; font-weight: normal">You are now logged out.</span></p></legend>';
+        }
+    }else{
+        echo '<legend>Please log in:</legend>';
+    }
+?>
+  <div class="control-group">
+    <label class="control-label" for="user">User name</label>
+    <div class="controls">
+      <input type="text" id="user" name="user" placeholder="User name">
+    </div>
+  </div>
+  <div class="control-group">
+    <label class="control-label" for="pass">Password</label>
+    <div class="controls">
+      <input type="password" id="pass" name="pass" placeholder="Password">
+    </div>
+  </div>
+  <div class="control-group">
+    <div class="controls">
+      <button type="submit" class="btn">Log in</button>
+    </div>
+  </div>
+</form>
+
+<?php
 }
 
 // fires the $query against our SPARQL endpoint and returns a EasyRDF Sparql_Result object 
@@ -30,16 +120,15 @@ function sparqlQuery($query){
 	';
 
 
-  	$sparql = new EasyRdf_Sparql_Client('http://hxl.humanitarianresponse.info/sparql');
-  	$query = $prefixes.$query;
-  	error_log($query);
-  
-  	try {
-    	$results = $sparql->query($query);      
-      	return $results;
-  	} catch (Exception $e) {
-      	return "<div class='error'>".$e->getMessage()."</div>\n";
-  	}
+	$sparql = new EasyRdf_Sparql_Client('http://hxl.humanitarianresponse.info/sparql');
+	$query = $prefixes.$query;
+	
+	try {
+  	$results = $sparql->query($query);      
+    	return $results;
+	} catch (Exception $e) {
+    	return "<div class='error'>".$e->getMessage()."</div>\n";
+	}
 }
 
 // this function implements the URI patterns documented at 
@@ -70,7 +159,7 @@ function makeURI($type, $properties = null){
 		$id = $time['sec'].'.'.$time['usec'];
 		
 		return "http://example.com/".$id;
-		error_log("Dummy URI generated for unknown resource type ".$type);
+		//error_log("Dummy URI generated for unknown resource type ".$type);
 	}
 }
 
@@ -126,8 +215,15 @@ foreach($links as $link => $text){
 	}
 }
 
-echo '
-			<li class="logininfo"><a href="#">Logged in as '.$_SESSION["user_name"].', '.$_SESSION["user_organisation"].'</a></li>';
+if(isset($_SESSION['loggedin'])){
+    echo '
+            <li class="logininfo" style="padding-top: 10px">Logged in as <span data-hxl-uri="'.$_SESSION["user_uri"].'" id="user-uri">'.$_SESSION["user_name"].'</span>, '.$_SESSION["user_organisation"].'</li>
+            <li><form class="form-inline" action="index.php" method="post">
+                <input type="hidden" name="logout" value="logout">
+                <button type="submit" class="btn btn-mini" style="margin-left: 13px; padding: 0.1em 0.7em">Log out</button>
+            </form></li>';
+    
+}
 
 echo'           
             </ul>
