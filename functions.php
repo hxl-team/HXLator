@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
       // open file with passwords:
 
       // users.txt needs to be structured the following way (each line):
-      // user,encryptedpassword,role,fullname,organisation,useruri
+      // user,encryptedpassword,role,fullname,organisation,useruri,organisationuri
       // note that there are no spaces after the commas!
       // PLEASE PLACE users.txt OUTSIDE OF YOUR SERVER DIRECTORY!
       $row = 1;
@@ -54,6 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                   $_SESSION["user_name"] = $data[3];
                   $_SESSION["user_organisation"] = $data[4];
                   $_SESSION["user_uri"] = $data[5];
+                  $_SESSION["user_organisation_uri"] = $data[6];
                }
             }
          }
@@ -102,7 +103,7 @@ function show_login_form() {
 <?php
 }
 
-// fires the $query against our SPARQL endpoint and returns a EasyRDF Sparql_Result object 
+// fires the $query against our SPARQL endpoint and returns an EasyRDF Sparql_Result object 
 // (see http://www.aelius.com/njh/easyrdf/docs/EasyRdf/EasyRdf_Sparql_Result.html),
 // which is basically an ArrayIterator with some extras
 function sparqlQuery($query){

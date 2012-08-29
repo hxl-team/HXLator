@@ -233,11 +233,11 @@ $inlineScript = '$initMapping = {
         },
         {
           "predicate": "hxl:reportedBy",
-          "object": "<'.$_POST["user_uri"].'>",          
+          "object": "<'.$_SESSION["user_uri"].'>",          
         },
         {
           "predicate": "hxl:reportedBy",
-          "object": "<'.$_POST["user_organisation_uri"].'>",          
+          "object": "<'.$_SESSION["user_organisation_uri"].'>",          
         },
         {
           "predicate": "hxl:date",

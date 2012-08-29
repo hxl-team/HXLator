@@ -884,7 +884,7 @@ function generateRDF($inputMapping){
 				}
 			}			
 		});
-
+		
 		// this is the case if the URI is already there:
 		$resuri = $uri;
 
@@ -932,8 +932,14 @@ function generateRDF($inputMapping){
 				// random GLIDE number for now
 				var $glide = 'unknown'-+new Date().getTime();
 
-				// TODO: wait for decision on how to handle GLIDEnumbers
-
+				// check whether the hasGLIDEnumber property is set:
+				$.each($triples['triples'], function($i, $triple){
+					if ($triple['predicate'] == 'hxl:hasGLIDEnumber'){
+						$glide = $triple['object'];						
+					}
+				});
+				
+				var $resuri = '<http://hxl.humanitarianresponse.info/data/' + $classslug + '/' + $glide + '>';			
 
     		} else if($mapping.classuri == 'hxl:APL') {
 
