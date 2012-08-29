@@ -67,7 +67,7 @@ function show_login_form() {
     
 ?>
     
-<form class="form-horizontal" method="POST">
+<form class="form-horizontal" action="index.php" method="POST">
     
 <?php
     if(isset($_POST['user']) && isset($_POST['pass']) && !isset($_SESSION['loggedin'])){

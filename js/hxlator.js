@@ -935,9 +935,9 @@ function generateRDF($inputMapping){
 				// TODO: wait for decision on how to handle GLIDEnumbers
 
 
-    		} else if($mapping.classuri == 'hxl:Camp') {
+    		} else if($mapping.classuri == 'hxl:APL') {
 
-    			// TODO: wait for decision about renaming to AFL (?)
+    			// TODO: wait for decision about renaming to APL (?)
 
 
     		} else if($mapping.classuri == 'hxl:Organisation') {
