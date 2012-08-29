@@ -939,12 +939,30 @@ function generateRDF($inputMapping){
 					}
 				});
 				
-				var $resuri = '<http://hxl.humanitarianresponse.info/data/' + $classslug + '/' + $glide + '>';			
+				
 
     		} else if($mapping.classuri == 'hxl:APL') {
 
-    			// TODO: wait for decision about renaming to APL (?)
+				var $loc = new Date().getTime();
+				var $pcode = new Date().getTime();
+				
+				// check whether location, sex and age categories are set:
+				$.each($triples['triples'], function($i, $triple){
+					if ($triple['predicate'] == 'hxl:atLocation'){
+						// grab URI and remove < and >
+						var $place = $triple['object'].substr(1, $triple['object'].length-2);
+						// strip the country and p-code from the URI (last two parts of URI):
+						var $placeURIparts = $place.split('/');
+						// we use only the country code
+						$loc = $placeURIparts[$placeURIparts.length - 2];
+					}else if ($triple['predicate'] == 'hxl:pcode'){
+						// grab URI and remove < and >
+						$pcode = $triple['object'];	
+					}
+				});
 
+    			// example: http://hxl.humanitarianresponse.info/data/locations/apl/bfa/UNHCR-POC-80
+    			var $resuri = '<http://hxl.humanitarianresponse.info/data/locations/apl/' + $loc + '/' + $pcode + '>';			
 
     		} else if($mapping.classuri == 'hxl:Organisation') {
 
