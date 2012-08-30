@@ -1,4 +1,6 @@
-console.log("Welcome to the HXLator switchboard. If you see any error messages below, we're terribly sorry. Please let us know at http://hxl.humanitarianresponse.info/hxlator/contact.php");
+//console.log("Welcome to the HXLator switchboard. If you see any error messages below, we're terribly sorry. Please let us know at http://hxl.humanitarianresponse.info/hxlator/contact.php");
+
+var $debug = false;
 
 // add forward / backward buttons to the navigation
 $('div.nav-hxlator').append('<span class="historynav pull-right"><a href="#" id="back" class="btn btn-mini disabled">&laquo; Back</a><a href="#" id="forward" class="btn btn-small disabled">Forward &raquo;</a></span>');
@@ -43,13 +45,8 @@ $hxlHistory.pushState = function($inputMapping){
 $hxlHistory.processMapping = function(){
 	$('#loading').show();
 	
-	//console.log($hxlHistory.currentState);
-	// console.log($hxlHistory.states);
-	
 	var $mapping = $hxlHistory.states[$hxlHistory.currentState];
-	// console.log('Current state of the mapping object:');
-	// console.log(JSON.stringify($mapping));
-	console.log($mapping);
+	if($debug){ console.log($mapping); }
 	
 	// if the class has not been set yet, show the class pills:
 	if(typeof $mapping.classuri == 'undefined'){
@@ -284,7 +281,7 @@ function mapProperty($inputMapping){
 
 // let the user select rows in the spreadsheet for mapping
 function enableRowSelection(){
-	$('.shortguide').html('<p class="lead">Let\'s select some rows!');
+	$('.shortguide').html('<p class="lead">Please select all rows now that you want to HXLate. Note that they must have the same structure as the row you have been working on so far.</p><p align="right"><i class="icon-hand-right"></i> Use <code>shift</code> again to select a range of rows.</p>');
 }
 
 // check if all properties have been mapped, show those that have not been mapped to the user in a modal:
