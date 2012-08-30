@@ -118,7 +118,7 @@ function hxlate(){
 			}
 			echo "
 			
-				<table class='table table-striped table-bordered table-condensed'>";
+				<table class='table table-bordered table-condensed'>";
 		
 			renderTable($sheetData, $tabno);				
 		

@@ -52,11 +52,19 @@ h1, div.shortguide{
 	margin-bottom: 30px;
 }
 
+// the green table row the user is working on during the mapping process
 tr.highlight{
 	color: #468847;
 	background-color: #DFF0D8 !important;
 }
 
+// style for the selected rows before the translation step
+tr.selected{
+	color: @red;
+	background-color: #FAA732;
+}
+
+// style for the selected cells during the mapping process
 .table tbody tr:hover td.selected,
 .table tbody tr td.selected {
 	color: @red;
@@ -125,15 +133,15 @@ a#back, a#forward{
 
 // disable browser text highlighting on the selected row in the table:
 // via http://www.kirupa.com/html5/changing_selection_color_using_css.htm
-.highlight > .hxlatorcell::selection {
+.highlight > .hxlatorcell::selection, .selected > .hxlatorcell::selection {
 	background-color: transparent;
 }
 
-.highlight > .hxlatorcell::-moz-selection {
+.highlight > .hxlatorcell::-moz-selection, .selected > .hxlatorcell::-moz-selection {
 	background-color: transparent;
 }
 
-.highlight > .hxlatorcell::-webkit-selection {
+.highlight > .hxlatorcell::-webkit-selection, .selected > .hxlatorcell::-webkit-selection {
 	background-color: transparent;
 }
 

@@ -58,10 +58,7 @@ $hxlHistory.processMapping = function(){
 	}	
 
 	$hxlHistory.checkLinks();
-	generateRDF($mapping);		
-
-	
-	
+	generateRDF($mapping);			
 }
 
 
@@ -281,7 +278,57 @@ function mapProperty($inputMapping){
 
 // let the user select rows in the spreadsheet for mapping
 function enableRowSelection(){
-	$('.shortguide').html('<p class="lead">Please select all rows now that you want to HXLate. Note that they must have the same structure as the row you have been working on so far.</p><p align="right"><i class="icon-hand-right"></i> Use <code>shift</code> again to select a range of rows.</p>');
+	$('.shortguide').html('<p class="lead">Please select all rows now that you want to HXLate. Note that they must have the same structure as the row you have been working on so far. <a href="#" id="done-rows" class="btn btn-info disabled">Done?</a></p><p align="right"><i class="icon-hand-right"></i> Use <code>shift</code> again to select a range of rows.</p>');
+
+	$('tr.hxlatorrow').removeClass('highlight');
+
+	$('tr.hxlatorrow').click(function(e) {		
+	  	$(this).toggleClass('selected');
+	  	// if (a) the row has been added to the selection, (b) a row has been selected before, and 
+	  	// (c) the shift key has been pressed, mark the whole range between those two as selected 
+	  	if( $(this).hasClass('selected') ) {
+	  		if ( $('.hxlatorrow').hasClass('lastselected') && e.shiftKey ){
+		  		$('.lastselected').addClass('range');
+		  		$(this).addClass('range');
+
+				// iterate through and mark all rows between the two .range rows as selected:
+				var $mark = false;
+				$('tr.hxlatorrow').each(function() {
+					// flip selection switch at the .range cells:
+					if( $(this).hasClass('range') ){
+						if($mark == true){
+							$mark = false;
+						} else {
+							$mark = true;
+						}
+					}
+					
+					if ($mark == true){
+						$(this).addClass('selected');
+					}
+				});
+				
+				// clean up
+			  	$('.hxlatorrow').removeClass('range');
+			 }
+			 
+			 //mark last selected cell to enable range selection via shift-click:
+			 $('.hxlatorrow').removeClass('lastselected');
+			 $(this).addClass('lastselected');
+			 
+	  	}
+	  	
+	  	// enable the property buttons and click listener if any cell is selected, disable if not:
+	  	if ( $('tr.hxlatorrow').hasClass('selected') ){
+	  		$('#done-rows').removeClass('disabled');
+	  		$('#done-rows').click(function() {
+	  			// TODO: Click listener for done button:
+	  		});
+	  	} else {
+		  	$('#done-rows').addClass('disabled');
+		  	$('#done-rows').unbind();
+	  	}	  			  
+	});	
 }
 
 // check if all properties have been mapped, show those that have not been mapped to the user in a modal:
