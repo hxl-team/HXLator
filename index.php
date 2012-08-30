@@ -40,7 +40,7 @@ getHead("index.php", $user_name, $user_organisation);
 		            <select id="report_category" name="report_category">
         		        <option value="http://hxl.humanitarianresponse.info/data/reportcategories/cluster1">Cluster 1</option>
                 		<option value="http://hxl.humanitarianresponse.info/data/reportcategories/cluster2">Cluster 2</option>
-                		<option value="http://hxl.humanitarianresponse.info/data/reportcategories/humanitarian profile">Humanitarian profile</option>
+                		<option value="http://hxl.humanitarianresponse.info/data/reportcategories/humanitarian_profile">Humanitarian profile</option>
                 		<option value="http://hxl.humanitarianresponse.info/data/reportcategories/security">Security</option>                		
 	            	</select> 
 	           	</div>

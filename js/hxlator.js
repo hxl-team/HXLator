@@ -196,7 +196,8 @@ function mapProperty($inputMapping){
 	
 	$('.hxlatorrow').unbind();
 	$('.hxlatorcell').unbind();
-	
+	$('a#done').unbind();
+
 	// if there are already any cells selected, 'unselect' them first:
 	$('.hxlatorcell').removeClass('selected lastselected');
 		
@@ -211,7 +212,12 @@ function mapProperty($inputMapping){
 			
 			// if there are already any mappings (i.e., at least one tagged property button), show a different text:
 			if($('a.mapped').length > 0){
-				$('.shortguide').append('<p class="lead">Keep doing this (select one or more cells, then select a property) until you have mapped all cells in the selected row. Keep in mind that a cell may address several properties. <strong>Are you <a href="#" id="done" class="btn btn-large">done?</a></strong></p><p align="right"><i class="icon-hand-right"></i> Made a mistake? You can always go back using the buttons in the top right.</p>');
+				$('.shortguide').append('<p class="lead">Keep doing this (select one or more cells, then select a property) until you have mapped all cells in the selected row. Keep in mind that a cell may address several properties. Are you <a href="#" id="done" class="btn btn-info">done?</a></p><p align="right"><i class="icon-hand-right"></i> Made a mistake? You can always go back using the buttons in the top right.</p>');
+
+				$('a#done').click(function(){
+					checkProperties();
+				});
+
 			}else{
 				$('.shortguide').append('<p class="lead">Pick a cell or set of cells from this row that provide some information about one of the HXL properties listed. Then click the property to which the data in this cell applies. Note that a given cell (or set of cells) may address several properties.</p><p align="right"><i class="icon-hand-right"></i> Use <code>shift</code> to select a range of cells.</p>');
 			}
@@ -274,6 +280,42 @@ function mapProperty($inputMapping){
 	});	
 	
 	$('#loading').hide();		
+}
+
+// let the user select rows in the spreadsheet for mapping
+function enableRowSelection(){
+	$('.shortguide').html('<p class="lead">Let\'s select some rows!');
+}
+
+// check if all properties have been mapped, show those that have not been mapped to the user in a modal:
+function checkProperties(){
+
+	$('a#selectRows').unbind();
+
+	var $missingProps = '';
+	var $numProps = 0;
+	$('a.hxlprop').each(function(){
+		if(!$(this).hasClass('mapped')){
+			$missingProps += '<span class="label label-info missing-prop" style>'+$(this).html()+'</span> ';
+			$numProps ++;
+		}
+	});
+
+	// show the modal if there are any missing properties:
+	if($missingProps != ''){
+		$('#mappingModal > .modal-header > h3').html($numProps+' properties not mapped');
+		$('#mappingModal > .modal-body').html('<p>The following properties have not been mapped yet:</p><p>'+$missingProps+'<p>If you do not have any information on these properties, go ahead and select the rows of this spreadsheet that you want to HXLate. If you do have information about any of these properties (either in the spreadsheet, or elsewhere), please go back to the mapping and fill these in.</p>');
+		$('#mappingModal > .modal-footer').html('<a href="#" id="selectRows" class="btn">Select rows</a><a href="#" class="btn" data-dismiss="modal">Keep mapping</a>');
+		$('#mappingModal').modal('show');
+
+		$('a#selectRows').click(function(){
+			$('#mappingModal').modal('hide');	
+			enableRowSelection();	
+		});
+
+	}else{
+		enableRowSelection();
+	}
 }
 
 function enableCellSelection($mapping){
