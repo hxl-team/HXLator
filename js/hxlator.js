@@ -206,9 +206,16 @@ function mapProperty($inputMapping){
 			
 		$.get('properties4class.php?classuri='+$mapping.classuri, function(data){
 			$('.shortguide').append(data);	
-			$('.shortguide').append('<p class="lead">Pick a cell or set of cells from this row that provide some information about one of the HXL properties listed. Then click the property to which the data in this cell applies. Note that a given cell (or set of cells) may address several properties.</p><p align="right"><i class="icon-hand-right"></i> Use <code>shift</code> to select a range of cells.</p>');
 			
 			tagMappedCellsAndProps($mapping);
+			
+			// if there are already any mappings (i.e., at least one tagged property button), show a different text:
+			if($('a.mapped').length > 0){
+				$('.shortguide').append('<p class="lead">Keep doing this (select one or more cells, then select a property) until you have mapped all cells in the selected row. Keep in mind that a cell may address several properties. <strong>Are you <a href="#" id="done" class="btn btn-large">done?</a></strong></p><p align="right"><i class="icon-hand-right"></i> Made a mistake? You can always go back using the buttons in the top right.</p>');
+			}else{
+				$('.shortguide').append('<p class="lead">Pick a cell or set of cells from this row that provide some information about one of the HXL properties listed. Then click the property to which the data in this cell applies. Note that a given cell (or set of cells) may address several properties.</p><p align="right"><i class="icon-hand-right"></i> Use <code>shift</code> to select a range of cells.</p>');
+			}
+			
 			$('.shortguide').slideDown();
 			
 			//explanation popovers for hxl properties:
