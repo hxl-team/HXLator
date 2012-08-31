@@ -192,6 +192,12 @@ function mapProperty($inputMapping){
 	$('.hxlatorcell').unbind();
 	$('a#done').unbind();
 
+	// in case we are coming back from the row selection:
+	$('tr.hxlatorrow').removeClass('selected');
+	$('tr.hxlatorrow').removeClass('lastselected');
+	$('tr.hxlatorrow[data-rowid="' + $mapping.samplerow + '"]').addClass('highlight');
+
+
 	// if there are already any cells selected, 'unselect' them first:
 	$('.hxlatorcell').removeClass('selected lastselected');
 		
@@ -209,7 +215,7 @@ function mapProperty($inputMapping){
 				$('.shortguide').append('<p class="lead">Keep doing this (select one or more cells, then select a property) until you have mapped all cells in the selected row. Keep in mind that a cell may address several properties. Are you <a href="#" id="done" class="btn btn-info">done?</a></p><p align="right"><i class="icon-hand-right"></i> Made a mistake? You can always go back using the buttons in the top right.</p>');
 
 				$('a#done').click(function(){
-					checkProperties();
+					checkProperties($mapping);
 				});
 
 			}else{
@@ -277,7 +283,10 @@ function mapProperty($inputMapping){
 }
 
 // let the user select rows in the spreadsheet for mapping
-function enableRowSelection(){
+function enableRowSelection($inputMapping){
+	// make sure we don't modify the original array entry:
+	var $mapping = $.extend(true, {}, $inputMapping);
+
 	$('.shortguide').html('<p class="lead">Please select all rows now that you want to HXLate. Note that they must have the same structure as the row you have been working on so far. <a href="#" id="done-rows" class="btn btn-info disabled">Done?</a></p><p align="right"><i class="icon-hand-right"></i> Use <code>shift</code> again to select a range of rows.</p>');
 
 	$('tr.hxlatorrow').removeClass('highlight');
@@ -319,10 +328,11 @@ function enableRowSelection(){
 	  	}
 	  	
 	  	// enable the property buttons and click listener if any cell is selected, disable if not:
+	  	$('#done-rows').unbind();
 	  	if ( $('tr.hxlatorrow').hasClass('selected') ){
 	  		$('#done-rows').removeClass('disabled');
 	  		$('#done-rows').click(function() {
-	  			// TODO: Click listener for done button:
+	  			checkAllRows($mapping);
 	  		});
 	  	} else {
 		  	$('#done-rows').addClass('disabled');
@@ -331,8 +341,69 @@ function enableRowSelection(){
 	});	
 }
 
+// iterate all selected rows and check which @lookup values are still missing from the mapping
+function checkAllRows($inputMapping){
+
+	// make sure we don't modify the original array entry:
+	var $mapping = $.extend(true, {}, $inputMapping);
+
+	var $lookUpColumns = new Array();
+	// first, iterate through the mapping to see at which colums we need to look for @lookup values
+	$.each($mapping.templates, function($i, $template){
+		$.each($template.triples, function($i, $triple){
+			if($triple.object.indexOf('@lookup') == 0){
+				var $thisColumn = $triple.object.substr(8);
+				if($lookUpColumns.indexOf($thisColumn) == -1){ // only add it if we don't have it yet
+					$lookUpColumns.push($thisColumn);
+				}
+			}
+		});
+	});
+
+	
+	var $lookUpTerms = new Array();
+
+	// iterate rows and check for missing @lookup values:
+	var $sample = $mapping.samplerow.split('-');
+	var $samplerow= $sample[1];
+	$('.hxlatorrow.selected').each(function($i, $tableRow){
+	    var $rowid = $(this).attr('data-rowid').split('-');
+
+		var $sheet = $rowid[0];
+		var $row = $rowid[1];
+
+		$.each($lookUpColumns, function($i, $column){
+			
+			$columnsheet = $column.split('-')[0];
+			$columncol = $column.split('-')[1];
+			$columnrow = $column.split('-')[2];
+			
+			var $shiftedLookup = $sheet+'-'+$columncol+'-'+$row;
+			var $val = $('td[data-cellid="'+$shiftedLookup+'"]').html();
+
+			// check if the cell is in the sampleRow, or outside
+			// if it is outside, do not "move" it to the current row (ignore it, it has already been added to the lookup table)
+			// also, check if the value is already in the lookup table in the mapping 
+			// and not yet in the lookup array we are currently filling
+			if($columnrow == $samplerow && $mapping.lookup[$val] == undefined && $lookUpTerms.indexOf($val) == -1){
+				
+				$lookUpTerms.push($val);
+				// console.log('Value in cell ' + $shiftedLookup + ': ' + $('td[data-cellid="'+$shiftedLookup+'"]').html());
+			}
+		});		
+
+	});
+
+	// display the lookup modal one more time:
+	lookUpModal($mapping, $lookUpTerms, true);
+	$('#mappingModal').modal('show');
+}
+
 // check if all properties have been mapped, show those that have not been mapped to the user in a modal:
-function checkProperties(){
+function checkProperties($inputMapping){
+
+	// make sure we don't modify the original array entry:
+	var $mapping = $.extend(true, {}, $inputMapping);
 
 	$('a#selectRows').unbind();
 
@@ -354,11 +425,11 @@ function checkProperties(){
 
 		$('a#selectRows').click(function(){
 			$('#mappingModal').modal('hide');	
-			enableRowSelection();	
+			enableRowSelection($mapping);	
 		});
 
 	}else{
-		enableRowSelection();
+		enableRowSelection($mapping);
 	}
 }
 
@@ -782,14 +853,15 @@ function addPropertyMappings($mapping, $propURI){
 			$('#mappingModal').modal('hide');
 		} else {
 			// send to lookup modal
-			lookUpModal($mapping, $nolook);
+			lookUpModal($mapping, $nolook, false);
 		}
 		
 	});
 }
 
 // generates a modal that allows the user to look up URIs for all terms in $missing and 
-function lookUpModal($inputMapping, $missing){
+// set $final to true if this is the final lookup before the RDF generation!
+function lookUpModal($inputMapping, $missing, $final){
 
 	// make sure we don't modify the original array entry:
 	var $mapping = $.extend(true, {}, $inputMapping);
@@ -868,8 +940,6 @@ function lookUpModal($inputMapping, $missing){
 							// select the query based on the range of this property:
 							var $query = 'prefix skos: <http://www.w3.org/2004/02/skos/core#> prefix hxl: <http://hxl.humanitarianresponse.info/ns/#> prefix dct: <http://purl.org/dc/terms/>  prefix foaf: <http://xmlns.com/foaf/0.1/> prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> SELECT DISTINCT ?uri ?label ?typelabel WHERE { ?uri a ?type . { ?type skos:prefLabel ?typelabel } UNION { ?type rdfs:label ?typelabel } { ?uri hxl:featureRefName ?label } UNION { ?uri hxl:commonTitle ?label }UNION { ?uri dct:title ?label } UNION { ?uri foaf:name ?label } UNION { ?uri hxl:abbreviation ?label } UNION { ?uri hxl:adminUnitLevelTitle ?label } UNION { ?uri hxl:orgName ?label } UNION { ?uri hxl:title ?label } FILTER regex(?label, "'+request.term+'", "i") } ORDER BY ?label';
 
-							//console.log($query);
-							
 							
 							$('#modal-loading').show();
 							$.ajax({
@@ -918,17 +988,26 @@ function lookUpModal($inputMapping, $missing){
 			
 		});
 
-		
 		$('#storeLookUps').click(function(){
+
 			// fetch all selected URIs and add them to the mapping object:
 			$('input:checked').each(function(){
 				$mapping.lookup[$(this).attr("name")] = $(this).attr("value");				
 			});
 			
-			// push mapping to mapping stack:
-			$hxlHistory.pushState($mapping);
+			
+			if($final == true){
+
+				console.log('initiating final translation!');
+
+			} else {
+				// push mapping to mapping stack:
+				$hxlHistory.pushState($mapping);
 		
-			$('#mappingModal').modal('hide');
+				$('#mappingModal').modal('hide');
+	
+			}
+
 		});
 
 		$(this).slideDown();
@@ -1109,27 +1188,6 @@ function generateRDF($inputMapping){
 	$('#nakedturtle').html(htmlentities($turtle, 0));
 	return $turtle;
 }
-
-
-// highlights all rows between the selected rows
-function highlightSpreadsheetBlock(){	
-	$hi = false;
-	$(".hxlatorrow").each(function() {
-		if($hi){
-			$(this).addClass('highlight');			
-			// TODO: add classes to the cells in this row to enable us to add a click listener in the next step			
-			if($(this).hasClass('last')){
-				$hi = false;
-				// TODO: store the row range for the conversion process
-			}
-		}else{
-			if($(this).hasClass('highlight')){
-				$hi = true;
-			}
-		}				  
-	});
-}
-
 
 
 // Marks all cells and properties that have already been mapped wit a green dot
