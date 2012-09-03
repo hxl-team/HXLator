@@ -168,7 +168,7 @@ function selectRow($inputMapping){
 	$('.hxlatorcell').unbind();
 	
 	$('.shortguide').slideUp(function(){		
-		$('.shortguide').html('<p class="lead selectedclass" style="visibility: none">Please click on the <strong>first</strong> row that contains <span class="label label-important" style="font-size: 1em">data</span> about a '+$mapping.classsingular+'/'+ $mapping.classplural +'.</p><p align="right"><i class="icon-hand-right"></i> That\'s <em>not</em> the header row, but usually the first row containing numbers.</p>');	
+		$('.shortguide').html('<p class="lead selectedclass" style="visibility: none">Please click on the <strong>first</strong> row that contains <span class="label label-important" style="font-size: 1em">data</span> about a '+$mapping.classsingular+'/'+ $mapping.classplural +'.</p><p align="right"><i class="icon-hand-right"></i> Careful!  Don\'t pick the header row, but the first row containing actual data.</p>');	
 		$('.shortguide').slideDown();
 		$('.hxlatorrow').unbind();
 		// put a click listener on the table rows:
