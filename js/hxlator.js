@@ -291,6 +291,13 @@ function enableRowSelection($inputMapping){
 
 	$('tr.hxlatorrow').removeClass('highlight');
 
+	// highlight all rows that have mapped cells in them:
+	$('tr.hxlatorrow').each(function(){
+		if($(this).find('.mapped').length > 0){
+			$(this).addClass('selected');
+		}
+	});
+
 	$('tr.hxlatorrow').click(function(e) {		
 	  	$(this).toggleClass('selected');
 	  	// if (a) the row has been added to the selection, (b) a row has been selected before, and 
@@ -1065,11 +1072,15 @@ function generateFinalRDF($mapping){
 		}		
 	});
     
-    console.log($mapping);
+    $hxlHistory.pushState($mapping);
     
-	// TODO
-	// add a submit button to the preview modal and show it, 
+    // add a submit button to the preview modal and show it, 
 	// so that the user can do a last check and then submit:
+	$('#hxlPreview > .modal-footer').html('<p><i class="icon-hand-right"></i> Please check the generated data one last time before you submit them for approval.</p><a href="#" id="fire" class="btn btn-submit">Submit HXL data for approval</a><a href="#" class="btn" data-dismiss="modal">Cancel</a>');
+
+	$('#mappingModal').modal('hide');
+    $('#hxlPreview').modal('show');
+
 }
 
 // fetches the cell contents from the table cell with id $cellID

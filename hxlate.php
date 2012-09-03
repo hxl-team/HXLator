@@ -251,9 +251,6 @@ $inlineScript = '$initMapping = {
 };
 
 
-// "Barani": "<http://example.org/Barani>",
-// "Deou": "<http://example.org/Deou>"
-
 $hxlHistory.pushState($initMapping);';
 
 if(!isset($_SESSION['loggedin'])) {   // remove the loading spinner if the user is not logged in - we're showing the login form then:
