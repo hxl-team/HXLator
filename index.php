@@ -18,7 +18,7 @@ getHead("index.php", $user_name, $user_organisation);
     <div class="hero-unit">	    
         <a href="https://sites.google.com/site/hxlproject/"><img src="img/hxl-logo-s.png" align="right" /></a>
         <h1>HXLator</h1>
-        <p style="margin-top:  1.5em; margin-bottom:  1.5em">A simple online tool to convert <em>any</em> spreadsheet into the Humanitarian eXchange Langue (HXL). Take a look at our <a href="guide.php">quick start guide</a> or start by uploading your spreadsheet here:</p>	    
+        <p style="margin-top:  1.5em; margin-bottom:  1.5em">A simple online tool to convert a spreadsheet into the Humanitarian eXchange Langue (HXL). Take a look at our <a href="guide.php">quick start guide</a> or start by uploading your spreadsheet here:</p>	    
 
 
 <?php    if(isset($_SESSION['loggedin'])) {   // show the upload options only if the user is logged in:  ?>
@@ -42,7 +42,7 @@ getHead("index.php", $user_name, $user_organisation);
                 		<option value="http://hxl.humanitarianresponse.info/data/reportcategories/cluster2">Cluster 2</option>
                 		<option value="http://hxl.humanitarianresponse.info/data/reportcategories/humanitarian_profile">Humanitarian profile</option>
                 		<option value="http://hxl.humanitarianresponse.info/data/reportcategories/security">Security</option>                		
-	            	</select> 
+	            	</select>  <span style="margin-left: 20px;"><em>This determines who will verify and approve your submission.</em></span><br />
 	           	</div>
 	        </div>
 			

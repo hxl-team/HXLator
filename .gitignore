@@ -1,13 +1,7 @@
 
 .DS_Store
 
-HXLator 2.esproj/Project.espressostorage
-
-HXLator 2.esproj/user.carsten.espressostorage
-
-HXLator.esproj/Project.espressostorage
-
-HXLator.esproj/user.carsten.espressostorage
+*.espressostorage
 
 *.sublime-project
 
@@ -18,7 +12,5 @@ users-clear.txt
 users.txt
 
 *.sublime-workspace
-
-HXLator.sublime-workspace
 
 login.php
