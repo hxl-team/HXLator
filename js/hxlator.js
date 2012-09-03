@@ -394,9 +394,15 @@ function checkAllRows($inputMapping){
 
 	});
 
-	// display the lookup modal one more time:
-	lookUpModal($mapping, $lookUpTerms, true);
-	$('#mappingModal').modal('show');
+	// if there are any terms to look up, display the lookup modal one more time:
+	if($lookUpTerms.length > 0){
+		lookUpModal($mapping, $lookUpTerms, true);
+		$('#mappingModal').modal('show');	
+	}else{
+		//if there's nothing left to look up, we can initiate the final translation:
+		generateFinalRDF($mapping); 
+	}
+	
 }
 
 // check if all properties have been mapped, show those that have not been mapped to the user in a modal:
@@ -998,8 +1004,9 @@ function lookUpModal($inputMapping, $missing, $final){
 			
 			if($final == true){
 
-				console.log('initiating final translation!');
-
+				//initiating final translation:
+				generateFinalRDF($mapping); 
+				
 			} else {
 				// push mapping to mapping stack:
 				$hxlHistory.pushState($mapping);
@@ -1012,6 +1019,57 @@ function lookUpModal($inputMapping, $missing, $final){
 
 		$(this).slideDown();
 	});
+}
+
+// generates the final RDF
+function generateFinalRDF($mapping){
+    var $samplerow = $mapping.samplerow.split('-')[1];
+    
+    // iterate through all templates in the mapping and copy them for each highlighted row,
+	// replacing all the row index in each @value, @uri and @lookup values
+	$.each($mapping.templates, function($uri, $template){
+        // only do that for URIs generated from the spreadsheet:
+		// and for each row EXCEPT the sample row!
+		if($uri.indexOf('@uri') == 0){
+			$('tr.hxlatorrow.selected').each(function(){
+                var $thisRow = $(this).attr('data-rowid').split('-')[1];
+				// make sure we don't overwrite the samplerow:
+                if($thisRow != $samplerow){
+                    // replace all @value, @uri and @lookup values according to the current row
+				    // and add these back to the mapping as a new template:
+				    var $oldURI = $uri.split('-');
+				    var $newURI = $oldURI[0]+'-'+$oldURI[1]+'-'+$thisRow;
+
+				    $mapping.templates[$newURI] = new Object();				                
+				    
+				    // now go through all triples and copy them over:
+				    $mapping.templates[$newURI].triples = new Array();	
+				    
+				    $.each($template.triples, function($i, $triple){				        
+				        $mapping.templates[$newURI].triples[$i] = $.extend(true, {}, $template.triples[$i]);
+				        // replace the row if there is an @uri, @lookup, or @value tag in the object:
+				        if($mapping.templates[$newURI].triples[$i].object.indexOf('@') == 0){
+				            // only move forward if the @ reference is to a value in the sample row
+				            // if this is not the case, this is a mapping to some other cell
+				            // (e.g. in the header of the sheet) and must not be changed!
+				            var $maprow = $mapping.templates[$newURI].triples[$i].object.split('-');
+				            if($samplerow == $maprow[2]){
+				                $mapping.templates[$newURI].triples[$i].object = $maprow[0]+'-'+$maprow[1]+'-'+$thisRow;
+				            }
+				        }    
+				    });
+				    
+                }																
+
+			});			
+		}		
+	});
+    
+    console.log($mapping);
+    
+	// TODO
+	// add a submit button to the preview modal and show it, 
+	// so that the user can do a last check and then submit:
 }
 
 // fetches the cell contents from the table cell with id $cellID
@@ -1190,7 +1248,7 @@ function generateRDF($inputMapping){
 }
 
 
-// Marks all cells and properties that have already been mapped wit a green dot
+// Marks all cells and properties that have already been mapped with a green dot
 function tagMappedCellsAndProps($mapping){
 	
 	// remove all, in case we're coming back:
