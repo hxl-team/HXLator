@@ -213,7 +213,7 @@ function createReaderForFile($pFilename) {
 	}	//	function createReaderForFile()
 
 $orgPost = null;
-if($_POST["user_organisation"]){
+if(isset($_POST["user_organisation"])){
 	$orgPost = array("org" => $_POST["user_organisation"]);
 } 
 

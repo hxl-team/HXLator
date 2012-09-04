@@ -10,7 +10,8 @@ include_once('functions.php');
 
 if(isset($_SESSION['loggedin'])) {   // only hxlate if the user is logged in:
 	
-	$tripleStorePW = file_get_contents('../../store.txt');
+	// load password for triple store from file:
+	$login = file_get_contents('../../store.txt');
 	$container = 'no container found';
 	
 	foreach(preg_split("/((\r?\n)|(\r\n?))/", $_POST['hxl']) as $line){
@@ -21,23 +22,25 @@ if(isset($_SESSION['loggedin'])) {   // only hxlate if the user is logged in:
 	}
 	
 
-	echo 'Data submitted via '.$container;
-
 	// submission via cURL
-	// $post = curl_init();
+	$post = curl_init();
  
- //   	curl_setopt($post, CURLOPT_URL, $url);
- //   	curl_setopt($post, CURLOPT_POST, TRUE);
- //   	curl_setopt($post, CURLOPT_POSTFIELDS, $_POST['hxl']);
- //   	curl_setopt($post, CURLOPT_RETURNTRANSFER, 1);
+   	curl_setopt($post, CURLOPT_URL, 'http://hxl.humanitarianresponse.info/graphstore?graph='.$container); // TODO: Change to incubator!
+   	curl_setopt($post, CURLOPT_POST, TRUE);
+   	curl_setopt($post, CURLOPT_USERPWD, $login);
+   	curl_setopt($post, CURLOPT_HTTPHEADER, array('Content-Type: application/x-turtle'));
+   	curl_setopt($post, CURLOPT_POSTFIELDS, $_POST['hxl']);
+   	curl_setopt($post, CURLOPT_RETURNTRANSFER, 1);
  
-	// $result = curl_exec($post);
+	$result = curl_exec($post);
  
- //   	curl_close($post);
+   	curl_close($post);
+
+   	echo '<a href="http://sparql.carsten.io/?query=SELECT%20*%20WHERE%20%7B%0A%20%20GRAPH%20%3C'.str_replace(':', '%3A', $container).'%3E%20%7B%0A%20%20%20%20%3Fa%20%3Fb%20%3Fc%20.%0A%20%20%7D%0A%7D&endpoint=http%3A//hxl.humanitarianresponse.info/sparql" class="btn btn-info" target="_blank">Check the submitted data</a>';
 
 
 }else{
-	echo 'You need to be logged in to submit data.';
+	echo 'You need log in to submit data.';
 } 
 
  

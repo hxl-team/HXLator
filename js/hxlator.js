@@ -1080,8 +1080,15 @@ function generateFinalRDF($mapping){
 	$('#hxlPreview > .modal-footer').html('<p><i class="icon-hand-right"></i> Please check the generated data one last time before you submit them for approval.</p><a href="#" id="fire" class="btn btn-submit">Submit HXL data for approval</a><a href="#" class="btn" data-dismiss="modal">Cancel</a>');
 
 	$('#fire').click(function(){
+		$('#hxlPreview > .modal-body').slideUp(function(){
+			$('#hxlPreview > .modal-header').html('<h3><img src="img/loader.gif" style="width: 25px; height: 25px" />Uploading data...</h3>');
+			$('#hxlPreview > .modal-footer').slideUp();
+		});
+
 		$.post('submit.php', { hxl: generateRDF($mapping) }, function($data){
-			alert($data);
+			$('#hxlPreview > .modal-header').html('<h3>Data submitted!</h3>');
+			$('#hxlPreview > .modal-footer').html('<p>'+$data+' <a href="index.php" class="btn">HXLate another spreadsheet</a></p>');
+			$('#hxlPreview > .modal-footer').slideDown();
 		});
 	});
 

@@ -49,13 +49,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $row++;
             for ($c=0; $c < count($data); $c++) {
                // check user name and password
-               if ($_POST['user'] == $data[0] && $data[1] == substr(crypt($_POST['pass'], $salt), strlen($salt))) {
+              if(isset($_POST['user'])){
+                if ($_POST['user'] == $data[0] && $data[1] == substr(crypt($_POST['pass'], $salt), strlen($salt))) {
                   $_SESSION['loggedin'] = true;
                   $_SESSION["user_name"] = $data[3];
                   $_SESSION["user_organisation"] = $data[4];
                   $_SESSION["user_uri"] = $data[5];
                   $_SESSION["user_organisation_uri"] = $data[6];
-               }
+                } 
+              }
+               
             }
          }
          fclose($handle);
