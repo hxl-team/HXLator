@@ -1081,7 +1081,7 @@ function generateFinalRDF($mapping){
 
 	$('#fire').click(function(){
 		$('#hxlPreview > .modal-body').slideUp(function(){
-			$('#hxlPreview > .modal-header').html('<h3><img src="img/loader.gif" style="width: 25px; height: 25px" />Uploading data...</h3>');
+			$('#hxlPreview > .modal-header').html('<h3><img src="img/loader.gif" style="width: 25px; height: 25px" /> Uploading data...</h3>');
 			$('#hxlPreview > .modal-footer').slideUp();
 		});
 
