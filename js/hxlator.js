@@ -1030,6 +1030,7 @@ function lookUpModal($inputMapping, $missing, $final){
 
 // generates the final RDF
 function generateFinalRDF($mapping){
+	$('#fire').unbind();
     var $samplerow = $mapping.samplerow.split('-')[1];
     
     // iterate through all templates in the mapping and copy them for each highlighted row,
@@ -1077,6 +1078,12 @@ function generateFinalRDF($mapping){
     // add a submit button to the preview modal and show it, 
 	// so that the user can do a last check and then submit:
 	$('#hxlPreview > .modal-footer').html('<p><i class="icon-hand-right"></i> Please check the generated data one last time before you submit them for approval.</p><a href="#" id="fire" class="btn btn-submit">Submit HXL data for approval</a><a href="#" class="btn" data-dismiss="modal">Cancel</a>');
+
+	$('#fire').click(function(){
+		$.post('submit.php', { hxl: generateRDF($mapping) }, function($data){
+			alert($data);
+		});
+	});
 
 	$('#mappingModal').modal('hide');
     $('#hxlPreview').modal('show');

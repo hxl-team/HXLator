@@ -224,6 +224,10 @@ $inlineScript = '$initMapping = {
     "<'.$containerURI.'>": {
       "triples": [
         {
+          "predicate": "a",
+          "object": "<http://hxl.humanitarianresponse.info/ns/#DataContainer>",          
+        },
+        {
           "predicate": "hxl:aboutEmergency",
           "object": "<'.$_POST["emergency"].'>",          
         },
