@@ -1085,19 +1085,30 @@ function generateFinalRDF($mapping){
 			$('#hxlPreview > .modal-footer').slideUp();
 		});
 
+
+
 		$.post('container-submit.php', { hxl: generateRDF($mapping) }, function($data){
 			$('#hxlPreview > .modal-header').html('<h3>Data submitted!</h3>');
-			$('#hxlPreview > .modal-body').html('<p>'+$data+'</p>'); 
+			$('#hxlPreview > .modal-body').html('<p>'+$data+'</p>');
 			$('#hxlPreview > .modal-footer').html('<p><a href="index.php" class="btn">HXLate another spreadsheet</a></p>');
-			$('#hxlPreview > .modal-body').slideDown(function(){
-				$('#hxlPreview > .modal-footer').slideDown();
-			});
+			saveTranslator($mapping);			
 		});
 	});
 
 	$('#mappingModal').modal('hide');
     $('#hxlPreview').modal('show');
 
+}
+
+// saves the mapping via AJAX under the user's name
+function saveTranslator($mapping){
+	$.get('store-mapping.php', { mapping: JSON.stringify($mapping) }, function($data){
+		$('#hxlPreview > .modal-body').append($data);
+		$('#hxlPreview > .modal-body').slideDown(function(){
+				$('#hxlPreview > .modal-footer').slideDown();
+			});
+	});
+	
 }
 
 // fetches the cell contents from the table cell with id $cellID

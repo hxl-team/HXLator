@@ -52,6 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
               if(isset($_POST['user'])){
                 if ($_POST['user'] == $data[0] && $data[1] == substr(crypt($_POST['pass'], $salt), strlen($salt))) {
                   $_SESSION['loggedin'] = true;
+                  $_SESSION['user_shortname'] = $data[0];
                   $_SESSION["user_role"] = $data[2];
                   $_SESSION["user_name"] = $data[3];
                   $_SESSION["user_organisation"] = $data[4];

@@ -58,6 +58,8 @@ function hxlate(){
 
 	if($isMove === true) {
 
+		$_SESSION['file'] = $_FILES["userfile"]["name"];
+
 		/** Include path **/
 		set_include_path(get_include_path() . PATH_SEPARATOR . './Classes/');
 		
@@ -74,7 +76,7 @@ function hxlate(){
 		echo '
 				<div class="row">
 				<div class="span12">
-				<h1>HXLating <em>'.$_FILES["userfile"]["name"].'</em> <a class="btn btn-info pull-right" data-toggle="modal" href="#hxlPreview">Preview HXL</a></h1>
+				<h1>HXLating <em>'.$_SESSION['file'].'</em> <a class="btn btn-info pull-right" data-toggle="modal" href="#hxlPreview">Preview HXL</a></h1>
 				</div>
 				</div>
 				</div>
