@@ -52,6 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
               if(isset($_POST['user'])){
                 if ($_POST['user'] == $data[0] && $data[1] == substr(crypt($_POST['pass'], $salt), strlen($salt))) {
                   $_SESSION['loggedin'] = true;
+                  $_SESSION["user_role"] = $data[2];
                   $_SESSION["user_name"] = $data[3];
                   $_SESSION["user_organisation"] = $data[4];
                   $_SESSION["user_uri"] = $data[5];
@@ -106,7 +107,7 @@ function show_login_form() {
 <?php
 }
 
-// fires the $query against our SPARQL endpoint and returns an EasyRDF Sparql_Result object 
+// fires the $query against the given SPARQL endpoint and returns an EasyRDF Sparql_Result object 
 // (see http://www.aelius.com/njh/easyrdf/docs/EasyRdf/EasyRdf_Sparql_Result.html),
 // which is basically an ArrayIterator with some extras
 function sparqlQuery($query){
@@ -175,6 +176,7 @@ function getHead($activePage = "index.php"){
 
 $links = array("index.php" => "HXLate", 
 			   "manage.php" => "Manage Translators",
+         "approve.php" => "Approve Data",
 			   "guide.php" => "Quick Start Guide",
 			   "contact.php" => "Contact"); 
 

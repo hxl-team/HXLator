@@ -4,18 +4,6 @@
 	
 	include_once('functions.php');
 	
-// 	$props = sparqlQuery('SELECT DISTINCT ?proplabel ?prop ?type ?description ?domain ?range ?rangename WHERE {
-//    '.$_GET['classuri'].' rdfs:subClassOf* ?domain  .
-//    ?prop rdfs:domain ?domain ;
-//         a ?type ; 
-// 	rdfs:range ?range ;
-// 	rdfs:comment ?description ;
-// 	skos:prefLabel ?proplabel .	
-// 	OPTIONAL { ?range skos:prefLabel ?rangename . }
-// MINUS { ?subprop rdfs:subPropertyOf ?prop }	
-// FILTER ( regex(str(?type),"http://www.w3.org/2002/07/owl") )
-// } ORDER BY ?proplabel');
-
 	$props = sparqlQuery('
 
 SELECT DISTINCT ?proplabel ?prop ?type ?description ?domain ?range ?rangename WHERE {
@@ -36,7 +24,7 @@ FILTER NOT EXISTS {
 FILTER (?class = '.$_GET['classuri'].')
 FILTER ( regex(str(?type),"http://www.w3.org/2002/07/owl") )
 
-} ORDER BY ?proplabel');
+} ORDER BY ?proplabel', 'http://hxl.humanitarianresponse.info/sparql');
 
 	echo '<div class="step4"><ul class="nav nav-pills properties">
 	  ';
