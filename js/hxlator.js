@@ -408,12 +408,14 @@ function checkAllRows($inputMapping){
 			
 			var $shiftedLookup = $sheet+'-'+$columncol+'-'+$row;
 			var $val = $('td[data-cellid="'+$shiftedLookup+'"]').html();
+			var $val = trim($val); // remove extra white space
+
 
 			// check if the cell is in the sampleRow, or outside
 			// if it is outside, do not "move" it to the current row (ignore it, it has already been added to the lookup table)
 			// also, check if the value is already in the lookup table in the mapping 
 			// and not yet in the lookup array we are currently filling
-			if($columnrow == $samplerow && $mapping.lookup[$val] == undefined && $lookUpTerms.indexOf($val) == -1){
+			if($val != '' && $columnrow == $samplerow && $mapping.lookup[$val] == undefined && $lookUpTerms.indexOf($val) == -1){
 				
 				$lookUpTerms.push($val);
 				// console.log('Value in cell ' + $shiftedLookup + ': ' + $('td[data-cellid="'+$shiftedLookup+'"]').html());
@@ -864,8 +866,9 @@ function addPropertyMappings($mapping, $propURI){
 				// if not, we save the term in an array and send the user to (yet anther) mapping // page where s/he can assign URIs to the terms not in the dictionary so far
 				// check if we already have the term in our lookup "dictionary" (or already in the $nolook array)
 				var $lookupterm = getCellContents($(this).attr('data-value-object'));
-				if($mapping.lookup[$lookupterm] == undefined && $.inArray($lookupterm, $nolook)){
-					$nolook.push($lookupterm)
+				$lookupterm = trim($lookupterm);
+				if($lookupterm != '' && $mapping.lookup[$lookupterm] == undefined && $.inArray($lookupterm, $nolook)){
+					$nolook.push($lookupterm);
 				} 
 
 			} else {
@@ -893,7 +896,7 @@ function addPropertyMappings($mapping, $propURI){
 	});
 }
 
-// generates a modal that allows the user to look up URIs for all terms in $missing and 
+// generates a modal that allows the user to look up URIs for all terms in $missing 
 // set $final to true if this is the final lookup before the RDF generation!
 function lookUpModal($inputMapping, $missing, $final){
 
@@ -1374,3 +1377,11 @@ Array.prototype.remove = function(from, to) {
   this.length = from < 0 ? this.length + from : from;
   return this.push.apply(this, rest);
 };
+
+// removes leading/trailing whitespaces from a string, plus multiple whitespaces are reduced to just 1; via http://www.qodo.co.uk/blog/javascript-trim-leading-and-trailing-spaces
+function trim(s) {
+	s = s.replace(/(^\s*)|(\s*$)/gi,"");
+	s = s.replace(/[ ]{2,}/gi," ");
+	s = s.replace(/\n /,"\n");
+	return s;
+}
