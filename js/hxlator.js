@@ -1088,8 +1088,7 @@ function generateFinalRDF($mapping){
     // add a submit button to the preview modal and show it, 
 	// so that the user can do a last check and then submit:
 	$('#hxlPreview > .modal-footer').html('<p><i class="icon-hand-right"></i> Please check the generated data one last time before you submit them for approval.</p><a href="#" id="fire" class="btn btn-submit">Submit HXL data for approval</a><a href="#" class="btn" data-dismiss="modal">Cancel</a>');
-
-	$('#fire').click(function(){
+    $('#fire').click(function(){
 		$('#hxlPreview > .modal-body').slideUp(function(){
 			$('#hxlPreview > .modal-header').html('<h3><img src="img/loader.gif" style="width: 25px; height: 25px" /> Uploading data...</h3>');
 			$('#hxlPreview > .modal-footer').slideUp();
@@ -1107,6 +1106,7 @@ function generateFinalRDF($mapping){
 
 	$('#mappingModal').modal('hide');
     $('#hxlPreview').modal('show');
+    $('#hxlPreview > .bodal-body').scrollTop(0); // scroll to top of preview pane, so that the different tabs are visible
 
 }
 
