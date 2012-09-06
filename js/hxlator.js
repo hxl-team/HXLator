@@ -5,6 +5,17 @@ var $debug = false;
 // add forward / backward buttons to the navigation
 $('div.nav-hxlator').append('<span class="historynav pull-right"><a href="#" id="back" class="btn btn-mini disabled">&laquo; Back</a><a href="#" id="forward" class="btn btn-small disabled">Forward &raquo;</a></span>');
 
+// click listener for the preview button:
+$('#showPreview').click(function(){
+	// replace the footer, in case the user has gone back after the final submission screen
+	$('#hxlPreview > .modal-footer').html('<a href="#" class="btn" data-dismiss="modal">Close</a>');
+	$('#hxlPreview').modal('show');	
+});
+
+// scroll to top of preview pane after loading it, so that the different tabs are visible
+$('#hxlPreview').on('shown', function(){
+    $('#hxlPreview > .modal-body').scrollTop(0); 
+})
 
 // ---------------------------------------------------
 // The history/undo stuff
@@ -1087,7 +1098,7 @@ function generateFinalRDF($mapping){
     
     // add a submit button to the preview modal and show it, 
 	// so that the user can do a last check and then submit:
-	$('#hxlPreview > .modal-footer').html('<p><i class="icon-hand-right"></i> Please check the generated data one last time before you submit them for approval.</p><a href="#" id="fire" class="btn btn-submit">Submit HXL data for approval</a><a href="#" class="btn" data-dismiss="modal">Cancel</a>');
+	$('#hxlPreview > .modal-footer').html('<p><i class="icon-hand-right"></i> Please check the generated data one last time before you submit them for approval.</p><a href="#" id="fire" class="btn btn-success">Submit HXL data for approval</a><a href="#" class="btn" data-dismiss="modal">Cancel</a>');
     $('#fire').click(function(){
 		$('#hxlPreview > .modal-body').slideUp(function(){
 			$('#hxlPreview > .modal-header').html('<h3><img src="img/loader.gif" style="width: 25px; height: 25px" /> Uploading data...</h3>');
@@ -1105,9 +1116,7 @@ function generateFinalRDF($mapping){
 	});
 
 	$('#mappingModal').modal('hide');
-    $('#hxlPreview').modal('show');
-    $('#hxlPreview > .bodal-body').scrollTop(0); // scroll to top of preview pane, so that the different tabs are visible
-
+    $('#hxlPreview').modal('show');    
 }
 
 // saves the mapping via AJAX under the user's name
