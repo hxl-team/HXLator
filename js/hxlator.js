@@ -1058,7 +1058,7 @@ function generateFinalRDF($mapping){
     var $samplerow = $mapping.samplerow.split('-')[1];
     
     // iterate through all templates in the mapping and copy them for each highlighted row,
-	// replacing all the row index in each @value, @uri and @lookup values
+	// replacing the row index in each @value, @uri and @lookup values
 	$.each($mapping.templates, function($uri, $template){
         // only do that for URIs generated from the spreadsheet:
 		// and for each row EXCEPT the sample row!
@@ -1159,8 +1159,8 @@ function generateRDF($inputMapping){
 		$.each($triples['triples'], function($i, $triple){
 
 			// values from spreadsheet:
-			if($triple['object'].indexOf('@value') == 0){				
-				$triple['object'] = getCellContents($triple['object'].substr(7));				
+			if($triple['object'].indexOf('@value') == 0){	
+				$triple['object'] = getCellContents($triple['object'].substr(7));
 			}
 
 			// values from spreadsheet, then map those to existing URIs:
@@ -1298,8 +1298,10 @@ function generateRDF($inputMapping){
 				$datatype  = '^^' + $triple['datatype'];
 			}
 			
-			// add the triple:			
-			$turtle += $resuri + ' ' + $triple['predicate'] + ' ' + $object + $datatype + ' .\n';
+			// add the triple, but ONLY if the object is not empty and the lookup did work:
+			if($object != '' && $object.indexOf('"@value') != 0 && $object.indexOf('"@lookup') != 0){			
+				$turtle += $resuri + ' ' + $triple['predicate'] + ' ' + $object + $datatype + ' .\n';
+			}
 
 		});
 	});
