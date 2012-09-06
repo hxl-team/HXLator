@@ -223,7 +223,7 @@ function mapProperty($inputMapping){
 			
 			// if there are already any mappings (i.e., at least one tagged property button), show a different text:
 			if($('a.mapped').length > 0){
-				$('.shortguide').append('<p class="lead">Keep doing this (select one or more cells, then select a property) until you have mapped all cells in the selected row. Keep in mind that a cell may address several properties. Are you <a href="#" id="done" class="btn btn-info">done?</a></p><p align="right"><i class="icon-hand-right"></i> Made a mistake? You can always go back using the buttons at the top right.</p>');
+				$('.shortguide').append('<p class="lead">Keep doing this (select one or more cells, then select a property) until you have mapped all cells in the selected row. Keep in mind that a cell may address several properties, or a property may be addressed by several cells. Are you <a href="#" id="done" class="btn btn-info">done?</a></p><p align="right"><i class="icon-hand-right"></i> Made a mistake? You can always go back using the buttons at the top right.</p>');
 
 				$('a#done').click(function(){
 					checkProperties($mapping);
@@ -453,8 +453,8 @@ function checkProperties($inputMapping){
 	// show the modal if there are any missing properties:
 	if($missingProps != ''){
 		$('#mappingModal > .modal-header > h3').html($numProps+' properties not mapped');
-		$('#mappingModal > .modal-body').html('<p>The following properties have not been mapped yet:</p><p>'+$missingProps+'<p>If you do not have any information on these properties, go ahead and select the rows of this spreadsheet that you want to HXLate. If you do have information about any of these properties (either in the spreadsheet, or elsewhere), please go back to the mapping and fill these in.</p>');
-		$('#mappingModal > .modal-footer').html('<a href="#" id="selectRows" class="btn">Select rows</a><a href="#" class="btn" data-dismiss="modal">Keep mapping</a>');
+		$('#mappingModal > .modal-body').html('<p>The following properties have not been mapped yet:</p><p>'+$missingProps+'<p>If you do not have any information on these properties, go ahead and select the rows of this spreadsheet that you want to HXLate. If you do have information about any of these properties (either in the spreadsheet, or elsewhere), please go back to the <em>Build Translator</em> page and fill these in.</p>');
+		$('#mappingModal > .modal-footer').html('<a href="#" id="selectRows" class="btn">Select rows</a><a href="#" class="btn" data-dismiss="modal">Go back</a>');
 		$('#mappingModal').modal('show');
 
 		$('a#selectRows').click(function(){
@@ -568,7 +568,7 @@ function mapWithURILookup($inputMapping, $propName, $propURI, $propType, $propRa
 
 			// show 'copy' button if more than one field is selected:
 			if ( $('.selected').length > 1){
-				$('#value-input').append('<br /><a href="#" class="btn btn-small disabled adoptforall valuefor-'+$(this).attr('data-cellid')+'" data-cellid="'+$(this).attr('data-cellid')+'" style="margin-top 10px">Adopt this value for all cells</a>');
+				$('#value-input').append('<br /><a href="#" class="btn btn-small disabled adoptforall valuefor-'+$(this).attr('data-cellid')+'" data-cellid="'+$(this).attr('data-cellid')+'" style="margin-top 10px">Adopt this value for all selected cells</a>');
 			}
 			
 		});
@@ -916,7 +916,7 @@ function lookUpModal($inputMapping, $missing, $final){
 	
 	
 	$('#mappingModal > .modal-footer').slideUp(function(){
-		$(this).html('<i class="icon-hand-right"></i> Don\'t worry about doing anything wrong here, you can always go back to fix it later.</p><a href="#" id="storeLookUps" class="btn btn-primary">Store URIs</a><a href="#" class="btn" data-dismiss="modal">Cancel</a>');		
+		$(this).html('<i class="icon-hand-right"></i> Don\'t worry about doing anything wrong here, you can always go back to fix it later.</p><a href="#" id="storeLookUps" class="btn btn-primary">Save and Continue</a><a href="#" class="btn" data-dismiss="modal">Cancel</a>');		
 		$(this).slideDown();
 	});
 	
