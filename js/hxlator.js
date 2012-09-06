@@ -287,7 +287,7 @@ function enableRowSelection($inputMapping){
 	// make sure we don't modify the original array entry:
 	var $mapping = $.extend(true, {}, $inputMapping);
 
-	$('.shortguide').html('<p class="lead">Please select all rows now that you want to HXLate. Note that they must have the same structure as the row you have been working on so far. <a href="#" id="done-rows" class="btn btn-info disabled">Done?</a></p><p align="right"><i class="icon-hand-right"></i> Use <code>shift</code> again to select a range of rows.</p>');
+	$('.shortguide').html('<p class="lead">Please select all rows now that you want to HXLate. Note that they must have the same structure as the row you have been working on so far. <a href="#" id="done-rows" class="btn btn-info">Done?</a></p><p align="right"><i class="icon-hand-right"></i> Use <code>shift</code> again to select a range of rows.</p>');
 
 	$('tr.hxlatorrow').removeClass('highlight');
 
@@ -296,6 +296,16 @@ function enableRowSelection($inputMapping){
 		if($(this).find('.mapped').length > 0){
 			$(this).addClass('selected');
 		}
+	});
+
+	// also add lastselected to the first row, if only this one is selected, to enable the shift-click thingy:
+	if($('tr.hxlatorrow.selected').length == 1){
+		$('tr.hxlatorrow.selected').addClass('lastselected');
+	}
+	
+	// ... aaand the click listener:
+	$('#done-rows').click(function() {
+	  	checkAllRows($mapping);
 	});
 
 	$('tr.hxlatorrow').click(function(e) {		
