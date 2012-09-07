@@ -880,12 +880,12 @@ function addPropertyMappings($mapping, $propURI){
 										
 		});
 		
-		// push mapping to mapping stack:
-		$hxlHistory.pushState($mapping);
-			
+		
 		// check the $nolook array: if it's empty, we are good and we can simply store the mapping.
 		// if it does contain any terms, we'll send the user over to a new modal, where s/he can look them up:
 		if($nolook.length == 0){
+			// push mapping to mapping stack:
+			$hxlHistory.pushState($mapping);
 			// close modal:
 			$('#mappingModal').modal('hide');
 		} else {
@@ -1191,51 +1191,52 @@ function generateRDF($inputMapping){
 			// populations:
 			if($mapping.classuri == 'hxl:Population' || $mapping.classuri == 'hxl:AffectedPopulation' || $mapping.classuri == 'hxl:TotalPopulation' || $mapping.classuri == 'hxl:Casualty' || $mapping.classuri == 'hxl:Displaced' || $mapping.classuri == 'hxl:NonDisplaced' || $mapping.classuri == 'hxl:Death' || $mapping.classuri == 'hxl:Injury' || $mapping.classuri == 'hxl:Missing' || $mapping.classuri == 'hxl:IDP' || $mapping.classuri == 'hxl:Others' || $mapping.classuri == 'hxl:RefugeesAsylumSeekers' || $mapping.classuri == 'hxl:HostPopulation' || $mapping.classuri == 'hxl:NonHostPopulation') {
 
-				var $loc = new Date().getTime();
-				var $sex = 'unknown';
+				var $loc = '';
+				var $sex = '';
 				var $age = '';
 
 				// check whether location, sex and age categories are set:
 				$.each($triples['triples'], function($i, $triple){
-					if ($triple['predicate'] == 'hxl:currentLocation'){
+					if ($triple['predicate'] == 'hxl:atLocation'){
 						// grab URI and remove < and >
-						var $place = $triple['object'].substr(1, $triple['object'].length-2);
+						var $place = $triple['object'].substr(1, $triple['object'].length-1);
 						// strip the country and p-code from the URI (last two parts of URI):
 						var $placeURIparts = $place.split('/');
-						$loc = $placeURIparts[$placeURIparts.length - 2] + '/' + $placeURIparts[$placeURIparts.length - 1];
+						$loc = '/' + $placeURIparts[$placeURIparts.length - 2] + '/' + $placeURIparts[$placeURIparts.length - 1];
 					}else if ($triple['predicate'] == 'hxl:sexCategory'){
 						// grab URI and remove < and >
 						var $sexCategory = $triple['object'].substr(1, $triple['object'].length-2);
 						var $sexCategoryURIparts = $sexCategory.split('/');
-						$sex = $sexCategoryURIparts[$sexCategoryURIparts.length -1];	
+						$sex = '/' + $sexCategoryURIparts[$sexCategoryURIparts.length -1];	
 					}else if ($triple['predicate'] == 'hxl:ageGroup'){
 						// grab URI and remove < and >
 						var $ageGroup = $triple['object'].substr(1, $triple['object'].length-2);
 						var $ageGroupURIparts = $ageGroup.split('/');
-						$age = '-'+$ageGroupURIparts[$ageGroupURIparts.length -1 ];
+						$age = '/'+$ageGroupURIparts[$ageGroupURIparts.length -1 ];
 					}
 				});
 
-				var $resuri = '<http://hxl.humanitarianresponse.info/data/' + $classslug + '/'+ $loc + '/'+ $sex + $age + '>';
+				var $resuri = '<http://hxl.humanitarianresponse.info/data/' + $classslug + $loc +  $sex + $age + '>';
 
 			} else if($mapping.classuri == 'hxl:Emergency') {
 				
 				// random GLIDE number for now
-				var $glide = 'unknown'-+new Date().getTime();
+				var $glide = 'unknown';
 
 				// check whether the hasGLIDEnumber property is set:
 				$.each($triples['triples'], function($i, $triple){
 					if ($triple['predicate'] == 'hxl:hasGLIDEnumber'){
-						$glide = $triple['object'];						
+						$glide = '/'+$triple['object'];						
 					}
 				});
 				
+				var $resuri = '<http://hxl.humanitarianresponse.info/data/' + $classslug + $glide;
 				
 
     		} else if($mapping.classuri == 'hxl:APL') {
 
-				var $loc = new Date().getTime();
-				var $pcode = new Date().getTime();
+				var $loc = '';
+				var $pcode = '';
 				
 				// check whether location, sex and age categories are set:
 				$.each($triples['triples'], function($i, $triple){
@@ -1245,30 +1246,30 @@ function generateRDF($inputMapping){
 						// strip the country and p-code from the URI (last two parts of URI):
 						var $placeURIparts = $place.split('/');
 						// we use only the country code
-						$loc = $placeURIparts[$placeURIparts.length - 2];
+						$loc = '/' + $placeURIparts[$placeURIparts.length - 2];
 					}else if ($triple['predicate'] == 'hxl:pcode'){
 						// grab URI and remove < and >
-						$pcode = $triple['object'];	
+						$pcode = '/' + $triple['object'];	
 					}
 				});
 
     			// example: http://hxl.humanitarianresponse.info/data/locations/apl/bfa/UNHCR-POC-80
-    			var $resuri = '<http://hxl.humanitarianresponse.info/data/locations/apl/' + $loc + '/' + $pcode + '>';			
+    			var $resuri = '<http://hxl.humanitarianresponse.info/data/locations/apl' + $loc + $pcode + '>';			
 
     		} else if($mapping.classuri == 'hxl:Organisation') {
 
     			// random acronym for now:
-    			var $acro = 'unknown'-+new Date().getTime();
+    			var $acro = '';
 
     			// check if the acronym is set:
     			$.each($triples['triples'], function($i, $triple){
     				if ($triple['predicate'] == 'hxl:abbreviation'){
     					// remove blanks, just in case...
-    					$acro = $triple['object'].toLowerCase().replace( /\s/g, '' );;					
+    					$acro = '/' + $triple['object'].toLowerCase().replace( /\s/g, '' );;					
     				}
     			});
 
-    			var $resuri = '<http://hxl.humanitarianresponse.info/data/' + $classslug + '/'+ $acro + '>';
+    			var $resuri = '<http://hxl.humanitarianresponse.info/data/' + $classslug + $acro + '>';
 
     		} else {
     			console.error('Error during URI generation');
@@ -1299,7 +1300,7 @@ function generateRDF($inputMapping){
 			}
 			
 			// add the triple, but ONLY if the object is not empty and the lookup did work:
-			if($object != '' && $object.indexOf('"@value') != 0 && $object.indexOf('"@lookup') != 0){			
+			if($object != '' && $object.indexOf('"@value') != 0 && $object.indexOf('"@lookup') != 0 && $object.indexOf('"@userlookup') != 0){			
 				$turtle += $resuri + ' ' + $triple['predicate'] + ' ' + $object + $datatype + ' .\n';
 			}
 
