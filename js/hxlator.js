@@ -1339,6 +1339,27 @@ function tagMappedCellsAndProps($mapping){
 
 		});
 	});
+
+	// hover lister for all mapped cells, highlighting all properties the cell has been mapped to
+	// unbind first, just in case
+	$('td.hxlatorcell.mapped').unbind();
+	$('td.hxlatorcell.mapped').hover(
+		function(){ // mouse enter
+			var $cellid = $(this).attr('data-cellid');
+			// go through mapping and find all properties this cell has been mapped to:
+			$.each($mapping.templates, function($uri, $template){
+				if($uri.indexOf($cellid) != -1){
+					$.each($template.triples, function($i, $triple){
+						$('a.btn.hxlprop[data-hxl-uri="'+$triple.predicate+'"]').addClass('btn-success');
+					});
+				}			
+	});
+		},
+		function(){ // mouse leave
+			$('a.hxlprop.btn-success').removeClass('btn-success');
+		}
+	);
+
 }
 
 
