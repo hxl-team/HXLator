@@ -50,8 +50,18 @@ getHead("index.php", $user_name, $user_organisation);
 			    <label class="control-label" for="translator">HXL translator:</label>
 			        <div class="controls">
 			           <select id="translator" name="translator">
-			              <option value="new">Create new HXL translator</option>
-			              <option><em>TODO: List user's existing translators</em></option>			               
+			              	<option value="new">Create new HXL translator</option>
+			              	<?php // list user's stored translators
+			              	$path = getcwd().'/mappings/'.$_SESSION['user_shortname'];
+							if ($handle = opendir($path)) {
+    							while (false !== ($file = readdir($handle))) {
+							        if ($file != "." && $file != "..") {
+							            echo "<option value=\"".$file."\">Reuse translator created for ".substr($file, 0 ,-5)."</option>\n";
+							        }
+							    }
+							    closedir($handle);
+							}
+							?>
 			        </select>
 				</div>
 			</div>
