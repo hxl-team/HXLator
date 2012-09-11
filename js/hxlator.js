@@ -1306,7 +1306,61 @@ function generateRDF($inputMapping){
 	});
 	// update the preview modal:
 	$('#nakedturtle').html(htmlentities($turtle, 0));
+	// update the preview table:
+	updateTablePreview($mapping);
 	return $turtle;
+}
+
+
+// generates a table preview from the "pre-processed" mapping JSON passed over by generateRDF()
+function updateTablePreview($mapping){
+	console.log($mapping);
+
+	var $table = '<table>';
+	// go through all triples and figure out how many distinct properties we have, so that we know the number of columns in the table:
+	var $predicates = new Array();
+	$.each($mapping.templates, function($uri, $triples){
+		if($uri.indexOf('@uri') == 0){   // ignore the metadata stuff
+			$.each($triples['triples'], function($i, $triple){
+				if($.inArray($triple['predicate'], $predicates) == -1){
+					$predicates.push($triple['predicate']);
+				}
+			});
+		}
+	});
+	
+	$table += '<thead><tr>';
+	$table += '<th>'+$mapping.classsingular+' in cell...</th>';
+	$.each($predicates, function($i, $p){		
+		$table += '<th>'+$p+'</th>';	
+	});
+	$table += '</tr></thead>';
+	$table += '<tbody>';
+	
+	$.each($mapping.templates, function($uri, $triples){
+	    if($uri.indexOf('@uri') == 0){   // ignore the metadata stuff
+    	    $table += '<tr>';
+	        $table += '<td>'+$uri.substr(5)+'</td>';
+	        // now go through all predicates and check whether we have a value for this one:
+	        $.each($predicates, function($i, $p){		
+	        	$table += '<td>';
+	        	$.each($triples['triples'], function($i, $triple){
+	        	    if($triple['predicate'] == $p){
+		        		
+		        		$table += $triple['object'].substr(1,$triple['object'].length-2);
+		        	}
+		        });
+		        $table += '</td>';
+	        });
+	        $table += '</tr>';  
+	        console.log(' ');
+	        console.log(' ');  
+	    }
+	});
+	
+    $table += '</tbody></table>';
+
+	$('#previewtabtable').html($table);
 }
 
 
