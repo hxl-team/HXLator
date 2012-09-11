@@ -21,7 +21,7 @@ if(isset($_SESSION['loggedin'])) {   // only submit data if the user is logged i
 	$filename = $_SESSION['file'].' ('.date('Y-m-d \a\t H\hi').')';
 	$flush = $path.'/'.$filename.'.json';
 
-	if(file_put_contents($flush, $_GET['mapping']) === false){
+	if(file_put_contents($flush, $_POST['mapping']) === false){
 		echo '<p>Saving your translator failed, sorry about that. Please <a href="contact.php">let us know</a> about this error.</p>';
 	}else{
 		echo '<p>The translator you have built during this session has been saved as<br /><code>'.$filename.'</code>.<br /> If you want to HXLate a spreadsheet with the same structure again later, you can select this mapping on the upload page.</p>';

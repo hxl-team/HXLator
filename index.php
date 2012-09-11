@@ -82,10 +82,11 @@ getHead("index.php", $user_name, $user_organisation);
 
     </div>	   
 </div> <!-- /container -->
-<script>document.getElementById('emergencies').focus()</script>
 
+<?php    if(isset($_SESSION['loggedin'])) { ?>
+	<script>document.getElementById('emergencies').focus()</script>
 
-<?php 
+<?php
 	$customJS = emergencyQuery();
 	getFoot(array('jquery-ui-1.8.21.custom.min.js'), $customJS ); 
 
@@ -145,4 +146,7 @@ getHead("index.php", $user_name, $user_organisation);
 	    
 	    return $elist;
 	}
+} else {
+	getFoot(array('jquery-ui-1.8.21.custom.min.js'), null );
+}
 ?>

@@ -1,5 +1,3 @@
-//console.log("Welcome to the HXLator switchboard. If you see any error messages below, we're terribly sorry. Please let us know at http://hxl.humanitarianresponse.info/hxlator/contact.php");
-
 var $debug = false;
 
 // add forward / backward buttons to the navigation
@@ -1124,7 +1122,7 @@ function generateFinalRDF($mapping){
 
 // saves the mapping via AJAX under the user's name
 function saveTranslator($mapping){
-	$.get('store-mapping.php', { mapping: JSON.stringify($mapping) }, function($data){
+	$.post('store-mapping.php', { mapping: JSON.stringify($mapping) }, function($data){
 		$('#hxlPreview > .modal-body').append($data);
 		$('#hxlPreview > .modal-body').slideDown(function(){
 				$('#hxlPreview > .modal-footer').slideDown();

@@ -24,7 +24,9 @@ getHead("approve.php");
 		// load password for triple store from file:
 		$login = file_get_contents('../../store.txt');
 
-		$query = 'SELECT * WHERE {?container a <http://hxl.humanitarianresponse.info/ns/#DataContainer> }';
+		// some federated query voodoo:
+		$query = 'prefix hxl: <http://hxl.humanitarianresponse.info/ns/#> prefix foaf: <http://xmlns.com/foaf/0.1/>  SELECT * WHERE {?container a <http://hxl.humanitarianresponse.info/ns/#DataContainer>; hxl:reportedBy ?reporter, ?org; hxl:date ?date. SERVICE <http://hxl.humanitarianresponse.info/sparql> { ?reporter a foaf:Person; foaf:name ?name . ?org a hxl:Organisation; hxl:orgDisplayName ?orgname . } }';
+		
 		$endpoint = 'http://hxl.humanitarianresponse.info/incubator-sparql';
 		// query via cURL, because we have to send the password along:
 		$curl = curl_init();
@@ -46,7 +48,12 @@ getHead("approve.php");
 
  			foreach ($results['results']['bindings'] as $index => $result) {
  				$container = $result['container']['value'];
- 				echo '<p class="lead" container="'.$container.'"><code>'.$container.'</code> <a href="#" class="btn btn-success approve" container="'.$container.'">Approve</a> <a href="#" class="btn btn-danger delete" container="'.$container.'">Delete</a></p>';
+ 				$reporter  = $result['reporter']['value'];
+ 				$name      = $result['name']['value'];
+ 				$date      = $result['date']['value'];
+ 				$org       = $result['org']['value'];
+ 				$orgname   = $result['orgname']['value'];
+ 				echo '<p class="lead" container="'.$container.'"><code>'.$container.'</code> <a href="#" class="btn btn-success approve" container="'.$container.'">Approve</a> <a href="#" class="btn btn-danger delete" container="'.$container.'">Delete</a></p><p>Submitted by <a href="'.$reporter.'" target="_blank">'.$name.'</a> (<a href="'.$org.'" target="_blank">'.$orgname.'</a>) on '.$date.' </p><hr />';
  			}
 
  		} else {
