@@ -1027,7 +1027,7 @@ function lookUpModal($inputMapping, $missing, $final){
 
 			// fetch all selected URIs and add them to the mapping object:
 			$('input:checked').each(function(){
-				$mapping.lookup[$(this).attr("name")] = $(this).attr("value");				
+				$mapping.lookup[$(this).attr('name')] = '<'+$(this).attr('value')+'>';
 			});
 			
 			
