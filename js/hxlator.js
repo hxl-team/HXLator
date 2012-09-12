@@ -527,7 +527,7 @@ function mappingModal($inputMapping, $propName, $propURI, $propType, $propRange,
 	
 	$('#mappingModal > .modal-header > h3').html('<img src="img/loader.gif" id="modal-loading" class="pull-right" />Mapping '+$numCells+' cells to the <em>'+$propName+'</em> property');
 	
-	$('#mappingModal > .modal-footer').html('<i class="icon-hand-right"></i> Don\'t worry about doing anything wrong here, you can always go back to fix it later.</p><a href="#" id="storeMapping" class="btn btn-primary">Store mapping</a><a href="#" class="btn" data-dismiss="modal">Cancel</a>');
+	$('#mappingModal > .modal-footer').html('<i class="icon-hand-right"></i> Don\'t worry about doing anything wrong here, you can always go back to fix it later.</p><p><i class="icon-hand-right"></i> If you want to peek at your spreadsheet, you can always hide this popup by pressing the <code>CTRL</code> key. Pressing it again will bring the popup back.</p><a href="#" id="storeMapping" class="btn btn-primary">Store mapping</a><a href="#" class="btn" data-dismiss="modal">Cancel</a>');
 	
 	if($propType == 'http://www.w3.org/2002/07/owl#DataProperty'){
 		$('#mappingModal > .modal-body').html('<p>You can either <a href="#" class="btn" id="mapCellValues">map each cell to the value it contains</a> or <a href="#" class="btn" id="mapDifferentValues">map it to a different value</a>.</p><div id="value-input" style="display: none"></div>');
@@ -919,7 +919,7 @@ function lookUpModal($inputMapping, $missing, $final){
 	
 	
 	$('#mappingModal > .modal-footer').slideUp(function(){
-		$(this).html('<i class="icon-hand-right"></i> Don\'t worry about doing anything wrong here, you can always go back to fix it later.</p><a href="#" id="storeLookUps" class="btn btn-primary">Save and Continue</a><a href="#" class="btn" data-dismiss="modal">Cancel</a>');		
+		$(this).html('<i class="icon-hand-right"></i> Don\'t worry about doing anything wrong here, you can always go back to fix it later.</p><p><i class="icon-hand-right"></i> If you want to peek at your spreadsheet, you can always hide this popup by pressing the <code>CTRL</code> key. Pressing it again will bring the popup back.</p><a href="#" id="storeLookUps" class="btn btn-primary">Save and Continue</a><a href="#" class="btn" data-dismiss="modal">Cancel</a>');		
 		$(this).slideDown();
 	});
 	
@@ -1455,6 +1455,33 @@ function tagMappedCellsAndProps($mapping){
 	);
 
 }
+
+// allow the user to temporarily hide the mapping modal to peek at their spreadsheet
+
+
+var hideHandler = function(){
+	if (event.ctrlKey==1){
+		$('#mappingModal').modal('hide');
+		$(document).unbind('keydown', hideHandler);
+		$(document).bind('keydown', showHandler);		
+	} else if (event.keyCode == 27) { // escape key
+		$(document).unbind('keydown', hideHandler);
+	}
+};
+
+var showHandler = function(){
+	if (event.ctrlKey==1){
+		$(document).unbind('keydown', showHandler);
+		$('#mappingModal').modal('show');
+	}
+};
+
+
+// Watch the mappingModal: if it is shown, enable the arrow up key to hide it:
+$('#mappingModal').on('shown', function(){
+	$(document).bind('keydown', hideHandler);
+});
+
 
 
 // ---------------------------------------------------
