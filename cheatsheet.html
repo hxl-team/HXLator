@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>OCHA HXLator Cheat Sheet</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <link href="css/hxlator.css" rel="stylesheet"> 
+    <link href="css/bootstrap-responsive.css" rel="stylesheet">
+	  <link href="css/jquery-ui-1.8.21.custom.css" rel="stylesheet">
+	
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    
+    <link rel="shortcut icon" href="img/ochaonline_theme_favicon.ico">
+  </head>
+
+  <body>
+    <div class="container">
+      <div class="navbar">
+        <div class="container">
+          <span class="brand"><img src="img/logo.png" /></span>
+        </div>
+      </div>
+      <div class="lead">
+        <h1>HXLator Cheat Sheet</h1>
+        <p class="lead">Explanations of all technical terms used in HXLator. In addition to the short explanations provided here, some terms are marked by a book icon. Clicking this will take you to a more elaborate explanation, e.g., on WikiPedia.</p>
+      </div>
+      <table class="table table-bordered">
+        <thead>
+          <tr><th>Term</th><th>Short Explanation</th></tr>
+        </thead>
+          <tr>
+            <th id="feature">Feature<a href="http://en.wikipedia.org/wiki/Geographic_feature" target="_blank"><i class="icon-book pull-right"> </i></a></th>
+            <td></td>
+          </tr>
+          <tr>
+            <th id="ld">Linked Data<a href="http://linkeddatabook.com" target="_blank"><i class="icon-book pull-right"> </i></a></th>
+            <td></td>
+          </tr>
+          <tr>
+            <th id="mapping">Mapping/translator</th>
+            <td>We refer to a configuration to translate a spreadsheet to HXL as a mapping or translator. Once you have converted a spreadsheet and submitted your data for approval, the mapping is stored for future re-use, so that you do not have to go through the whole process again if you want to HXLate another spreadsheet that has the same structure or uses the same template. </td>
+          </tr><tr>
+            <th id="uri">URI/URL<a href="http://en.wikipedia.org/wiki/Uniform_Resource_Identifier" target="_blank"><i class="icon-book pull-right"> </i></a></th>
+            <td>Short for <em>Uniform Resource Identifier</em>. URIs include URLs (Uniform Resource Locators) such as <a href="http://humanitarianresponse.info">http://humanitarianresponse.info</a> that you use whenever you visit a webpage. HXL builds on the Linked Data approach, which uses URLs as identifiers for things. For HXL, this means that we have a URL for each affected people's location (e.g., <a href="http://hxl.humanitarianresponse.info/data/locations/apl/bfa/UNHCR-POC-80">http://hxl.humanitarianresponse.info/data/locations/apl/bfa/UNHCR-POC-80</a>), admin unit (e.g., <a href="http://hxl.humanitarianresponse.info/data/locations/admin/bfa/BFA056001">http://hxl.humanitarianresponse.info/data/locations/admin/bfa/BFA056001</a>), person (e.g., <a href="http://hxl.humanitarianresponse.info/data/persons/unocha/cj_hendrix">http://hxl.humanitarianresponse.info/data/persons/unocha/cj_hendrix</a> ), organisation (e.g., <a href="http://hxl.humanitarianresponse.info/data/organisations/unocha">http://hxl.humanitarianresponse.info/data/organisations/unocha</a>), and so on. As you can see, URLs are perfect for publishing data on the web, where they both uniquely identify a thing <em>and</em> tell us where to find information about this thing.</td>
+          </tr>          
+        <tbody></tbody>
+      </table>
+    </div>  
+  
+  </body>
+</html>
