@@ -1310,7 +1310,6 @@ function generateRDF($inputMapping){
 	$('#nakedturtle').html(htmlentities($turtle, 0));
 	// update the preview table:
 	updateTablePreview($mapping);
-	console.log($mapping);
 	return $turtle;
 }
 
@@ -1318,7 +1317,7 @@ function generateRDF($inputMapping){
 // generates a table preview from the "pre-processed" mapping JSON passed over by generateRDF()
 function updateTablePreview($mapping){
 	
-	var $table = '<table class="table table-hover table-bordered table-condensed"><caption>A table-based preview of your spreadsheet, translated into HXL.</caption>';
+	var $table = '<p>A table-based preview of your spreadsheet, translated into HXL. You can sort by each column by clicking the column header, or filter using the search field:</p><table id="previewTable" class="table table-hover table-bordered table-condensed">';
 	// go through all triples and figure out how many distinct properties we have, so that we know the number of columns in the table:
 	var $predicates = new Array();
 	$.each($mapping.templates, function($uri, $triples){
@@ -1398,7 +1397,9 @@ function updateTablePreview($mapping){
 	
 	$table += '</tbody></table>';
 	$('#previewtabtable').html($table);
-	
+	$('#previewTable').dataTable( {
+		"bPaginate": false
+	});
 }
 
 
