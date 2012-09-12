@@ -1,5 +1,7 @@
 var $debug = false;
 
+var $names = new Object(); // stores names for URIs based on dc:title, hxl:featureName, etc.
+
 // add forward / backward buttons to the navigation
 $('div.nav-hxlator').append('<span class="historynav pull-right"><a href="#" id="back" class="btn btn-mini disabled">&laquo; Back</a><a href="#" id="forward" class="btn btn-small disabled">Forward &raquo;</a></span>');
 
@@ -1308,15 +1310,15 @@ function generateRDF($inputMapping){
 	$('#nakedturtle').html(htmlentities($turtle, 0));
 	// update the preview table:
 	updateTablePreview($mapping);
+	console.log($mapping);
 	return $turtle;
 }
 
 
 // generates a table preview from the "pre-processed" mapping JSON passed over by generateRDF()
 function updateTablePreview($mapping){
-	console.log($mapping);
-
-	var $table = '<table>';
+	
+	var $table = '<table class="table table-hover table-bordered table-condensed"><caption>A table-based preview of your spreadsheet, translated into HXL.</caption>';
 	// go through all triples and figure out how many distinct properties we have, so that we know the number of columns in the table:
 	var $predicates = new Array();
 	$.each($mapping.templates, function($uri, $triples){
@@ -1332,36 +1334,75 @@ function updateTablePreview($mapping){
 	$table += '<thead><tr>';
 	$table += '<th>'+$mapping.classsingular+' in cell...</th>';
 	$.each($predicates, function($i, $p){		
-		$table += '<th>'+$p+'</th>';	
+		$table += '<th>'+$p.substr(4)+'</th>';	
 	});
 	$table += '</tr></thead>';
 	$table += '<tbody>';
 	
-	$.each($mapping.templates, function($uri, $triples){
-	    if($uri.indexOf('@uri') == 0){   // ignore the metadata stuff
+	var $templateCounter = 0;
+
+	$.each($mapping.templates, function($subjuri, $triples){
+	    if($subjuri.indexOf('@uri') == 0){   // ignore the metadata stuff
     	    $table += '<tr>';
-	        $table += '<td>'+$uri.substr(5)+'</td>';
+	        $table += '<th>'+$subjuri.substr(5)+'</th>';
 	        // now go through all predicates and check whether we have a value for this one:
 	        $.each($predicates, function($i, $p){		
 	        	$table += '<td>';
 	        	$.each($triples['triples'], function($i, $triple){
 	        	    if($triple['predicate'] == $p){
-		        		
-		        		$table += $triple['object'].substr(1,$triple['object'].length-2);
+		        		if($triple['object'].indexOf('<') == 0){
+							
+		        			var $uri = $triple['object'];
+
+    		        		// get the name for this URI, either from the global $names object, or, if it is not there yet,
+							// via AJAX (and then add it to the $names object for future use)
+
+							if($names[$uri] == undefined){
+								$('#loading').show();
+								$query = 'prefix hxl: <http://hxl.humanitarianresponse.info/ns/#> prefix foaf: <http://xmlns.com/foaf/0.1/> SELECT * WHERE { {'+$uri+' hxl:title ?name .} UNION {'+$uri+' hxl:featureName ?name .} UNION {'+$uri+' foaf:name ?name .} UNION {'+$uri+' hxl:abbreviation ?name .} UNION {'+$uri+' hxl:commonTitle ?name .} UNION {'+$uri+' hxl:orgName ?name .}}'; 
+								$.ajax({
+									async: false,
+									url: 'http://hxl.humanitarianresponse.info/sparql',
+									headers: {
+										Accept: 'application/sparql-results+json'
+									},
+									data: { 
+										query: $query 
+									},							
+									success: function( data ) { 
+										$.map( data.results.bindings, function( result ) {
+										 	$names[$uri] = result.name.value;
+										 	$table += '<a href="'+$uri.substr(1,$uri.length-2)+'" target="_blank">'+result.name.value+'</a>';
+										});
+
+										$('#loading').hide();
+									},
+									error: function($jqXHR, $textStatus, $errorThrown){
+										console.error($textStatus);
+									}
+								});
+							}else{
+								$table += '<a href="'+$uri.substr(1,$uri.length-2)+'" target="_blank">'+$names[$uri]+'</a>';
+							}
+
+    		            } else {
+    		                $table += $triple['object'];
+    		            }
 		        	}
 		        });
 		        $table += '</td>';
 	        });
-	        $table += '</tr>';  
-	        console.log(' ');
-	        console.log(' ');  
-	    }
+	        $table += '</tr>';   
+	    }	    
 	});
 	
-    $table += '</tbody></table>';
-
+	$table += '</tbody></table>';
 	$('#previewtabtable').html($table);
+	
 }
+
+
+
 
 
 // Marks all cells and properties that have already been mapped with a green dot
