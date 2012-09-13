@@ -30,7 +30,7 @@ getHead("index.php", $user_name, $user_organisation);
             	<div class="controls">
             		<input type="text" id="emergencies" name="selectemergency" /> <span style="margin-left: 20px;"><em>Start typing and select from the emergencies list.</em></span><br />
             		<input type="hidden" name="emergency" id="emergency">
-            		<small id="emergencyuri"></small>
+            		<!-- <small id="emergencyuri"></small> -->
             	</div>
             </div>
 
@@ -132,7 +132,7 @@ getHead("index.php", $user_name, $user_organisation);
 	    		response(results);
             },
             select: function(event, ui) {
-                $("#emergencyuri").html("URI for this emergency: <a href=\'"+ui.item.uri+"\' target=\'_blank\'>"+ui.item.uri+"</a>");
+                // $("#emergencyuri").html("URI for this emergency: <a href=\'"+ui.item.uri+"\' target=\'_blank\'>"+ui.item.uri+"</a>");
                 $("#emergency").val(ui.item.uri);
             }
         }).data("autocomplete")._renderItem = function(ul, item) {
