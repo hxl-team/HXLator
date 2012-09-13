@@ -76,7 +76,7 @@ function hxlate(){
 		echo '
 				<div class="row">
 				<div class="span12">
-				<h1>Build translator for  <em>'.$_SESSION['file'].'</em> <a class="btn btn-info pull-right" id="showPreview" href="#">Preview HXL</a></h1>
+				<h2>Build translator for  <em>'.$_SESSION['file'].'</em> <a class="btn btn-info pull-right" id="showPreview" href="#">Preview HXL</a></h2>
 				</div>
 				</div>
 				</div>

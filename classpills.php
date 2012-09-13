@@ -3,7 +3,7 @@
 	include_once('functions.php');
 	
 	echo '<div class="step1">
-	<p class="lead"><strong>Step 1:</strong> What is the data in this spreadsheet <em>primarily</em> about? Hover for explanations: </p>
+	<h2>Step 1: What is the data in this spreadsheet <em>primarily</em> about? Hover for explanations: </h2>
 	<div class="row">';
 	
 	echo getClassPills();
@@ -55,7 +55,7 @@
 		
 		foreach($hxlClasses as $hxlClass){	  	
 			if($hxlClass->$count != "0") { 
-				$pills .= '<li class="solo"><a href="#" class="hxlclass hxlclass-expandable" rel="popover" title="'.$hxlClass->$label.'" data-content="'.$hxlClass->$description.' <br /><small><strong>Click to view '.$hxlClass->$count.' subclasses.<strong></small>" classuri="'.shorten($hxlClass->$class, 'hxl').'">'.$hxlClass->$plural.'<span class="badge badge-inverse pull-right">'.$hxlClass->$count.'</span>'; 
+				$pills .= '<li class="solo"><a href="#" class="hxlclass hxlclass-expandable" rel="popover" title="'.$hxlClass->$label.'" data-content="'.$hxlClass->$description.' <br /><small><strong>Click to view '.$hxlClass->$count.' subclasses.<strong></small>" classuri="'.shorten($hxlClass->$class, 'hxl').'">'.$hxlClass->$plural.'<span class="badge badge-inverse pull-right">'.$hxlClass->$count.' types</span>'; 
 				// we're gonna show subclasses for this one:
 				$recursionClasses[] = array($hxlClass->$class, $hxlClass->$label, $hxlClass->$plural);
 			}else{
