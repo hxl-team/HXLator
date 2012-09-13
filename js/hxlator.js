@@ -179,7 +179,7 @@ function selectRow($inputMapping){
 	$('.hxlatorcell').unbind();
 	
 	$('.shortguide').slideUp(function(){		
-		$('.shortguide').html('<p class="lead selectedclass" style="visibility: none">Please click on the <strong>first</strong> row that contains <span class="label label-important" style="font-size: 1em">data</span> about a '+$mapping.classsingular+'/'+ $mapping.classplural +'.</p><p align="right"><i class="icon-hand-right"></i> Careful!  Don\'t pick the header row, but the first row containing actual data.</p>');	
+		$('.shortguide').html('<p class="lead selectedclass" style="visibility: none"><strong>Step 2:</strong> Please click on the <strong>first</strong> row that contains <span class="label label-important" style="font-size: 1em">data</span> about a '+$mapping.classsingular+'/'+ $mapping.classplural +'.</p><p align="right"><i class="icon-hand-right"></i> Careful!  Don\'t pick the header row, but the first row containing actual data.</p>');	
 		$('.shortguide').slideDown();
 		$('.hxlatorrow').unbind();
 		// put a click listener on the table rows:
@@ -217,6 +217,7 @@ function mapProperty($inputMapping){
 		$.get('properties4class.php?classuri='+$mapping.classuri, function(data){
 			
 			var $hint = '';
+			tagMappedCellsAndProps($mapping);
 
 			// if there are already any mappings (i.e., at least one tagged property button), show a different text:
 			if($('a.mapped').length > 0){
@@ -229,7 +230,7 @@ function mapProperty($inputMapping){
 				});
 
 			}else{
-				$('.shortguide').html('<p class="lead">In HXL, any '+$mapping.classsingular+' can have the following properties. Pick a cell or set of cells from the selected row that provide some information about one of the HXL properties listed above. Then click the property to which the data in this cell applies. Note that a given cell (or set of cells) may address several properties.</p>');
+				$('.shortguide').html('<p class="lead"><strong>Step 3:</strong> In HXL, any '+$mapping.classsingular+' can have the following properties. Pick a cell or set of cells from the selected row that provide some information about one of the HXL properties listed above. Then click the property to which the data in this cell applies. Note that a given cell (or set of cells) may address several properties.</p>');
 
 				$hint = '<p align="right"><i class="icon-hand-right"></i> Use <code>shift</code> to select a range of cells.</p>';
 			}
@@ -304,7 +305,7 @@ function enableRowSelection($inputMapping){
 	// make sure we don't modify the original array entry:
 	var $mapping = $.extend(true, {}, $inputMapping);
 
-	$('.shortguide').html('<p class="lead">Please select all rows now that you want to HXLate. Note that they must have the same structure as the row you have been working on so far. <a href="#" id="done-rows" class="btn btn-info">Done?</a></p><p align="right"><i class="icon-hand-right"></i> Use <code>shift</code> again to select a range of rows.</p>');
+	$('.shortguide').html('<p class="lead"><strong>Step 4:</strong> Please select all rows now that you want to HXLate. Note that they must have the same structure as the row you have been working on so far. <a href="#" id="done-rows" class="btn btn-info">Done?</a></p><p align="right"><i class="icon-hand-right"></i> Use <code>shift</code> again to select a range of rows.</p>');
 
 	$('tr.hxlatorrow').removeClass('highlight');
 
@@ -1118,8 +1119,8 @@ function generateFinalRDF($mapping){
 
 		$.post('container-submit.php', { hxl: generateRDF($mapping) }, function($data){
 			$('#hxlPreview > .modal-header').html('<h3>Data submitted!</h3>');
-			$('#hxlPreview > .modal-body').html('<p>'+$data+'</p>');
-			$('#hxlPreview > .modal-footer').html('<p><a href="index.php" class="btn">HXLate another spreadsheet</a></p>');
+			$('#hxlPreview > .modal-body').html($data);
+			$('#hxlPreview > .modal-footer').html('<p class="lead"><a href="index.php" class="btn">HXLate another spreadsheet</a></p>');
 			saveTranslator($mapping);			
 		});
 	});

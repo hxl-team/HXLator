@@ -38,7 +38,7 @@ if(isset($_SESSION['loggedin'])) {   // only submit data if the user is logged i
 
    	// echo '<a href="http://sparql.carsten.io/?query=SELECT%20*%20WHERE%20%7B%0A%20%20GRAPH%20%3C'.str_replace(':', '%3A', $container).'%3E%20%7B%0A%20%20%20%20%3Fa%20%3Fb%20%3Fc%20.%0A%20%20%7D%0A%7D&endpoint=http%3A//hxl.humanitarianresponse.info/sparql" class="btn btn-info" target="_blank">Check the submitted data</a>';
 
-   	echo 'The data container <code>'.$container.'</code> has been submitted for <a class="btn btn-small" href="approve.php">approval</a>.';
+   	echo '<p class="lead">The data container <code>'.$container.'</code> has been submitted for <a class="btn btn-small" href="approve.php">approval</a>.</p>';
 
 
 }else{
