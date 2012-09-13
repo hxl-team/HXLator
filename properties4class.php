@@ -26,7 +26,7 @@ FILTER ( regex(str(?type),"http://www.w3.org/2002/07/owl") )
 
 } ORDER BY ?proplabel', 'http://hxl.humanitarianresponse.info/sparql');
 
-	echo '<div class="step4"><ul class="nav nav-pills properties">
+	echo '<div class="step4"><h3>Properties (hover for explanations)</h3><ul class="nav nav-pills properties">
 	  ';
 		
 	  $label = "proplabel";

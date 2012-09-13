@@ -214,26 +214,32 @@ function mapProperty($inputMapping){
 		
 	//next step: show properties: 
 	$('.shortguide').slideUp(function(){
-		$('.shortguide').html('<p class="lead">In HXL, any '+$mapping.classsingular+' can have the following properties (hover for explanations):</p>');	
-			
 		$.get('properties4class.php?classuri='+$mapping.classuri, function(data){
-			$('.shortguide').append(data);	
 			
-			tagMappedCellsAndProps($mapping);
-			
+			var $hint = '';
+
 			// if there are already any mappings (i.e., at least one tagged property button), show a different text:
 			if($('a.mapped').length > 0){
-				$('.shortguide').append('<p class="lead">Keep doing this (select one or more cells, then select a property) until you have mapped all cells in the selected row. Keep in mind that a cell may address several properties, or a property may be addressed by several cells. Are you <a href="#" id="done" class="btn btn-info">done?</a></p><p align="right"><i class="icon-hand-right"></i> Made a mistake? You can always go back using the buttons at the top right.</p>');
+				$('.shortguide').html('<p class="lead">Keep doing this (select one or more cells, then select a property) until you have mapped all cells in the selected row. Keep in mind that a cell may address several properties, or a property may be addressed by several cells. Are you <a href="#" id="done" class="btn btn-info">done?</a></p>');
+
+				$hint = '<p align="right"><i class="icon-hand-right"></i> Made a mistake? You can always go back using the buttons at the top right.</p>';
 
 				$('a#done').click(function(){
 					checkProperties($mapping);
 				});
 
 			}else{
-				$('.shortguide').append('<p class="lead">Pick a cell or set of cells from the selected row that provide some information about one of the HXL properties listed above. Then click the property to which the data in this cell applies. Note that a given cell (or set of cells) may address several properties.</p><p align="right"><i class="icon-hand-right"></i> Use <code>shift</code> to select a range of cells.</p>');
+				$('.shortguide').html('<p class="lead">In HXL, any '+$mapping.classsingular+' can have the following properties. Pick a cell or set of cells from the selected row that provide some information about one of the HXL properties listed above. Then click the property to which the data in this cell applies. Note that a given cell (or set of cells) may address several properties.</p>');
+
+				$hint = '<p align="right"><i class="icon-hand-right"></i> Use <code>shift</code> to select a range of cells.</p>';
 			}
 			
-			$('.shortguide').slideDown();
+			$('.shortguide').append(data);	
+			
+			tagMappedCellsAndProps($mapping);		
+
+
+			$('.shortguide').append($hint).slideDown();
 			
 			//explanation popovers for hxl properties:
 			// placement function makes sure the popover stay within the page, via http://stackoverflow.com/questions/10238089/how-can-you-ensure-twitter-bootstrap-popover-windows-are-visible
