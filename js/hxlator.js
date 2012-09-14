@@ -230,7 +230,7 @@ function mapProperty($inputMapping){
 				});
 
 			}else{
-				$('.shortguide').html('<p class="lead alert"><strong>Step 3:</strong> In HXL, any '+$mapping.classsingular+' can have the following properties. Pick a cell or set of cells from the selected row that provide some information about one of the HXL properties listed above. Then click the property to which the data in this cell applies. Note that a given cell (or set of cells) may address several properties.</p>');
+				$('.shortguide').html('<p class="lead alert"><strong>Step 3:</strong> In HXL, any '+$mapping.classsingular+' can have the following properties. <br />3a: Pick a cell or set of cells from the selected row that provide some information about one of the HXL properties listed above.<br />3b: Then click the property to which the data in this cell applies.<br /> <span class="muted">Note that a given cell (or set of cells) may address several properties.</span></p>');
 
 				$hint = '<p align="right"><i class="icon-hand-right"></i> Use <code>shift</code> to select a range of cells.</p>';
 			}
@@ -564,6 +564,9 @@ function mappingModal($inputMapping, $propName, $propURI, $propType, $propRange,
 		
 	$('#mappingModal').modal('show');
 }
+
+
+
 
 // generates the modal contents to map object properties (with URI lookup)
 function mapWithURILookup($inputMapping, $propName, $propURI, $propType, $propRange, $propRangeName){
