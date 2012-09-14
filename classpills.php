@@ -3,7 +3,7 @@
 	include_once('functions.php');
 	
 	echo '<div class="step1">
-	<h2>Step 1: What is the data in this spreadsheet <em>primarily</em> about? Hover for explanations: </h2>
+	<p class="lead alert"><strong>Step 1</strong>: What is the data in this spreadsheet <em>primarily</em> about? Hover for explanations: </p>
 	<div class="row">';
 	
 	echo getClassPills();

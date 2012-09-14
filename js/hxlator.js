@@ -179,7 +179,7 @@ function selectRow($inputMapping){
 	$('.hxlatorcell').unbind();
 	
 	$('.shortguide').slideUp(function(){		
-		$('.shortguide').html('<p class="lead selectedclass" style="visibility: none"><strong>Step 2:</strong> Please click on the <strong>first</strong> row that contains <span class="label label-important" style="font-size: 1em">data</span> about a '+$mapping.classsingular+'/'+ $mapping.classplural +'.</p><p align="right"><i class="icon-hand-right"></i> Careful!  Don\'t pick the header row, but the first row containing actual data.</p>');	
+		$('.shortguide').html('<p class="lead alert selectedclass" style="visibility: none"><strong>Step 2:</strong> Please click on the <strong>first</strong> row that contains <span class="label label-important" style="font-size: 1em">data</span> about a '+$mapping.classsingular+'/'+ $mapping.classplural +'.</p><p align="right"><i class="icon-hand-right"></i> Careful!  Don\'t pick the header row, but the first row containing actual data.</p>');	
 		$('.shortguide').slideDown();
 		$('.hxlatorrow').unbind();
 		// put a click listener on the table rows:
@@ -230,7 +230,7 @@ function mapProperty($inputMapping){
 				});
 
 			}else{
-				$('.shortguide').html('<p class="lead"><strong>Step 3:</strong> In HXL, any '+$mapping.classsingular+' can have the following properties. Pick a cell or set of cells from the selected row that provide some information about one of the HXL properties listed above. Then click the property to which the data in this cell applies. Note that a given cell (or set of cells) may address several properties.</p>');
+				$('.shortguide').html('<p class="lead alert"><strong>Step 3:</strong> In HXL, any '+$mapping.classsingular+' can have the following properties. Pick a cell or set of cells from the selected row that provide some information about one of the HXL properties listed above. Then click the property to which the data in this cell applies. Note that a given cell (or set of cells) may address several properties.</p>');
 
 				$hint = '<p align="right"><i class="icon-hand-right"></i> Use <code>shift</code> to select a range of cells.</p>';
 			}
@@ -305,7 +305,7 @@ function enableRowSelection($inputMapping){
 	// make sure we don't modify the original array entry:
 	var $mapping = $.extend(true, {}, $inputMapping);
 
-	$('.shortguide').html('<p class="lead"><strong>Step 4:</strong> Please select all rows now that you want to HXLate. Note that they must have the same structure as the row you have been working on so far. <a href="#" id="done-rows" class="btn btn-info">Done?</a></p><p align="right"><i class="icon-hand-right"></i> Use <code>shift</code> again to select a range of rows.</p>');
+	$('.shortguide').html('<p class="lead alert"><strong>Step 4:</strong> Please select all rows now that you want to HXLate. Note that they must have the same structure as the row you have been working on so far. <a href="#" id="done-rows" class="btn btn-info">Done?</a></p><p align="right"><i class="icon-hand-right"></i> Use <code>shift</code> again to select a range of rows.</p>');
 
 	$('tr.hxlatorrow').removeClass('highlight');
 
@@ -537,7 +537,7 @@ function mappingModal($inputMapping, $propName, $propURI, $propType, $propRange,
 	$('#mappingModal > .modal-footer').html('<i class="icon-hand-right"></i> Don\'t worry about doing anything wrong here, you can always go back to fix it later.</p><p><i class="icon-hand-right"></i> If you want to peek at your spreadsheet, you can always hide this popup by pressing the <code>CTRL</code> key. Pressing it again will bring the popup back.</p><a href="#" id="storeMapping" class="btn btn-primary">Store mapping</a><a href="#" class="btn" data-dismiss="modal">Cancel</a>');
 	
 	if($propType == 'http://www.w3.org/2002/07/owl#DataProperty'){
-		$('#mappingModal > .modal-body').html('<p>You can either <a href="#" class="btn" id="mapCellValues">map each cell to the value it contains</a> or <a href="#" class="btn" id="mapDifferentValues">map it to a different value</a>.</p><div id="value-input" style="display: none"></div>');
+		$('#mappingModal > .modal-body').html('<p>You can either <a href="#" class="btn" id="mapCellValues">use the values in the selected cell(s)</a> or <a href="#" class="btn" id="mapDifferentValues">use a different value</a></p><div id="value-input" style="display: none"></div>');
 		
 		$('#mapCellValues').click(function(){
 			$(this).addClass('btn-info');
@@ -741,7 +741,7 @@ function mapDifferentValues($inputMapping, $propName, $propURI, $propType, $prop
 
 			//show 'copy' button if there is more than one cell selected
 			if($('.selected').length > 1){
-			 	$('#value-input').append('<br /><a href="#" class="btn btn-small disabled adoptforall" data-cellid="'+$(this).attr('data-cellid')+'">Adopt this value for all cells</a>');
+			 	$('#value-input').append('<br /><a href="#" class="btn btn-small disabled adoptforall" data-cellid="'+$(this).attr('data-cellid')+'">Adopt this value for all selected cells</a>');
 			 
 			 	var $cell = $(this).attr('data-cellid');
 			 	var $selecta = 'input[data-value-subject="'+ $cell +'"]';
