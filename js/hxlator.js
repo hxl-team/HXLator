@@ -1352,7 +1352,7 @@ function updateTablePreview($mapping){
     	    $table += '<tr>';
 	        $table += '<th>'+$subjuri.substr(5)+'</th>';
 	        // now go through all predicates and check whether we have a value for this one:
-	        $.each($predicates, function($i, $p){		
+	        $.each($predicates, function($j, $p){		
 	        	$table += '<td>';
 	        	$.each($triples['triples'], function($i, $triple){
 	        	    if($triple['predicate'] == $p){
@@ -1378,7 +1378,7 @@ function updateTablePreview($mapping){
 									success: function( data ) { 
 										$.map( data.results.bindings, function( result ) {
 										 	$names[$uri] = result.name.value;
-										 	$table += '<a href="'+$uri.substr(1,$uri.length-2)+'" target="_blank">'+result.name.value+'</a>';
+										 	$table += '<a href="'+$uri.substr(1,$uri.length-2)+'" target="_blank">'+result.name.value+'</a> | ';										 	
 										});
 
 										$('#loading').hide();
@@ -1388,14 +1388,22 @@ function updateTablePreview($mapping){
 									}
 								});
 							}else{
-								$table += '<a href="'+$uri.substr(1,$uri.length-2)+'" target="_blank">'+$names[$uri]+'</a>';
+								$table += '<a href="'+$uri.substr(1,$uri.length-2)+'" target="_blank">'+$names[$uri]+'</a>'+ ' | ';;							   
 							}
 
     		            } else {
-    		                $table += $triple['object'];
+    		                $table += $triple['object']+ ' | ';
+		        	        
     		            }
 		        	}
+		        		        	
 		        });
+				if($table.indexOf(' | ', $table.length - 3) !== -1){
+				    console.log('yep');
+					$table = $table.substring(0, $table.length -3);
+				}else{
+				    console.log($table+'X');
+				}
 		        $table += '</td>';
 	        });
 	        $table += '</tr>';   
@@ -1521,7 +1529,6 @@ window.onbeforeunload = function (e) {
 	// For Safari
 	return message;
 };
-
 
 // Array Remove - By John Resig (MIT Licensed)
 Array.prototype.remove = function(from, to) {
