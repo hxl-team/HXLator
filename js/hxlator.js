@@ -657,6 +657,10 @@ function mapWithURILookup($inputMapping, $propName, $propURI, $propType, $propRa
 				
 						$query = 'prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> prefix hxl: <http://hxl.humanitarianresponse.info/ns/#> SELECT * WHERE { ?value rdf:type/rdfs:subClassOf* <'+$propRange+'> . ?value hxl:featureName ?label . ?value hxl:atLocation* ?location . ?location a hxl:Country ; hxl:featureName ?country .   FILTER regex(?label, "'+request.term+'", "i") } ORDER BY ?label';
 
+					}else if ($propRange == 'http://hxl.humanitarianresponse.info/ns/#AgeGroup'){
+						
+						$query = 'PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX hxl: <http://hxl.humanitarianresponse.info/ns/#> PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> SELECT DISTINCT ?set ?setTitle ?group ?groupTitle WHERE { ?set a hxl:AgeGroupSet ; hxl:title ?setTitle ; ?foo ?group . ?group a hxl:AgeGroup ; hxl:title ?groupTitle. FILTER regex(?groupTitle, "'+request.term+'", "i") } ORDER BY ?groupTitle';
+						
 					}else if ($propRange == 'http://hxl.humanitarianresponse.info/ns/#AdminUnitLevel'){
 						
 						$query = 'prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> prefix hxl: <http://hxl.humanitarianresponse.info/ns/#> SELECT * WHERE { ?value rdf:type/rdfs:subClassOf* <'+$propRange+'> . ?value hxl:adminUnitLevelTitle ?label . FILTER regex(?label, "'+request.term+'", "i") } ORDER BY ?label';
@@ -694,6 +698,12 @@ function mapWithURILookup($inputMapping, $propName, $propURI, $propType, $propRa
 									return {
 										value: result.label.value+ ' ('+result.country.value+')',
 										uri: result.value.value
+									}
+								// special handling for age groups to include the age group set title:
+								}else if($propRange == 'http://hxl.humanitarianresponse.info/ns/#AgeGroup'){
+									return {
+										value: result.groupTitle.value+ ' ('+result.setTitle.value+')',
+										uri: result.group.value
 									}
 								}else{
 									return {
