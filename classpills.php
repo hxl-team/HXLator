@@ -66,7 +66,7 @@
 		}
 	
 		if($superclass != null){
-			$pills .= '<li><a href="#" class="hxlclass hxlclass-selectable" rel="popover" title="Different '.$superclassLabelPlural.'" data-content="Select this option if you have a mix of different '.$superclassLabelPlural.' in your data." classuri="'.shorten($superclass, 'hxl').'" singular="'.$superclassLabel.'" plural="'.$superclassLabelPlural.'">It is a <em>mix</em> of these.</a></li>';
+			$pills .= '<li><a href="#" class="hxlclass hxlclass-selectable" rel="popover" title="Different '.$superclassLabelPlural.'" data-content="Select this option if you have a mix of different '.$superclassLabelPlural.' in your data." classuri="'.shorten($superclass, 'hxl').'" singular="'.$superclassLabel.'" plural="'.$superclassLabelPlural.'">My data is a <em>mix</em> of these.</a></li>';
 		}
 		
 		$pills .= '</ul></div>
