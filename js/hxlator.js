@@ -230,7 +230,7 @@ function mapProperty($inputMapping){
 				});
 
 			}else{
-				$('.shortguide').html('<p class="lead alert"><strong>Step 3:</strong> In HXL, any '+$mapping.classsingular+' can have the following properties. <br />3a: Pick a cell or set of cells from the selected row that provide some information about one of the HXL properties listed above.<br />3b: Then click the property to which the data in this cell applies.<br /> <span class="muted">Note that a given cell (or set of cells) may address several properties.</span></p>');
+				$('.shortguide').html('<p class="lead alert"><strong>Step 3:</strong> In HXL, any '+$mapping.classsingular+' can have the following properties. <br />3a: Pick a cell or set of cells from the selected row that provide some information about one of the listed HXL properties.<br />3b: Then click the property to which the data in this cell applies.<br /> <span class="muted">Note that a given cell (or set of cells) may address several properties.</span></p>');
 
 				$hint = '<p align="right"><i class="icon-hand-right"></i> Use <code>shift</code> to select a range of cells.</p>';
 			}
@@ -691,28 +691,36 @@ function mapWithURILookup($inputMapping, $propName, $propURI, $propType, $propRa
 							query: $query 
 						},							
 						success: function( data ) {
-							response( $.map( data.results.bindings, function( result ) {
-								
-								// special handling of Features to show the country they are in:
-								if($propRange == 'http://hxl.humanitarianresponse.info/ns/#AdminUnit' || $propRange == 'http://hxl.humanitarianresponse.info/ns/#Country' || $propRange == 'http://www.opengis.net/geosparql#Feature'){
-									return {
-										value: result.label.value+ ' ('+result.country.value+')',
-										uri: result.value.value
+
+							if(!data.results.bindings.length){ // no results
+								response([{
+									value: 'No matching results found.',
+									uri: '<>'
+								}]);
+							}else{				
+								response( $.map( data.results.bindings, function( result ) {
+									
+									// special handling of Features to show the country they are in:
+									if($propRange == 'http://hxl.humanitarianresponse.info/ns/#AdminUnit' || $propRange == 'http://hxl.humanitarianresponse.info/ns/#Country' || $propRange == 'http://www.opengis.net/geosparql#Feature'){
+										return {
+											value: result.label.value+ ' ('+result.country.value+')',
+											uri: result.value.value
+										}
+									// special handling for age groups to include the age group set title:
+									}else if($propRange == 'http://hxl.humanitarianresponse.info/ns/#AgeGroup'){
+										return {
+											value: result.groupTitle.value+ ' ('+result.setTitle.value+')',
+											uri: result.group.value
+										}
+									}else{
+										return {
+											value: result.label.value,
+											uri: result.value.value
+										}
 									}
-								// special handling for age groups to include the age group set title:
-								}else if($propRange == 'http://hxl.humanitarianresponse.info/ns/#AgeGroup'){
-									return {
-										value: result.groupTitle.value+ ' ('+result.setTitle.value+')',
-										uri: result.group.value
-									}
-								}else{
-									return {
-										value: result.label.value,
-										uri: result.value.value
-									}
-								}
-								
-							}));
+									
+								}));
+							}
 							$('#modal-loading').hide();
 						},
 						error: function($jqXHR, $textStatus, $errorThrown){
@@ -1008,14 +1016,20 @@ function lookUpModal($inputMapping, $missing, $final){
 									query: $query 
 								},							
 								success: function( data ) {
-									response( $.map( data.results.bindings, function( result ) {
-																				
-										return {
-											value: result.label.value+' ('+result.typelabel.value+')',
-											uri: result.uri.value
-										}
-										
-									}));
+									if(!data.results.bindings.length){ // no results
+										response([{
+											value: 'No matching results found.',
+											uri: '<>'
+										}]);
+									}else{
+										response( $.map( data.results.bindings, function( result ) {
+											return {
+												value: result.label.value+' ('+result.typelabel.value+')',
+												uri: result.uri.value
+											}										
+										}));	
+									}
+									
 									$('#modal-loading').hide();
 								},
 								error: function($jqXHR, $textStatus, $errorThrown){

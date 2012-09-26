@@ -122,18 +122,20 @@ getHead("index.php", $user_name, $user_organisation);
 		$("#emergencies").autocomplete({
 			source: function(request, response) {
 		       	var results = $.ui.autocomplete.filter(emergencies, request.term);
-		     	
-	    		response(results);
+		     	if(!results.length){
+		     		response(["<span style=\"color:red\">No matching emergencies found.</span>"]);
+		     	}else{
+		     		response(results);
+		     	}		     	
             },
             select: function(event, ui) {
-                $("#emergency").val(ui.item.uri);
-                console.log(ui.item.uri);
+                $("#emergency").val(ui.item.uri);                
             }
         }).data("autocomplete")._renderItem = function(ul, item) {
             return $("<li></li>")
-            .data("item.autocomplete", item)
-            .append("<a>" + item.label + "<br /></a>")
-            .appendTo(ul);
+            	.data("item.autocomplete", item)
+            	.append("<a>" + item.label + "<br /></a>")
+            	.appendTo(ul);
         };
     
 	    ';
