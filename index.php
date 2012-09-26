@@ -29,8 +29,7 @@ getHead("index.php", $user_name, $user_organisation);
             	<label for="emergencies">Emergency: </label>
             	<div class="controls">
             		<input type="text" id="emergencies" name="selectemergency" /> <span style="margin-left: 20px;"><em>Start typing and select from the emergencies list.</em></span><br />
-            		<input type="hidden" name="emergency" id="emergency">
-            		<!-- <small id="emergencyuri"></small> -->
+            		<input type="hidden" name="emergency" id="emergency">            		
             	</div>
             </div>
 
@@ -87,19 +86,14 @@ getHead("index.php", $user_name, $user_organisation);
 	<script>document.getElementById('emergencies').focus()</script>
 
 <?php
-	$customJS = emergencyQuery();
-	getFoot(array('jquery-ui-1.8.21.custom.min.js'), $customJS ); 
-
-	
 	/*
 	 * Generates the autocomplete field for the emergency selection:
 	 */
-	function emergencyQuery()
-	{
+	function emergencyQuery(){
 	    $emergencies = sparqlQuery('SELECT DISTINCT ?uri ?label WHERE {
-	        GRAPH <http://hxl.humanitarianresponse.info/data/reference/fts-emergencies-2012> {
-	            ?uri hxl:commonTitle ?label .
-	        }
+	            ?uri a hxl:Emergency; 
+	                 hxl:commonTitle ?label .
+	        
 	    } ORDER BY ?label');
 	    
 	    $label = "label";
@@ -132,8 +126,8 @@ getHead("index.php", $user_name, $user_organisation);
 	    		response(results);
             },
             select: function(event, ui) {
-                // $("#emergencyuri").html("URI for this emergency: <a href=\'"+ui.item.uri+"\' target=\'_blank\'>"+ui.item.uri+"</a>");
                 $("#emergency").val(ui.item.uri);
+                console.log(ui.item.uri);
             }
         }).data("autocomplete")._renderItem = function(ul, item) {
             return $("<li></li>")
@@ -146,6 +140,11 @@ getHead("index.php", $user_name, $user_organisation);
 	    
 	    return $elist;
 	}
+
+	$customJS = emergencyQuery();
+	getFoot(array('jquery-ui-1.8.21.custom.min.js'), $customJS ); 
+
+
 } else {
 	getFoot(array('jquery-ui-1.8.21.custom.min.js'), null );
 }
