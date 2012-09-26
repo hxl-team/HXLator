@@ -1,4 +1,5 @@
 var $debug = false;
+var $showInstructions = true;
 
 var $names = new Object(); // stores names for URIs based on dc:title, hxl:featureName, etc.
 
@@ -179,7 +180,7 @@ function selectRow($inputMapping){
 	$('.hxlatorcell').unbind();
 	
 	$('.shortguide').slideUp(function(){		
-		$('.shortguide').html('<p class="lead alert selectedclass" style="visibility: none"><strong>Step 2:</strong> Please click on the <strong>first</strong> row that contains <span class="label label-important" style="font-size: 1em">data</span> about a '+$mapping.classsingular+'/'+ $mapping.classplural +'.</p><p align="right"><i class="icon-hand-right"></i> Careful!  Don\'t pick the header row, but the first row containing actual data.</p>');	
+		$('.shortguide').html('<p class="lead alert selectedclass instr" style="visibility: none"><strong>Step 2:</strong> Please click on the <strong>first</strong> row that contains <span class="label label-important" style="font-size: 1em">data</span> about a '+$mapping.classsingular+'/'+ $mapping.classplural +'.</p><p align="right"><i class="icon-hand-right"></i> Careful!  Don\'t pick the header row, but the first row containing actual data.</p>');	
 		$('.shortguide').slideDown();
 		$('.hxlatorrow').unbind();
 		// put a click listener on the table rows:
@@ -221,7 +222,7 @@ function mapProperty($inputMapping){
 
 			// if there are already any mappings (i.e., at least one tagged property button), show a different text:
 			if($('a.mapped').length > 0){
-				$('.shortguide').html('<p class="lead">Keep doing this (select one or more cells, then select a property) until you have mapped all cells in the selected row. Keep in mind that a cell may address several properties, or a property may be addressed by several cells. Are you <a href="#" id="done" class="btn btn-info">done?</a></p>');
+				$('.shortguide').html('<p class="lead instr">Keep doing this (select one or more cells, then select a property) until you have mapped all cells in the selected row. Keep in mind that a cell may address several properties, or a property may be addressed by several cells. Are you <a href="#" id="done" class="btn btn-info">done?</a></p><p align="right" id="togglep"><a href="#" id="toggle" class="btn btn-mini"><i class="icon-resize-vertical"></i> Toggle instructions</a></p>');
 
 				$hint = '<p align="right"><i class="icon-hand-right"></i> Made a mistake? You can always go back using the buttons at the top right.</p>';
 
@@ -230,17 +231,29 @@ function mapProperty($inputMapping){
 				});
 
 			}else{
-				$('.shortguide').html('<p class="lead alert"><strong>Step 3:</strong> In HXL, any '+$mapping.classsingular+' can have the following properties. <br />3a: Pick a cell or set of cells from the selected row that provide some information about one of the listed HXL properties.<br />3b: Then click the property to which the data in this cell applies.<br /> <span class="muted">Note that a given cell (or set of cells) may address several properties.</span></p>');
+				$('.shortguide').html('<p class="lead alert instr"><strong>Step 3:</strong> In HXL, any '+$mapping.classsingular+' can have the following properties. <br />3a: Pick a cell or set of cells from the selected row that provide some information about one of the listed HXL properties.<br />3b: Then click the property to which the data in this cell applies.<br /> <span class="muted">Note that a given cell (or set of cells) may address several properties.</span></p><p align="right" id="togglep"><a href="#" id="toggle" class="btn btn-mini"><i class="icon-resize-vertical"></i> Toggle instructions</a></p>');
 
 				$hint = '<p align="right"><i class="icon-hand-right"></i> Use <code>shift</code> to select a range of cells.</p>';
 			}
 			
+			//hide instructions if they were hidden before:
+			if(!$showInstructions){
+				$('p.instr').hide();
+			}
+			// enable toggling of instructions:
+			$('#toggle').unbind();
+			$('#toggle').click(function(){
+				$('p.instr').toggle('fast');
+				$showInstructions = !$showInstructions;
+			});
+
+
 			$('.shortguide').append(data);	
-			
+
 			tagMappedCellsAndProps($mapping);		
 
 
-			$('.shortguide').append($hint).slideDown();
+			$('.shortguide').append($hint).slideDown();			
 			
 			//explanation popovers for hxl properties:
 			// placement function makes sure the popover stay within the page, via http://stackoverflow.com/questions/10238089/how-can-you-ensure-twitter-bootstrap-popover-windows-are-visible
@@ -305,7 +318,7 @@ function enableRowSelection($inputMapping){
 	// make sure we don't modify the original array entry:
 	var $mapping = $.extend(true, {}, $inputMapping);
 
-	$('.shortguide').html('<p class="lead alert"><strong>Step 4:</strong> Please select all rows now that you want to HXLate. Note that they must have the same structure as the row you have been working on so far. <a href="#" id="done-rows" class="btn btn-info">Done?</a></p><p align="right"><i class="icon-hand-right"></i> Use <code>shift</code> again to select a range of rows.</p>');
+	$('.shortguide').html('<p class="lead alert instr"><strong>Step 4:</strong> Please select all rows now that you want to HXLate. Note that they must have the same structure as the row you have been working on so far. <a href="#" id="done-rows" class="btn btn-info">Done?</a></p><p align="right"><i class="icon-hand-right"></i> Use <code>shift</code> again to select a range of rows.</p>');
 
 	$('tr.hxlatorrow').removeClass('highlight');
 
