@@ -685,9 +685,9 @@ function mapWithURILookup($inputMapping, $propName, $propURI, $propType, $propRa
 					// select the query based on the range of this property:
 					var $query = '';
 				
-					if($propRange == 'http://hxl.humanitarianresponse.info/ns/#AdminUnit' || $propRange == 'http://hxl.humanitarianresponse.info/ns/#Country' || $propRange == 'http://www.opengis.net/geosparql#Feature'){
+					if($propRange == 'http://hxl.humanitarianresponse.info/ns/#AdminUnit' || $propRange == 'http://hxl.humanitarianresponse.info/ns/#APL' ||$propRange == 'http://hxl.humanitarianresponse.info/ns/#Country' || $propRange == 'http://www.opengis.net/geosparql#Feature'){
 				
-						$query = 'prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> prefix hxl: <http://hxl.humanitarianresponse.info/ns/#> SELECT * WHERE { ?value rdf:type/rdfs:subClassOf* <'+$propRange+'> . ?value hxl:featureName ?label . ?value hxl:atLocation* ?location . ?location a hxl:Country ; hxl:featureName ?country .   FILTER regex(?label, "'+request.term+'", "i") } ORDER BY ?label';
+						$query = 'prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> prefix hxl: <http://hxl.humanitarianresponse.info/ns/#> prefix skos: <http://www.w3.org/2004/02/skos/core#> SELECT * WHERE { ?value rdf:type/rdfs:subClassOf* <'+$propRange+'>; a ?type ; hxl:featureName ?label ; hxl:atLocation* ?location ; hxl:pcode ?pcode . ?type skos:prefLabel ?typeLabel . ?location a hxl:Country ; hxl:featureName ?country .   FILTER regex(?label, "'+request.term+'", "i") } ORDER BY ?label';
 
 					}else if ($propRange == 'http://hxl.humanitarianresponse.info/ns/#AgeGroup'){
 						
@@ -732,9 +732,9 @@ function mapWithURILookup($inputMapping, $propName, $propURI, $propType, $propRa
 								response( $.map( data.results.bindings, function( result ) {
 									
 									// special handling of Features to show the country they are in:
-									if($propRange == 'http://hxl.humanitarianresponse.info/ns/#AdminUnit' || $propRange == 'http://hxl.humanitarianresponse.info/ns/#Country' || $propRange == 'http://www.opengis.net/geosparql#Feature'){
+									if($propRange == 'http://hxl.humanitarianresponse.info/ns/#AdminUnit' || $propRange == 'http://hxl.humanitarianresponse.info/ns/#APL' || $propRange == 'http://hxl.humanitarianresponse.info/ns/#Country' || $propRange == 'http://www.opengis.net/geosparql#Feature'){
 										return {
-											value: result.label.value+ ' ('+result.country.value+')',
+											value: result.label.value+ ' ('+result.typeLabel.value+' in '+result.country.value+', P-Code: '+result.pcode.value+')',
 											uri: result.value.value
 										}
 									// special handling for age groups to include the age group set title:
@@ -997,7 +997,7 @@ function lookUpModal($inputMapping, $missing, $final){
 			$('#mappingModal > .modal-body').append('<div class="row"><div class="span2"><h3><code>'+$miss.term+'</code></h3></div><div class="span3" for-term="'+$miss.term+'"></div></div><hr />');
 
 
-			$query = 'prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> prefix skos: <http://www.w3.org/2004/02/skos/core#> prefix hxl: <http://hxl.humanitarianresponse.info/ns/#> prefix dct: <http://purl.org/dc/terms/>  prefix foaf: <http://xmlns.com/foaf/0.1/> prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> SELECT DISTINCT ?uri ?label ?typelabel WHERE {'+$miss.predicate+' rdfs:range ?range . ?uri rdf:type/rdfs:subClassOf* ?range; a ?type . { ?type skos:prefLabel ?typelabel } UNION { ?type rdfs:label ?typelabel } { ?uri hxl:featureRefName ?label } UNION { ?uri hxl:commonTitle ?label }UNION { ?uri dct:title ?label } UNION { ?uri foaf:name ?label } UNION { ?uri hxl:abbreviation ?label } UNION { ?uri hxl:adminUnitLevelTitle ?label } UNION { ?uri hxl:orgName ?label } UNION { ?uri hxl:title ?label } FILTER regex(?label, "'+$miss.term+'", "i") } ORDER BY ?label';
+			var $query = 'prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> prefix skos: <http://www.w3.org/2004/02/skos/core#> prefix hxl: <http://hxl.humanitarianresponse.info/ns/#> prefix dct: <http://purl.org/dc/terms/>  prefix foaf: <http://xmlns.com/foaf/0.1/> prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> SELECT DISTINCT ?uri ?label ?typelabel ?pcode ?loc WHERE {'+$miss.predicate+' rdfs:range ?range . ?uri rdf:type/rdfs:subClassOf* ?range; a ?type . { ?type skos:prefLabel ?typelabel } UNION { ?type rdfs:label ?typelabel } { ?uri hxl:featureRefName ?label } UNION { ?uri hxl:commonTitle ?label }UNION { ?uri dct:title ?label } UNION { ?uri foaf:name ?label } UNION { ?uri hxl:abbreviation ?label } UNION { ?uri hxl:adminUnitLevelTitle ?label } UNION { ?uri hxl:orgName ?label } UNION { ?uri hxl:title ?label } OPTIONAL {?uri hxl:atLocation* ?location ; hxl:pcode ?pcode . ?location hxl:featureName ?loc; a hxl:Country . } FILTER regex(?label, "'+$miss.term+'", "i") } ORDER BY ?label';
 
 			$.ajax({
 				url: 'http://hxl.humanitarianresponse.info/sparql',
@@ -1010,7 +1010,11 @@ function lookUpModal($inputMapping, $missing, $final){
 				success: function( data ) {
 
 					$.each(data.results.bindings, function(i, result) {
-						$('div[for-term="'+$miss.term+'"]').append('<label class="radio"><input type="radio" name="'+$miss.term+'" class="rdio" value="'+result.uri.value+'">'+result.label.value+' ('+result.typelabel.value+')<br /><small><a href="'+result.uri.value+'" target="_blank">'+result.uri.value+'</a></small></label>');
+						var placeInfo = '';
+						if(result.pcode.value != undefined && result.loc.value != undefined){
+							placeInfo = ' in ' + result.loc.value + '; P-Code '+result.pcode.value;
+						}
+						$('div[for-term="'+$miss.term+'"]').append('<label class="radio"><input type="radio" name="'+$miss.term+'" class="rdio" value="'+result.uri.value+'">'+result.label.value+' (' + result.typelabel.value + placeInfo + ')<br /><small><a href="'+result.uri.value+'" target="_blank">'+result.uri.value+'</a></small></label>');
 					});
 
 					// if there are no results:
@@ -1041,7 +1045,7 @@ function lookUpModal($inputMapping, $missing, $final){
 						source: function( request, response ) {
 							
 							// query based on user input:
-							var $query = 'prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> prefix skos: <http://www.w3.org/2004/02/skos/core#> prefix hxl: <http://hxl.humanitarianresponse.info/ns/#> prefix dct: <http://purl.org/dc/terms/>  prefix foaf: <http://xmlns.com/foaf/0.1/> prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> SELECT DISTINCT ?uri ?label ?typelabel WHERE {'+$miss.predicate+' rdfs:range ?range . ?uri rdf:type/rdfs:subClassOf* ?range; a ?type . { ?type skos:prefLabel ?typelabel } UNION { ?type rdfs:label ?typelabel } { ?uri hxl:featureRefName ?label } UNION { ?uri hxl:commonTitle ?label }UNION { ?uri dct:title ?label } UNION { ?uri foaf:name ?label } UNION { ?uri hxl:abbreviation ?label } UNION { ?uri hxl:adminUnitLevelTitle ?label } UNION { ?uri hxl:orgName ?label } UNION { ?uri hxl:title ?label } FILTER regex(?label, "'+request.term+'", "i") } ORDER BY ?label';
+							var $query = 'prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> prefix skos: <http://www.w3.org/2004/02/skos/core#> prefix hxl: <http://hxl.humanitarianresponse.info/ns/#> prefix dct: <http://purl.org/dc/terms/>  prefix foaf: <http://xmlns.com/foaf/0.1/> prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> SELECT DISTINCT ?uri ?label ?typelabel ?pcode ?loc WHERE {'+$miss.predicate+' rdfs:range ?range . ?uri rdf:type/rdfs:subClassOf* ?range; a ?type . { ?type skos:prefLabel ?typelabel } UNION { ?type rdfs:label ?typelabel } { ?uri hxl:featureRefName ?label } UNION { ?uri hxl:commonTitle ?label }UNION { ?uri dct:title ?label } UNION { ?uri foaf:name ?label } UNION { ?uri hxl:abbreviation ?label } UNION { ?uri hxl:adminUnitLevelTitle ?label } UNION { ?uri hxl:orgName ?label } UNION { ?uri hxl:title ?label } OPTIONAL {?uri hxl:atLocation* ?location ; hxl:pcode ?pcode . ?location hxl:featureName ?loc; a hxl:Country . } FILTER regex(?label, "'+request.term+'", "i") } ORDER BY ?label';
 
 							
 							$('#modal-loading').show();
@@ -1060,11 +1064,20 @@ function lookUpModal($inputMapping, $missing, $final){
 											uri: '<>'
 										}]);
 									}else{
-										response( $.map( data.results.bindings, function( result ) {
-											return {
+										response( $.map( data.results.bindings, function( result ){
+											// special handling for features:
+											if(result.loc != undefined && result.pcode != undefined){
+												return {
+													value: result.label.value+ ' ('+result.typelabel.value+' in '+result.loc.value+', P-Code: '+result.pcode.value+')',
+													uri: result.uri.value
+												}
+											}else{
+												return {
 												value: result.label.value+' ('+result.typelabel.value+')',
 												uri: result.uri.value
-											}										
+											}	
+											}	
+																					
 										}));	
 									}
 									
