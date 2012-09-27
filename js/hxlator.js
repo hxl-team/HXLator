@@ -400,9 +400,13 @@ function checkAllRows($inputMapping){
 	$.each($mapping.templates, function($i, $template){
 		$.each($template.triples, function($i, $triple){
 			if($triple.object.indexOf('@lookup') == 0){
-				var $thisColumn = $triple.object.substr(8);
-				if($lookUpColumns.indexOf($thisColumn) == -1){ // only add it if we don't have it yet
-					$lookUpColumns.push($thisColumn);
+				
+				var $pusher = new Object;
+				$pusher['column'] = $triple.object.substr(8);;
+				$pusher['predicate'] = $triple.predicate;
+					
+				if($lookUpColumns.indexOf($pusher) == -1){ // only add if we don't have it yet
+					$lookUpColumns.push($pusher);
 				}
 			}
 		});
@@ -420,8 +424,10 @@ function checkAllRows($inputMapping){
 		var $sheet = $rowid[0];
 		var $row = $rowid[1];
 
-		$.each($lookUpColumns, function($i, $column){
+		$.each($lookUpColumns, function($i, $lc){
 			
+			$column = $lc.column;			
+
 			$columnsheet = $column.split('-')[0];
 			$columncol = $column.split('-')[1];
 			$columnrow = $column.split('-')[2];
@@ -430,15 +436,19 @@ function checkAllRows($inputMapping){
 			var $val = $('td[data-cellid="'+$shiftedLookup+'"]').html();
 			var $val = trim($val); // remove extra white space
 
-
 			// check if the cell is in the sampleRow, or outside
-			// if it is outside, do not "move" it to the current row (ignore it, it has already been added to the lookup table)
+			// if it is outside, do not "move" it to the current row (ignore it, it has already 
+			// been added to the lookup table)
 			// also, check if the value is already in the lookup table in the mapping 
 			// and not yet in the lookup array we are currently filling
-			if($val != '' && $columnrow == $samplerow && $mapping.lookup[$val] == undefined && $lookUpTerms.indexOf($val) == -1){
-				
-				$lookUpTerms.push($val);
-				// console.log('Value in cell ' + $shiftedLookup + ': ' + $('td[data-cellid="'+$shiftedLookup+'"]').html());
+			if($val != '' && $columnrow == $samplerow && $mapping.lookup[$val] == undefined){
+				var $looki = new Object;
+				$looki['term'] = $val;
+				$looki['predicate'] = $lc.predicate;
+
+				if($lookUpTerms.indexOf($looki) == -1){
+					$lookUpTerms.push($looki);				
+				}			
 			}
 		});		
 
@@ -908,8 +918,13 @@ function addPropertyMappings($mapping, $propURI){
 				// check if we already have the term in our lookup "dictionary" (or already in the $nolook array)
 				var $lookupterm = getCellContents($(this).attr('data-value-object'));
 				$lookupterm = trim($lookupterm);
-				if($lookupterm != '' && $mapping.lookup[$lookupterm] == undefined && $.inArray($lookupterm, $nolook)){
-					$nolook.push($lookupterm);
+				if($lookupterm != '' && $mapping.lookup[$lookupterm] == undefined){
+					var $looki = new Object();
+					$looki['term'] = $lookupterm;
+					$looki['predicate'] = $propURI;
+
+					// TODO: check if $looki is already in $nolook?
+					$nolook.push($looki);
 				} 
 
 			} else {
@@ -969,11 +984,14 @@ function lookUpModal($inputMapping, $missing, $final){
 		$(this).html('<p>Please select one URI from our reference lists for each value that you have selected in your spreadsheet. We try to propose URIs that match the terms; if that does not work, you can also look them up yourself.</p><hr />');
 		$(this).append('<div class="row"><div class="span2"><h3>Term</h3></div><div class="span3"><h3>URI</h3></div></div><hr />');
 
-		$.each($missing, function($i, $term){
-			$('#mappingModal > .modal-body').append('<div class="row"><div class="span2"><h3><code>'+$term+'</code></h3></div><div class="span3" for-term="'+$term+'"></div></div><hr />');
+		$.each($missing, function($i, $miss){
 
-			$query = 'prefix skos: <http://www.w3.org/2004/02/skos/core#> prefix hxl: <http://hxl.humanitarianresponse.info/ns/#> prefix dct: <http://purl.org/dc/terms/>  prefix foaf: <http://xmlns.com/foaf/0.1/> prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> SELECT DISTINCT ?uri ?label ?typelabel WHERE { ?uri a ?type . { ?type skos:prefLabel ?typelabel } UNION { ?type rdfs:label ?typelabel } { ?uri hxl:featureRefName ?label } UNION { ?uri hxl:commonTitle ?label }UNION { ?uri dct:title ?label } UNION { ?uri foaf:name ?label } UNION { ?uri hxl:abbreviation ?label } UNION { ?uri hxl:adminUnitLevelTitle ?label } UNION { ?uri hxl:orgName ?label } UNION { ?uri hxl:title ?label } FILTER regex(?label, "'+$term+'", "i") } ORDER BY ?label';
-				// console.log($query);
+			console.log($miss);
+
+			$('#mappingModal > .modal-body').append('<div class="row"><div class="span2"><h3><code>'+$miss.term+'</code></h3></div><div class="span3" for-term="'+$miss.term+'"></div></div><hr />');
+
+
+			$query = 'prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> prefix skos: <http://www.w3.org/2004/02/skos/core#> prefix hxl: <http://hxl.humanitarianresponse.info/ns/#> prefix dct: <http://purl.org/dc/terms/>  prefix foaf: <http://xmlns.com/foaf/0.1/> prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> SELECT DISTINCT ?uri ?label ?typelabel WHERE {'+$miss.predicate+' rdfs:range ?range . ?uri rdf:type/rdfs:subClassOf* ?range; a ?type . { ?type skos:prefLabel ?typelabel } UNION { ?type rdfs:label ?typelabel } { ?uri hxl:featureRefName ?label } UNION { ?uri hxl:commonTitle ?label }UNION { ?uri dct:title ?label } UNION { ?uri foaf:name ?label } UNION { ?uri hxl:abbreviation ?label } UNION { ?uri hxl:adminUnitLevelTitle ?label } UNION { ?uri hxl:orgName ?label } UNION { ?uri hxl:title ?label } FILTER regex(?label, "'+$miss.term+'", "i") } ORDER BY ?label';
 
 			$.ajax({
 				url: 'http://hxl.humanitarianresponse.info/sparql',
@@ -984,39 +1002,42 @@ function lookUpModal($inputMapping, $missing, $final){
 					query: $query 
 				},							
 				success: function( data ) {
-					$.each(data.results.bindings, function(i, result ) {
-						$('div[for-term="'+$term+'"]').append('<label class="radio"><input type="radio" name="'+$term+'" class="rdio" value="'+result.uri.value+'">'+result.label.value+' ('+result.typelabel.value+')<br /><small><a href="'+result.uri.value+'" target="_blank">'+result.uri.value+'</a></small></label>');
+
+					console.log($miss.term);
+
+					$.each(data.results.bindings, function(i, result) {
+						$('div[for-term="'+$miss.term+'"]').append('<label class="radio"><input type="radio" name="'+$miss.term+'" class="rdio" value="'+result.uri.value+'">'+result.label.value+' ('+result.typelabel.value+')<br /><small><a href="'+result.uri.value+'" target="_blank">'+result.uri.value+'</a></small></label>');
 					});
 
 					// if there are no results:
 					if(data.results.bindings.length == 0){
-						$('div[for-term="'+$term+'"]').append('<p class="'+$term+'">No suggestion found for this term, you can try to find a URI yourself:</p>');
-						$('div[for-term="'+$term+'"]').append('<input type="text" class="uri-search" placeholder="Start typing to search reference list" for-term="'+$term+'" />');
+						$('div[for-term="'+$miss.term+'"]').append('<p class="'+$miss.term+'">No suggestion found for this term, you can try to find a URI yourself:</p>');
+						$('div[for-term="'+$miss.term+'"]').append('<input type="text" class="uri-search" placeholder="Start typing to search reference list" for-term="'+$miss.term+'" />');
 					}else{
-						$('div[for-term="'+$term+'"]').append('<p class="'+$term+'">If the correct URI is not among the suggestions, you can try to find it yourself:</p>');
-						$('div[for-term="'+$term+'"]').append('<label class="radio"><input type="radio" name="'+$term+'"  class="rdio" value="@userlookup"><input type="text" readonly class="uri-search" placeholder="Start typing to search reference list" for-term="'+$term+'" /></label>');
+						$('div[for-term="'+$miss.term+'"]').append('<p class="'+$miss.term+'">If the correct URI is not among the suggestions, you can try to find it yourself:</p>');
+						$('div[for-term="'+$miss.term+'"]').append('<label class="radio"><input type="radio" name="'+$miss.term+'"  class="rdio" value="@userlookup"><input type="text" readonly class="uri-search" placeholder="Start typing to search reference list" for-term="'+$miss.term+'" /></label>');
 					}
 
 					// make the radio buttons next to the input boxes enable the corresponding text input box:
-					$('input[name="'+$term+'"]').change(function(){
+					$('input[name="'+$miss.term+'"]').change(function(){
 						
-						if($('input[name="'+$term+'"]:checked').val() == '@userlookup'){
+						if($('input[name="'+$miss.term+'"]:checked').val() == '@userlookup'){
 							// if the radio button next to the text box is clicked, toggle readonly:
-							$('input[for-term="'+$term+'"]').attr('readonly', false);
+							$('input[for-term="'+$miss.term+'"]').attr('readonly', false);
 						}else{
-							$('input[for-term="'+$term+'"]').val('');
-							$('input[for-term="'+$term+'"]').attr('readonly', true);
+							$('input[for-term="'+$miss.term+'"]').val('');
+							$('input[for-term="'+$miss.term+'"]').attr('readonly', true);
 						}
 						
 					});
 		
 
 					// add autocomplete to the search field:
-					$('input[for-term="'+$term+'"]').autocomplete({
+					$('input[for-term="'+$miss.term+'"]').autocomplete({
 						source: function( request, response ) {
 							
-							// select the query based on the range of this property:
-							var $query = 'prefix skos: <http://www.w3.org/2004/02/skos/core#> prefix hxl: <http://hxl.humanitarianresponse.info/ns/#> prefix dct: <http://purl.org/dc/terms/>  prefix foaf: <http://xmlns.com/foaf/0.1/> prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> SELECT DISTINCT ?uri ?label ?typelabel WHERE { ?uri a ?type . { ?type skos:prefLabel ?typelabel } UNION { ?type rdfs:label ?typelabel } { ?uri hxl:featureRefName ?label } UNION { ?uri hxl:commonTitle ?label }UNION { ?uri dct:title ?label } UNION { ?uri foaf:name ?label } UNION { ?uri hxl:abbreviation ?label } UNION { ?uri hxl:adminUnitLevelTitle ?label } UNION { ?uri hxl:orgName ?label } UNION { ?uri hxl:title ?label } FILTER regex(?label, "'+request.term+'", "i") } ORDER BY ?label';
+							// query based on user input:
+							var $query = 'prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> prefix skos: <http://www.w3.org/2004/02/skos/core#> prefix hxl: <http://hxl.humanitarianresponse.info/ns/#> prefix dct: <http://purl.org/dc/terms/>  prefix foaf: <http://xmlns.com/foaf/0.1/> prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> SELECT DISTINCT ?uri ?label ?typelabel WHERE {'+$miss.predicate+' rdfs:range ?range . ?uri rdf:type/rdfs:subClassOf* ?range; a ?type . { ?type skos:prefLabel ?typelabel } UNION { ?type rdfs:label ?typelabel } { ?uri hxl:featureRefName ?label } UNION { ?uri hxl:commonTitle ?label }UNION { ?uri dct:title ?label } UNION { ?uri foaf:name ?label } UNION { ?uri hxl:abbreviation ?label } UNION { ?uri hxl:adminUnitLevelTitle ?label } UNION { ?uri hxl:orgName ?label } UNION { ?uri hxl:title ?label } FILTER regex(?label, "'+request.term+'", "i") } ORDER BY ?label';
 
 							
 							$('#modal-loading').show();
@@ -1053,9 +1074,9 @@ function lookUpModal($inputMapping, $missing, $final){
 						minLength: 1,
 						select: function( event, ui ) {
 							// Add one option to the radio list and select it:
-							$('<label class="radio"><input type="radio" name="'+$term+'" checked class="rdio" value="'+ui.item.uri+'">'+ui.item.value+'<br /><small><a href="'+ui.item.uri+'" target="_blank">'+ui.item.uri+'</a></small></label>').insertBefore('p.'+$term);
+							$('<label class="radio"><input type="radio" name="'+$miss.term+'" checked class="rdio" value="'+ui.item.uri+'">'+ui.item.value+'<br /><small><a href="'+ui.item.uri+'" target="_blank">'+ui.item.uri+'</a></small></label>').insertBefore('p.'+$miss.term);
 							// empty and deselect input box by triggering change event
-							$('input[name="'+$term+'"]').change(); 
+							$('input[name="'+$miss.term+'"]').change(); 
 
 						}
 					});
@@ -1246,7 +1267,7 @@ function generateRDF($inputMapping){
 				$.each($triples['triples'], function($i, $triple){
 					if ($triple['predicate'] == 'hxl:atLocation'){
 						// grab URI and remove < and >
-						var $place = $triple['object'].substr(1, $triple['object'].length-1);
+						var $place = $triple['object'].substr(1, $triple['object'].length-2);
 						// strip the country and p-code from the URI (last two parts of URI):
 						var $placeURIparts = $place.split('/');
 						$loc = '/' + $placeURIparts[$placeURIparts.length - 2] + '/' + $placeURIparts[$placeURIparts.length - 1];
@@ -1439,10 +1460,7 @@ function updateTablePreview($mapping){
 		        		        	
 		        });
 				if($table.indexOf(' | ', $table.length - 3) !== -1){
-				    console.log('yep');
-					$table = $table.substring(0, $table.length -3);
-				}else{
-				    console.log($table+'X');
+				    $table = $table.substring(0, $table.length -3);
 				}
 		        $table += '</td>';
 	        });
@@ -1502,7 +1520,7 @@ function tagMappedCellsAndProps($mapping){
 						$('a.btn.hxlprop[data-hxl-uri="'+$triple.predicate+'"]').addClass('btn-success');
 					});
 				}			
-	});
+			});
 		},
 		function(){ // mouse leave
 			$('a.hxlprop.btn-success').removeClass('btn-success');
