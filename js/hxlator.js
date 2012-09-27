@@ -220,9 +220,18 @@ function mapProperty($inputMapping){
 			var $hint = '';
 			tagMappedCellsAndProps($mapping);
 
-			// if there are already any mappings (i.e., at least one tagged property button), show a different text:
+			// show a popup over the "preview HXL" button after the first mapped triple:
+			var $t = 0;
+			$.each($mapping.templates, function($i, $template){
+				$t++;
+			});
+			if($t == 2){
+				$('#showPreview').tooltip('show');
+			}
+
+			// if there are already any mappings (i.e., at least one tagged property button), show a different text:			
 			if($('a.mapped').length > 0){
-				$('.shortguide').html('<p class="lead instr">Keep doing this (select one or more cells, then select a property) until you have mapped all cells in the selected row. Keep in mind that a cell may address several properties, or a property may be addressed by several cells. Are you <a href="#" id="done" class="btn btn-info">done?</a></p><p align="right" id="togglep"><a href="#" id="toggle" class="btn btn-mini"><i class="icon-resize-vertical"></i> Toggle instructions</a></p>');
+				$('.shortguide').html('<p class="lead alert instr">Keep doing this (select one or more cells, then select a property) until you have mapped all cells in the selected row. Keep in mind that a cell may address several properties, or a property may be addressed by several cells. Are you <a href="#" id="done" class="btn btn-info">done?</a></p><p align="right" id="togglep"><a href="#" id="toggle" class="btn btn-mini"><i class="icon-resize-vertical"></i> Toggle instructions</a></p>');
 
 				$hint = '<p align="right"><i class="icon-hand-right"></i> Made a mistake? You can always go back using the buttons at the top right.</p>';
 
@@ -701,7 +710,6 @@ function mapWithURILookup($inputMapping, $propName, $propURI, $propType, $propRa
 
 					}
 					
-					//console.log($query);
 					
 					
 					$('#modal-loading').show();
@@ -986,8 +994,6 @@ function lookUpModal($inputMapping, $missing, $final){
 
 		$.each($missing, function($i, $miss){
 
-			console.log($miss);
-
 			$('#mappingModal > .modal-body').append('<div class="row"><div class="span2"><h3><code>'+$miss.term+'</code></h3></div><div class="span3" for-term="'+$miss.term+'"></div></div><hr />');
 
 
@@ -1002,8 +1008,6 @@ function lookUpModal($inputMapping, $missing, $final){
 					query: $query 
 				},							
 				success: function( data ) {
-
-					console.log($miss.term);
 
 					$.each(data.results.bindings, function(i, result) {
 						$('div[for-term="'+$miss.term+'"]').append('<label class="radio"><input type="radio" name="'+$miss.term+'" class="rdio" value="'+result.uri.value+'">'+result.label.value+' ('+result.typelabel.value+')<br /><small><a href="'+result.uri.value+'" target="_blank">'+result.uri.value+'</a></small></label>');
