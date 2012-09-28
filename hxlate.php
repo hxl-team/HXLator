@@ -221,43 +221,91 @@ if(isset($_POST["user_organisation"])){
 
 $containerURI = makeURI("hxl:DataContainer", $orgPost);
 
-$inlineScript = '$initMapping = {
-  "templates": {
-    "<'.$containerURI.'>": {
-      "triples": [
-        {
-          "predicate": "a",
-          "object": "<http://hxl.humanitarianresponse.info/ns/#DataContainer>",          
-        },
-        {
-          "predicate": "hxl:aboutEmergency",
-          "object": "<'.$_POST["emergency"].'>",          
-        },
-        {
-          "predicate": "hxl:reportCateogry",
-          "object": "<'.$_POST["report_category"].'>",          
-        },
-        {
-          "predicate": "hxl:reportedBy",
-          "object": "<'.$_SESSION["user_uri"].'>",          
-        },
-        {
-          "predicate": "hxl:reportedBy",
-          "object": "<'.$_SESSION["user_organisation_uri"].'>",          
-        },
-        {
-          "predicate": "hxl:date",
-          "object": "'.date("Y-m-d").'",
-          "datatype": "xsd:date"          
-        }
-      ]
-    }
-  },
-  "lookup": {}
-};
+$im = '$initMapping = {
+	  "templates": {
+	    "<'.$containerURI.'>": {
+	      "triples": [
+	        {
+	          "predicate": "a",
+	          "object": "<http://hxl.humanitarianresponse.info/ns/#DataContainer>",          
+	        },
+	        {
+	          "predicate": "hxl:aboutEmergency",
+	          "object": "<'.$_POST["emergency"].'>",          
+	        },
+	        {
+	          "predicate": "hxl:reportCateogry",
+	          "object": "<'.$_POST["report_category"].'>",          
+	        },
+	        {
+	          "predicate": "hxl:reportedBy",
+	          "object": "<'.$_SESSION["user_uri"].'>",          
+	        },
+	        {
+	          "predicate": "hxl:reportedBy",
+	          "object": "<'.$_SESSION["user_organisation_uri"].'>",          
+	        },
+	        {
+	          "predicate": "hxl:date",
+	          "object": "'.date("Y-m-d").'",
+	          "datatype": "xsd:date"          
+	        }
+	      ]
+	    }
+	  },
+	  "lookup": {}
+	};';
+
+if($_POST["translator"] == "new"){
+
+	// start with an empty translator:
+
+	$inlineScript = $im.'
+
+	var $recycle = false;
+	$hxlHistory.pushState($initMapping);
+	';
+}else{
+
+	// read the existing translator and start from there:
+	$translator = file_get_contents(getcwd().'/mappings/'.$_SESSION['user_shortname'].'/'.$_POST["translator"]
+		);
+
+	// Convert to PHP object:
+	$trans = json_decode($translator, true);
+
+	// replace data container metadata:
+	foreach ($trans['templates'] as $uri => $template) {
+		// remove metadata from this container
+		// TODO: we'll probably need to update this once we start splitting a file up into several data containers
+		if(strpos($uri, '/datacontainers/') !== false){
+			unset($trans['templates'][$uri]);
+		}
+
+		// remove all mappings outside of the samplerow:
+		if(strpos($uri, '@uri') === 0){
+			$parts = explode(" ", $uri);
+			$thiscell = explode("-", $parts[1]);
+
+			$thisrow = $thiscell[0].'-'.$thiscell[2];
+			
+			// check if this cell is outside of the sample row:
+			if($thisrow != $trans['samplerow']){
+				unset($trans['templates'][$uri]);
+			} 
+		}
+	}
+
+	$inlineScript = $im.'
+	$loadedMapping = eval('.json_encode($trans).');
+	var $recycle = true;
+	$debug = true;
+	// merge the existing mapping with the new metadata
+	$hxlHistory.pushState($.extend(true, $initMapping, $loadedMapping));
+	';	
+}
 
 
-$hxlHistory.pushState($initMapping);';
 
 if(!isset($_SESSION['loggedin'])) {   // remove the loading spinner if the user is not logged in - we're showing the login form then:
 	$inlineScript .= '

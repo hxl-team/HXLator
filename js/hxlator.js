@@ -60,8 +60,12 @@ $hxlHistory.processMapping = function(){
 	var $mapping = $hxlHistory.states[$hxlHistory.currentState];
 	if($debug){ console.log($mapping); }
 	
-	// if the class has not been set yet, show the class pills:
-	if(typeof $mapping.classuri == 'undefined'){
+	// if the user is coming back with an existing mapping, send her straight to the row selection:
+	if($recycle){
+		tagMappedCellsAndProps($mapping);
+		enableRowSelection($initMapping);
+	// otherwise: if the class has not been set yet, show the class pills:
+	}else if(typeof $mapping.classuri == 'undefined'){
 		selectClass($mapping);	
 	}else if (typeof $mapping.samplerow == 'undefined') {
 		selectRow($mapping);
@@ -327,7 +331,13 @@ function enableRowSelection($inputMapping){
 	// make sure we don't modify the original array entry:
 	var $mapping = $.extend(true, {}, $inputMapping);
 
-	$('.shortguide').html('<p class="lead alert instr"><strong>Step 4:</strong> Please select all rows now that you want to HXLate. Note that they must have the same structure as the row you have been working on so far. <a href="#" id="done-rows" class="btn btn-info">Done?</a></p><p align="right"><i class="icon-hand-right"></i> Use <code>shift</code> again to select a range of rows.</p>');
+	if($recycle){ // in case the user is combing back with an existing translator:
+		$('.shortguide').html('<p class="lead alert instr"><strong>Welcome back!</strong> Since you are re-using an existing translator, you can proceed to selecting the rows to HXLate. <a href="#" id="done-rows" class="btn btn-info">Done?</a></p><p align="right"><i class="icon-hand-right"></i> Use <code>shift</code> to select a range of rows.</p>');
+
+	}else{
+		$('.shortguide').html('<p class="lead alert instr"><strong>Step 4:</strong> Please select all rows now that you want to HXLate. Note that they must have the same structure as the row you have been working on so far. <a href="#" id="done-rows" class="btn btn-info">Done?</a></p><p align="right"><i class="icon-hand-right"></i> Use <code>shift</code> again to select a range of rows.</p>');	
+	}
+	
 
 	$('tr.hxlatorrow').removeClass('highlight');
 
@@ -1199,7 +1209,16 @@ function generateFinalRDF($mapping){
 			$('#hxlPreview > .modal-header').html('<h3>Data submitted!</h3>');
 			$('#hxlPreview > .modal-body').html($data);
 			$('#hxlPreview > .modal-footer').html('<p class="lead"><a href="index.php" class="btn">HXLate another spreadsheet</a></p>');
-			saveTranslator($mapping);			
+			
+			// only save the translator if it hasn't been saved before:
+			if(!$recycle){
+				saveTranslator($mapping);				
+			}else{
+				$('#hxlPreview > .modal-body').slideDown(function(){
+					$('#hxlPreview > .modal-footer').slideDown();
+				});		
+			}
+			
 		});
 	});
 
