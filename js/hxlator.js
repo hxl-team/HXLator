@@ -1570,18 +1570,28 @@ function tagMappedCellsAndProps($mapping){
 
 var hideHandler = function(){
 	if (event.ctrlKey==1 && event.keyCode == 75){ // CTRL+K
-		$('#mappingModal').modal('hide');
-		$(document).unbind('keydown', hideHandler);
-		$(document).bind('keydown', showHandler);		
+		// only move on if the modal is visible:
+		if($('#mappingModal').is(":visible")){
+			$('#mappingModal').modal('hide');
+			$('.shortguide').slideUp().after('<div class="container ctrl-instructions"><div class="alert alert-info">Press <code>CTRL-K</code> again to go back to the mapping window.</div></div>');
+			$(document).unbind('keydown', hideHandler);
+			$(document).bind('keydown', showHandler);		
+		}
 	} else if (event.keyCode == 27) { // escape key
 		$(document).unbind('keydown', hideHandler);
 	}
+			
 };
 
 var showHandler = function(){
 	if (event.ctrlKey==1 && event.keyCode == 75){ // CTRL+K
-		$(document).unbind('keydown', showHandler);
-		$('#mappingModal').modal('show');
+		// only move on if the modal is hidden:
+		if($('#mappingModal').is(":hidden")){
+			$(document).unbind('keydown', showHandler);
+			$('#mappingModal').modal('show');
+			$('.ctrl-instructions').remove();
+			$('.shortguide').slideDown();
+		}
 	}
 };
 

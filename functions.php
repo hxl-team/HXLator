@@ -305,14 +305,14 @@ function loadHXLPreviewModal(){
             
             <div class="tabbable" style="margin-bottom: 18px;">
                     <ul class="nav nav-tabs">
-                      <li><a href="#previewtaboverview" data-toggle="tab">Overview</a></li>
+                      <!-- <li><a href="#previewtaboverview" data-toggle="tab">Overview</a></li> -->
                       <li class="active"><a href="#previewtabtable" data-toggle="tab">Table</a></li>
                       <li><a href="#previewtabturtle" data-toggle="tab">Turtle</a></li>
                     </ul>
                     <div class="tab-content" style="padding-bottom: 9px; border-bottom: 1px solid #ddd;">
-                      <div class="tab-pane" id="previewtaboverview">
+                      <!-- <div class="tab-pane" id="previewtaboverview">
                         <p><span class="label label-warning">TBD</span></p>
-                      </div>
+                      </div> -->
                       <div class="tab-pane active" id="previewtabtable">
                         <p><span class="label label-warning">Please map some properties first, this preview will then show what you have done so far.</span></p>
                       </div>
