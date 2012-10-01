@@ -572,9 +572,15 @@ function enableCellSelection($mapping){
 // shows and fills the mapping modal
 function mappingModal($inputMapping, $propName, $propURI, $propType, $propRange, $propRangeName){
 	
-	var $numCells = $('td.selected').length;
+	var $nc = $('td.selected').length;
+
+	if($nc == 1){
+		var $numCells = 'one cell';
+	}else{
+		var $numCells = $nc+' cells';
+	}
 	
-	$('#mappingModal > .modal-header > h3').html('<img src="img/loader.gif" id="modal-loading" class="pull-right" />Mapping '+$numCells+' cells to the <em>'+$propName+'</em> property');
+	$('#mappingModal > .modal-header > h3').html('<img src="img/loader.gif" id="modal-loading" class="pull-right" />Mapping '+$numCells+' to the <em>'+$propName+'</em> property');
 	
 	$('#mappingModal > .modal-footer').html('<i class="icon-hand-right"></i> Don\'t worry about doing anything wrong here, you can always go back to fix it later.</p><p><i class="icon-hand-right"></i> If you want to peek at your spreadsheet, you can always hide this popup by pressing <code>CTRL-K</code>. Pressing it again will bring the popup back.</p><a href="#" id="storeMapping" class="btn btn-primary">Store mapping</a><a href="#" class="btn" data-dismiss="modal">Cancel</a>');
 	
