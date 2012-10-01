@@ -707,7 +707,7 @@ function mapWithURILookup($inputMapping, $propName, $propURI, $propType, $propRa
 
 					}else if ($propRange == 'http://hxl.humanitarianresponse.info/ns/#AgeGroup'){
 						
-						$query = 'PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX hxl: <http://hxl.humanitarianresponse.info/ns/#> PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> SELECT DISTINCT ?set ?setTitle ?group ?groupTitle WHERE { ?set a hxl:AgeGroupSet ; hxl:title ?setTitle ; ?foo ?group . ?group a hxl:AgeGroup ; hxl:title ?groupTitle. FILTER regex(?groupTitle, "'+request.term+'", "i") } ORDER BY ?groupTitle';
+						$query = 'PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX hxl: <http://hxl.humanitarianresponse.info/ns/#> PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> SELECT DISTINCT ?set ?setTitle ?group ?groupTitle WHERE {  ?set a hxl:AgeGroupSet ; hxl:title ?setTitle ; ?foo ?group . ?group a hxl:AgeGroup ; hxl:title ?groupTitle ; hxl:fromAge ?fromAge . FILTER regex(?groupTitle, "'+request.term+'", "i")} ORDER BY ?fromAge';
 						
 					}else if ($propRange == 'http://hxl.humanitarianresponse.info/ns/#AdminUnitLevel'){
 						
