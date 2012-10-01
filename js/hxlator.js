@@ -576,7 +576,7 @@ function mappingModal($inputMapping, $propName, $propURI, $propType, $propRange,
 	
 	$('#mappingModal > .modal-header > h3').html('<img src="img/loader.gif" id="modal-loading" class="pull-right" />Mapping '+$numCells+' cells to the <em>'+$propName+'</em> property');
 	
-	$('#mappingModal > .modal-footer').html('<i class="icon-hand-right"></i> Don\'t worry about doing anything wrong here, you can always go back to fix it later.</p><p><i class="icon-hand-right"></i> If you want to peek at your spreadsheet, you can always hide this popup by pressing the <code>CTRL</code> key. Pressing it again will bring the popup back.</p><a href="#" id="storeMapping" class="btn btn-primary">Store mapping</a><a href="#" class="btn" data-dismiss="modal">Cancel</a>');
+	$('#mappingModal > .modal-footer').html('<i class="icon-hand-right"></i> Don\'t worry about doing anything wrong here, you can always go back to fix it later.</p><p><i class="icon-hand-right"></i> If you want to peek at your spreadsheet, you can always hide this popup by pressing <code>CTRL-K</code>. Pressing it again will bring the popup back.</p><a href="#" id="storeMapping" class="btn btn-primary">Store mapping</a><a href="#" class="btn" data-dismiss="modal">Cancel</a>');
 	
 	if($propType == 'http://www.w3.org/2002/07/owl#DataProperty'){
 		$('#mappingModal > .modal-body').html('<p>You can either <a href="#" class="btn" id="mapCellValues">use the values in the selected cell(s)</a> or <a href="#" class="btn" id="mapDifferentValues">use a different value</a></p><div id="value-input" style="display: none"></div>');
@@ -993,7 +993,7 @@ function lookUpModal($inputMapping, $missing, $final){
 	
 	
 	$('#mappingModal > .modal-footer').slideUp(function(){
-		$(this).html('<i class="icon-hand-right"></i> Don\'t worry about doing anything wrong here, you can always go back to fix it later.</p><p><i class="icon-hand-right"></i> If you want to peek at your spreadsheet, you can always hide this popup by pressing the <code>CTRL</code> key. Pressing it again will bring the popup back.</p><a href="#" id="storeLookUps" class="btn btn-primary">Save and Continue</a><a href="#" class="btn" data-dismiss="modal">Cancel</a>');		
+		$(this).html('<i class="icon-hand-right"></i> Don\'t worry about doing anything wrong here, you can always go back to fix it later.</p><p><i class="icon-hand-right"></i> If you want to peek at your spreadsheet, you can always hide this popup by pressing <code>CTRL-K</code> key. Pressing it again will bring the popup back.</p><a href="#" id="storeLookUps" class="btn btn-primary">Save and Continue</a><a href="#" class="btn" data-dismiss="modal">Cancel</a>');		
 		$(this).slideDown();
 	});
 	
@@ -1569,7 +1569,7 @@ function tagMappedCellsAndProps($mapping){
 
 
 var hideHandler = function(){
-	if (event.ctrlKey==1){
+	if (event.ctrlKey==1 && event.keyCode == 75){ // CTRL+K
 		$('#mappingModal').modal('hide');
 		$(document).unbind('keydown', hideHandler);
 		$(document).bind('keydown', showHandler);		
@@ -1579,7 +1579,7 @@ var hideHandler = function(){
 };
 
 var showHandler = function(){
-	if (event.ctrlKey==1){
+	if (event.ctrlKey==1 && event.keyCode == 75){ // CTRL+K
 		$(document).unbind('keydown', showHandler);
 		$('#mappingModal').modal('show');
 	}
