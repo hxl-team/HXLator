@@ -84,12 +84,11 @@ function hxlate(){
 			
 		echo '
 			</div> <!-- shortguide -->
-			<div class="container" id="tablebox">
 			';
 		
 		// Let's show the spreadsheet"
 		// iterate once for the tabs (i.e., one tab per sheet in the workbook)
-		echo '<div class="tabbable" style="margin-bottom: 18px;">
+		echo '<div class="container tabbable" style="margin-bottom: 18px;">
 		          <ul class="nav nav-tabs">';
 		
 		$tabno = 1; 
@@ -119,20 +118,22 @@ function hxlate(){
 				echo '<div class="tab-pane" id="tab'.$tabno.'">';
 			}
 			echo "
-			
-				<table class='table table-bordered table-condensed'>";
+				<div class='fixed-table'>
+				<div class='table-content'>
+				<table class='table table-bordered table-condensed table-fixed-header'>";
 		
 			renderTable($sheetData, $tabno);				
 		
 			echo"
 				  </table>
+				  </div>
+				  </div>
 				</div>";
 				
 			$tabno++;
 		}
 		
 		echo   ' </div>
-			</div>
 		</div>';
 		
 		// we're done - delete the uploaded file
@@ -302,9 +303,14 @@ if($_POST["translator"] == "new"){
 	$debug = true;
 	// merge the existing mapping with the new metadata
 	$hxlHistory.pushState($.extend(true, $initMapping, $loadedMapping));
+
 	';	
 }
 
+$inlineScript = $inlineScript.'
+	// fix table header:
+	 $(".table-fixed-header").fixedHeader();
+';
 
 
 if(!isset($_SESSION['loggedin'])) {   // remove the loading spinner if the user is not logged in - we're showing the login form then:
@@ -314,7 +320,7 @@ if(!isset($_SESSION['loggedin'])) {   // remove the loading spinner if the user 
 
 
 // load the footer, along with the extra JS required for this page
-getFoot(array("bootstrap-tab.js", "bootstrap-tooltip.js", "bootstrap-popover.js", "bootstrap-dropdown.js", "bootstrap-modal.js", "bootstrap-transition.js", "bootstrap-alert.js", "jquery-ui-1.8.21.custom.min.js", "jquery.dataTables.min.js", "hxlator.js" ), $inlineScript);
+getFoot(array("bootstrap-tab.js", "bootstrap-tooltip.js", "bootstrap-popover.js", "bootstrap-dropdown.js", "bootstrap-modal.js", "bootstrap-transition.js", "bootstrap-alert.js", "jquery-ui-1.8.21.custom.min.js", "jquery.dataTables.min.js", "table-fixed-header.js", "hxlator.js" ), $inlineScript);
 
 // renders the given $sheetData as an HTML table
 // $sheetIndex is the index of the given sheet in the containing workbook
@@ -325,7 +331,7 @@ function renderTable($sheetData, $sheetIndex){
 		// show the header (A B ...) above the first row
 		if($rownumber == 1){ // header row
 			echo '
-				<thead>
+				<thead class="header">
 					<tr class="hxlatorrow">
 						<th class="hxlatorcell"> </th>';		
 			foreach ($rowcontents as $cellid => $cellvalue) {
