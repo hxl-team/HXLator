@@ -924,53 +924,66 @@ function addPropertyMappings($mapping, $propURI){
 		
 		// iterate through all input fields 
 		$('.value-input').each(function(){
-			var $uri = '@uri '+$(this).attr('data-value-subject');
-			
-			// if there are no mappings for this URI yet, add this node to the JSON tree:
-			if($mapping.templates[$uri] == undefined){
-				$mapping.templates[$uri] = new Object();
-				$mapping.templates[$uri].triples = new Array();						
-			}
-			
-			// add the triples:
-			var $index =  $mapping.templates[$uri].triples.length;
-			$mapping.templates[$uri].triples[$index] = new Object();
-			$mapping.templates[$uri].triples[$index]["predicate"] = $propURI;
-			
-			// store a mapping depending on input field metadata
-			if($(this).attr('data-value-object') == undefined){
-				
-				// data property with direct input
-				$mapping.templates[$uri].triples[$index]['object'] = $(this).val();
-				
-			} else if($(this).attr('data-value-object').indexOf('http') == 0){
-			
-				// object property that has already been looked up
-				$mapping.templates[$uri].triples[$index]['object'] = '<'+$(this).attr('data-value-object')+'>';
-			
-			} else if($(this).attr('data-function') == '@lookup'){
-				
-				// object property with lookup at the end of the mapping process
-				$mapping.templates[$uri].triples[$index]["object"] = '@lookup '+$(this).attr('data-value-object');
 
-				// check if the term to look up is already in our lookup dictionary; 
-				// if not, we save the term in an array and send the user to (yet anther) mapping // page where s/he can assign URIs to the terms not in the dictionary so far
-				// check if we already have the term in our lookup "dictionary" (or already in the $nolook array)
-				var $lookupterm = getCellContents($(this).attr('data-value-object'));
-				$lookupterm = trim($lookupterm);
-				if($lookupterm != '' && $mapping.lookup[$lookupterm] == undefined){
-					var $looki = new Object();
-					$looki['term'] = $lookupterm;
-					$looki['predicate'] = $propURI;
-
-					addLookupTerm($looki, $nolook);					
-				} 
-
-			} else {
+			if($(this).attr('data-value-object') != undefined || $(this).val() != ''){ // ignore fields with no input
+				var $uri = '@uri '+$(this).attr('data-value-subject');
 				
-				// data property that takes the value from the spreadsheet
-				$mapping.templates[$uri].triples[$index]["object"] = '@value '+$(this).attr('data-value-object');
+				// if there are no mappings for this URI yet, add this node to the JSON tree:
+				if($mapping.templates[$uri] == undefined){
+					$mapping.templates[$uri] = new Object();
+					$mapping.templates[$uri].triples = new Array();						
+				}
 				
+				// add the triple: 
+				var $index =  $mapping.templates[$uri].triples.length;
+
+				// check if this predicate is already mapped: if so, replace the old value
+				// TODO: this basically assumes that all our properties have a max cardinality of 1; 
+				// we might have to come up with something based on the vocabulary once we have cardinalities in there.
+				$.each($mapping.templates[$uri].triples, function($i, $triple){
+					if($triple['predicate'] == $propURI){
+						$index = $i;
+					}
+				});
+
+				$mapping.templates[$uri].triples[$index] = new Object();
+				$mapping.templates[$uri].triples[$index]['predicate'] = $propURI;
+				
+				// store a mapping depending on input field metadata
+				if($(this).attr('data-value-object') == undefined){
+					
+					// data property with direct input
+					$mapping.templates[$uri].triples[$index]['object'] = $(this).val();
+					
+				} else if($(this).attr('data-value-object').indexOf('http') == 0){
+				
+					// object property that has already been looked up
+					$mapping.templates[$uri].triples[$index]['object'] = '<'+$(this).attr('data-value-object')+'>';
+				
+				} else if($(this).attr('data-function') == '@lookup'){
+					
+					// object property with lookup at the end of the mapping process
+					$mapping.templates[$uri].triples[$index]["object"] = '@lookup '+$(this).attr('data-value-object');
+
+					// check if the term to look up is already in our lookup dictionary; 
+					// if not, we save the term in an array and send the user to (yet anther) mapping // page where s/he can assign URIs to the terms not in the dictionary so far
+					// check if we already have the term in our lookup "dictionary" (or already in the $nolook array)
+					var $lookupterm = getCellContents($(this).attr('data-value-object'));
+					$lookupterm = trim($lookupterm);
+					if($lookupterm != '' && $mapping.lookup[$lookupterm] == undefined){
+						var $looki = new Object();
+						$looki['term'] = $lookupterm;
+						$looki['predicate'] = $propURI;
+
+						addLookupTerm($looki, $nolook);					
+					} 
+
+				} else {
+					
+					// data property that takes the value from the spreadsheet
+					$mapping.templates[$uri].triples[$index]["object"] = '@value '+$(this).attr('data-value-object');
+					
+				}
 			}
 										
 		});
