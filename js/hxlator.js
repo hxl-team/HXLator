@@ -616,7 +616,7 @@ function mappingModal($inputMapping, $propName, $propURI, $propType, $propRange,
 		});
 		
 	} else if ($propType == 'http://www.w3.org/2002/07/owl#ObjectProperty'){
-		$('#mappingModal > .modal-body').html('<p>This property should refer to a <em>'+$propRangeName+' </em> from one of our reference lists.</p><div id="value-input" style="display: none"></div>');
+		$('#mappingModal > .modal-body').html('<p>This property should refer to a <a href="'+$propRange+'" target="blank">'+$propRangeName+'</a> from one of our reference lists.</p><div id="value-input" style="display: none"></div>');
 		
 		mapWithURILookup($inputMapping, $propName, $propURI, $propType, $propRange, $propRangeName);
 		
