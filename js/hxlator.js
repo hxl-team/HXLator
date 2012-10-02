@@ -464,10 +464,8 @@ function checkAllRows($inputMapping){
 				var $looki = new Object;
 				$looki['term'] = $val;
 				$looki['predicate'] = $lc.predicate;
-
-				if($lookUpTerms.indexOf($looki) == -1){
-					$lookUpTerms.push($looki);				
-				}			
+				
+				addLookupTerm($looki, $lookUpTerms);			
 			}
 		});		
 
@@ -481,7 +479,25 @@ function checkAllRows($inputMapping){
 		//if there's nothing left to look up, we can initiate the final translation:
 		generateFinalRDF($mapping); 
 	}
+}
+
+// adds a $term object, consisting of ['term'] and ['predicate'] to $lookUpTerms
+// if there is no $term with the same ['term'] and ['predicate'] yet
+function addLookupTerm($term, $lookUpTerms){
 	
+	var $add = true;
+
+	$.each($lookUpTerms, function($i, $looki){		
+		if($looki['term'] == $term['term'] && $looki['predicate'] == $term['predicate']){
+			$add = false;
+		}
+	});
+
+	// term is not there yet, add it:
+	if($add){
+		$lookUpTerms.push($term);	
+	}	
+	return $lookUpTerms;
 }
 
 // check if all properties have been mapped, show those that have not been mapped to the user in a modal:
@@ -947,8 +963,7 @@ function addPropertyMappings($mapping, $propURI){
 					$looki['term'] = $lookupterm;
 					$looki['predicate'] = $propURI;
 
-					// TODO: check if $looki is already in $nolook?
-					$nolook.push($looki);
+					addLookupTerm($looki, $nolook);					
 				} 
 
 			} else {
@@ -976,8 +991,8 @@ function addPropertyMappings($mapping, $propURI){
 	});
 }
 
-// generates a modal that allows the user to look up URIs for all terms in $missing 
-// set $final to true if this is the final lookup before the RDF generation!
+// Generates a modal that allows the user to look up URIs for all terms in $missing. 
+// Set $final to true if this is the final lookup before the RDF generation!
 function lookUpModal($inputMapping, $missing, $final){
 
 	// make sure we don't modify the original array entry:
@@ -1027,7 +1042,7 @@ function lookUpModal($inputMapping, $missing, $final){
 
 					$.each(data.results.bindings, function(i, result) {
 						var placeInfo = '';
-						if(result.pcode.value != undefined && result.loc.value != undefined){
+						if(result.pcode != undefined && result.loc != undefined){
 							placeInfo = ' in ' + result.loc.value + '; P-Code '+result.pcode.value;
 						}
 						$('div[for-term="'+$miss.term+'"]').append('<label class="radio"><input type="radio" name="'+$miss.term+'" class="rdio" value="'+result.uri.value+'">'+result.label.value+' (' + result.typelabel.value + placeInfo + ')<br /><small><a href="'+result.uri.value+'" target="_blank">'+result.uri.value+'</a></small></label>');

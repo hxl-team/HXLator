@@ -317,7 +317,7 @@ function loadHXLPreviewModal(){
                         <p><span class="label label-warning">Please map some properties first, this preview will then show what you have done so far.</span></p>
                       </div>
                       <div class="tab-pane" id="previewtabturtle">
-                      	<p>Preview in <a href="http://en.wikipedia.org/wiki/Turtle_(syntax)">Turtle syntax</a>:</p>
+                      	<p>Preview in <a href="http://en.wikipedia.org/wiki/Turtle_(syntax)" target="_blank">Turtle syntax</a>:</p>
                         <code>
                         	<pre id="nakedturtle"></pre>
                         </code>
