@@ -598,7 +598,7 @@ function mappingModal($inputMapping, $propName, $propURI, $propType, $propRange,
 	
 	$('#mappingModal > .modal-header > h3').html('<img src="img/loader.gif" id="modal-loading" class="pull-right" />Mapping '+$numCells+' to the <em>'+$propName+'</em> property');
 	
-	$('#mappingModal > .modal-footer').html('<i class="icon-hand-right"></i> Don\'t worry about doing anything wrong here, you can always go back to fix it later.</p><p><i class="icon-hand-right"></i> If you want to peek at your spreadsheet, you can always hide this popup by pressing <code>CTRL-K</code>. Pressing it again will bring the popup back.</p><a href="#" id="storeMapping" class="btn btn-primary">Store mapping</a><a href="#" class="btn" data-dismiss="modal">Cancel</a>');
+	$('#mappingModal > .modal-footer').html('<i class="icon-hand-right"></i> Don\'t worry about doing anything wrong here, you can always go back to fix it later.</p><p><i class="icon-hand-right"></i> If you want to peek at your spreadsheet, you can always hide this popup by pressing <code>CTRL-K</code>.<br />Pressing it again will bring the popup back.</p><a href="#" id="storeMapping" class="btn btn-primary">Store mapping</a><a href="#" class="btn" data-dismiss="modal">Cancel</a>');
 	
 	if($propType == 'http://www.w3.org/2002/07/owl#DataProperty'){
 		$('#mappingModal > .modal-body').html('<p>You can either <a href="#" class="btn" id="mapCellValues">use the values in the selected cell(s)</a> or <a href="#" class="btn" id="mapDifferentValues">use a different value</a></p><div id="value-input" style="display: none"></div>');
@@ -919,6 +919,9 @@ function addPropertyMappings($mapping, $propURI){
 	$('#storeMapping').unbind(); // remove any old listeners
 	$('#storeMapping').click(function(){
 		
+		// make sure the CTRL-K handler is removed when the modal is closed
+		$(document).unbind('keydown', hideHandler);
+
 		// store all @lookup values that are not in the lookup table yet in an array:
 		var $nolook = new Array();
 		
@@ -1027,7 +1030,7 @@ function lookUpModal($inputMapping, $missing, $final){
 	
 	
 	$('#mappingModal > .modal-footer').slideUp(function(){
-		$(this).html('<i class="icon-hand-right"></i> Don\'t worry about doing anything wrong here, you can always go back to fix it later.</p><p><i class="icon-hand-right"></i> If you want to peek at your spreadsheet, you can always hide this popup by pressing <code>CTRL-K</code> key. Pressing it again will bring the popup back.</p><a href="#" id="storeLookUps" class="btn btn-primary">Save and Continue</a><a href="#" class="btn" data-dismiss="modal">Cancel</a>');		
+		$(this).html('<i class="icon-hand-right"></i> Don\'t worry about doing anything wrong here, you can always go back to fix it later.</p><p><i class="icon-hand-right"></i> If you want to peek at your spreadsheet, you can always hide this popup by pressing <code>CTRL-K</code> key.<br />Pressing it again will bring the popup back.</p><a href="#" id="storeLookUps" class="btn btn-primary">Save and Continue</a><a href="#" class="btn" data-dismiss="modal">Cancel</a>');		
 		$(this).slideDown();
 	});
 	
@@ -1604,17 +1607,16 @@ function tagMappedCellsAndProps($mapping){
 
 var hideHandler = function(){
 	if (event.ctrlKey==1 && event.keyCode == 75){ // CTRL+K
+		$(document).unbind('keydown', hideHandler);
 		// only move on if the modal is visible:
 		if($('#mappingModal').is(":visible")){
 			$('#mappingModal').modal('hide');
 			$('.shortguide').slideUp().after('<div class="container ctrl-instructions"><div class="alert alert-info">Press <code>CTRL-K</code> again to go back to the mapping window.</div></div>');
-			$(document).unbind('keydown', hideHandler);
 			$(document).bind('keydown', showHandler);		
 		}
 	} else if (event.keyCode == 27) { // escape key
 		$(document).unbind('keydown', hideHandler);
-	}
-			
+	}	
 };
 
 var showHandler = function(){
@@ -1630,7 +1632,7 @@ var showHandler = function(){
 };
 
 
-// Watch the mappingModal: if it is shown, enable the arrow up key to hide it:
+// Watch the mappingModal: if it is shown, enable the CTRL-K shortcut to hide it:
 $('#mappingModal').on('shown', function(){
 	$(document).bind('keydown', hideHandler);
 });
