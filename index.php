@@ -26,50 +26,54 @@ getHead("index.php", $user_name, $user_organisation);
         <form class="alert" enctype="multipart/form-data" action="hxlate.php#" method="POST">
 
 			<div class="control-group">
-            	<label for="emergencies">Emergency: </label>
+            	<label for="emergencies"><i class="icon-fire"></i> Emergency: </label>
             	<div class="controls">
-            		<input type="text" id="emergencies" name="selectemergency" /> <span style="margin-left: 20px;"><em>Start typing and select from the emergencies list.</em></span><br />
-            		<input type="hidden" name="emergency" id="emergency">            		
+            		<span class="add-on"></span>
+            		<input type="text" id="emergencies" name="selectemergency" class="span3" /> <span style="margin-left: 20px;"><em>Start typing and select from the emergencies list.</em></span><br />
+            		<input type="hidden" name="emergency" id="emergency">            		            		
             	</div>
             </div>
 
 			<div class="control-group">	
-            	<label  class="control-label" for="report_category" >Report category:</label>
+            	<label class="control-label" for="report_category" ><i class="icon-tags"></i> Report category:</label>
             	<div class="controls">
-		            <select id="report_category" name="report_category">
-        		        <option value="http://hxl.humanitarianresponse.info/data/reportcategories/cluster1">Cluster 1</option>
-                		<option value="http://hxl.humanitarianresponse.info/data/reportcategories/cluster2">Cluster 2</option>
-                		<option value="http://hxl.humanitarianresponse.info/data/reportcategories/humanitarian_profile">Humanitarian profile</option>
-                		<option value="http://hxl.humanitarianresponse.info/data/reportcategories/security">Security</option>                		
-	            	</select>  <span style="margin-left: 20px;"><em>This determines who will verify and approve your submission.</em></span><br />
+        			<select id="report_category" name="report_category" class="span3">
+    		        	<option value="http://hxl.humanitarianresponse.info/data/reportcategories/cluster1">Cluster 1</option>
+            			<option value="http://hxl.humanitarianresponse.info/data/reportcategories/cluster2">Cluster 2</option>
+            			<option value="http://hxl.humanitarianresponse.info/data/reportcategories/humanitarian_profile" selected>Humanitarian profile</option>
+            			<option value="http://hxl.humanitarianresponse.info/data/reportcategories/security">Security</option>                		
+            		</select>  <span style="margin-left: 20px;"><em>This determines who will verify and approve your submission.</em></span><br />            	
 	           	</div>
 	        </div>
 			
 			<div class="control-group">
-			    <label class="control-label" for="translator">HXL translator:</label>
+			    <label class="control-label" for="translator"><i class="icon-briefcase"></i> HXL translator:</label>
 			        <div class="controls">
-			           <select id="translator" name="translator">
-			              	<option value="new">Create new HXL translator</option>
-			              	<?php // list user's stored translators
-			              	$path = getcwd().'/mappings/'.$_SESSION['user_shortname'];
-							if ($handle = opendir($path)) {
-    							while (false !== ($file = readdir($handle))) {
-							        if ($file != "." && $file != "..") {
-							            echo "<option value=\"".$file."\">Reuse translator created for ".substr($file, 0 ,-5)."</option>\n";
-							        }
-							    }
-							    closedir($handle);
-							}
-							?>
-			        </select>
+		        		<select id="translator" name="translator" class="span3">
+		              		<option value="new">Create new HXL translator</option>
+		              	<?php // list user's stored translators
+		              	$path = getcwd().'/mappings/'.$_SESSION['user_shortname'];
+						if ($handle = opendir($path)) {
+							while (false !== ($file = readdir($handle))) {
+						        if ($file != "." && $file != "..") {
+						            echo "<option value=\"".$file."\">Reuse translator created for ".substr($file, 0 ,-5)."</option>\n";
+						        }
+						    }
+						    closedir($handle);
+						}
+						?>
+		        	</select>			    	
 				</div>
 			</div>
 			
-            Select the spreadsheet to HXLate:<br />
-            <input type="hidden" name="MAX_FILE_SIZE" value="5242880"><!-- 5MB -->
-            <input name="userfile" type="file"><br />
+            <div class="fileupload fileupload-new" data-provides="fileupload">
+            	<label class="control-label" for="file"><i class="icon-file"></i> Select file to HXLate:</label>
+  				<div class="fileupload-preview span3 uneditable-input" style="border: 1px solid #ccc"></div>
+  				<span class="btn btn-file"><span class="fileupload-new">Select file</span><span class="fileupload-exists">Change</span><input name="userfile" type="file" /></span>  				
+			</div>
+
             <br />
-            <button type="submit" class="btn">HXLate File</button>
+            <button type="submit" class="btn btn-inverse btn-large">HXLate File</button>
 
         </form>  
 
@@ -143,8 +147,12 @@ getHead("index.php", $user_name, $user_organisation);
 	    return $elist;
 	}
 
-	$customJS = emergencyQuery();
-	getFoot(array('jquery-ui-1.8.21.custom.min.js'), $customJS ); 
+	$customJS = emergencyQuery().'
+
+	$(".fileupload").fileupload();
+	';
+	
+	getFoot(array('jquery-ui-1.8.21.custom.min.js', 'bootstrap-fileupload.js'), $customJS ); 
 
 
 } else {
