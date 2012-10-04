@@ -598,7 +598,7 @@ function mappingModal($inputMapping, $propName, $propURI, $propType, $propRange,
 	
 	$('#mappingModal > .modal-header > h3').html('<img src="img/loader.gif" id="modal-loading" class="pull-right" />Mapping '+$numCells+' to the <em>'+$propName+'</em> property');
 	
-	$('#mappingModal > .modal-footer').html('<i class="icon-hand-right"></i> Don\'t worry about doing anything wrong here, you can always go back to fix it later.</p><p><i class="icon-hand-right"></i> If you want to peek at your spreadsheet, you can always hide this popup by pressing <code>CTRL-K</code>.<br />Pressing it again will bring the popup back.</p><a href="#" id="storeMapping" class="btn btn-primary">Store mapping</a><a href="#" class="btn" data-dismiss="modal">Cancel</a>');
+	$('#mappingModal > .modal-footer').html('<i class="icon-hand-right"></i> Don\'t worry about doing anything wrong here, you can always go back to fix it later.</p><p><i class="icon-hand-right"></i> If you want to peek at your spreadsheet, you can always hide this popup by pressing <code>CTRL-K</code>.<br />Pressing <code>CTRL-K</code> again will bring the popup back.</p><a href="#" id="storeMapping" class="btn btn-primary">Store mapping</a><a href="#" class="btn" data-dismiss="modal">Cancel</a>');
 	
 	if($propType == 'http://www.w3.org/2002/07/owl#DataProperty'){
 		$('#mappingModal > .modal-body').html('<p>You can either <a href="#" class="btn" id="mapCellValues">use the values in the selected cell(s)</a> or <a href="#" class="btn" id="mapDifferentValues">use a different value</a></p><div id="value-input" style="display: none"></div>');
@@ -1310,7 +1310,7 @@ function generateRDF($inputMapping){
 
 				// check if we already have the term in our lookup "dictionary"
 				if($mapping.lookup[$lookupterm] == undefined){
-					//console.log('No @lookup found for "'+$lookupterm+'"');
+					// No @lookup found for this term; let's ignore it:					
 				} else {
 					$triple['object'] = $mapping.lookup[$lookupterm];
 				}
@@ -1339,21 +1339,34 @@ function generateRDF($inputMapping){
 				// check whether location, sex and age categories are set:
 				$.each($triples['triples'], function($i, $triple){
 					if ($triple['predicate'] == 'hxl:atLocation'){
-						// grab URI and remove < and >
-						var $place = $triple['object'].substr(1, $triple['object'].length-2);
-						// strip the country and p-code from the URI (last two parts of URI):
-						var $placeURIparts = $place.split('/');
-						$loc = '/' + $placeURIparts[$placeURIparts.length - 2] + '/' + $placeURIparts[$placeURIparts.length - 1];
+						if($triple['object'].indexOf('@lookup') != 0){
+							// grab URI and remove < and >
+							var $place = $triple['object'].substr(1, $triple['object'].length-2);
+							// strip the country and p-code from the URI (last two parts of URI):
+							var $placeURIparts = $place.split('/');
+							$loc = '/' + $placeURIparts[$placeURIparts.length - 2] + '/' + $placeURIparts[$placeURIparts.length - 1];	
+						} else { //lookup failed
+							$loc = '/unknownLocation';
+						}
+						
 					}else if ($triple['predicate'] == 'hxl:sexCategory'){
-						// grab URI and remove < and >
-						var $sexCategory = $triple['object'].substr(1, $triple['object'].length-2);
-						var $sexCategoryURIparts = $sexCategory.split('/');
-						$sex = '/' + $sexCategoryURIparts[$sexCategoryURIparts.length -1];	
+						if($triple['object'].indexOf('@lookup') != 0){						
+							// grab URI and remove < and >
+							var $sexCategory = $triple['object'].substr(1, $triple['object'].length-2);
+							var $sexCategoryURIparts = $sexCategory.split('/');
+							$sex = '/' + $sexCategoryURIparts[$sexCategoryURIparts.length -1];	
+						} else { // lookup failed
+							$sex = '/unknownSex';
+						}
 					}else if ($triple['predicate'] == 'hxl:ageGroup'){
-						// grab URI and remove < and >
-						var $ageGroup = $triple['object'].substr(1, $triple['object'].length-2);
-						var $ageGroupURIparts = $ageGroup.split('/');
-						$age = '/'+$ageGroupURIparts[$ageGroupURIparts.length -1 ];
+						if($triple['object'].indexOf('@lookup') != 0){						
+							// grab URI and remove < and >
+							var $ageGroup = $triple['object'].substr(1, $triple['object'].length-2);
+							var $ageGroupURIparts = $ageGroup.split('/');
+							$age = '/'+$ageGroupURIparts[$ageGroupURIparts.length -1 ];
+						} else { // lookup failed
+							$age =  '/unknownAgeGroup';
+						}
 					}
 				});
 
@@ -1362,7 +1375,7 @@ function generateRDF($inputMapping){
 			} else if($mapping.classuri == 'hxl:Emergency') {
 				
 				// random GLIDE number for now
-				var $glide = 'unknown';
+				var $glide = '/unknownGLIDEnumber';
 
 				// check whether the hasGLIDEnumber property is set:
 				$.each($triples['triples'], function($i, $triple){
@@ -1376,8 +1389,8 @@ function generateRDF($inputMapping){
 
     		} else if($mapping.classuri == 'hxl:APL') {
 
-				var $loc = '';
-				var $pcode = '';
+				var $loc = '/unknownLocation';
+				var $pcode = '/unknownPcode';
 				
 				// check whether location, sex and age categories are set:
 				$.each($triples['triples'], function($i, $triple){
@@ -1512,7 +1525,7 @@ function updateTablePreview($mapping){
 									success: function( data ) { 
 										$.map( data.results.bindings, function( result ) {
 										 	$names[$uri] = result.name.value;
-										 	$table += '<a href="'+$uri.substr(1,$uri.length-2)+'" target="_blank">'+result.name.value+'</a> | ';										 	
+										 	$table += '<a href="'+$uri.substr(1,$uri.length-2)+'" target="_blank">'+result.name.value+'</a>';										 	
 										});
 
 										$('#loading').hide();
@@ -1522,11 +1535,16 @@ function updateTablePreview($mapping){
 									}
 								});
 							}else{
-								$table += '<a href="'+$uri.substr(1,$uri.length-2)+'" target="_blank">'+$names[$uri]+'</a>'+ ' | ';;							   
+								$table += '<a href="'+$uri.substr(1,$uri.length-2)+'" target="_blank">'+$names[$uri]+'</a>';							   
 							}
-
-    		            } else {
-    		                $table += $triple['object']+ ' | ';
+						} else if ($triple['object'].indexOf('@lookup') == 0) {
+							
+							// lookup failed, skip this value
+    		            
+    		            } else { 
+    		            
+    		            	// simple data property
+    		                $table += $triple['object'];
 		        	        
     		            }
 		        	}
