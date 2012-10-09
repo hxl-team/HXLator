@@ -464,6 +464,7 @@ function checkAllRows($inputMapping){
 				var $looki = new Object;
 				$looki['term'] = $val;
 				$looki['predicate'] = $lc.predicate;
+				$looki['cell'] = $shiftedLookup;
 				
 				addLookupTerm($looki, $lookUpTerms);			
 			}
@@ -482,22 +483,28 @@ function checkAllRows($inputMapping){
 }
 
 // adds a $term object, consisting of ['term'], ['predicate'], and ['cell'] to $lookUpTerms
-// if there is no $term with the same ['term'] and ['predicate'] yet
+// if there is no $term with the same ['term'] and ['predicate'] yet; if it is already there, 
+// only add the ['cell'] to this object's cells
 function addLookupTerm($term, $lookUpTerms){
 	
 	var $addNewTerm = true;
 
 	$.each($lookUpTerms, function($i, $looki){		
 		if($looki['term'] == $term['term'] && $looki['predicate'] == $term['predicate']){
+			$looki['cells'].push($term['cell']);
 			$addNewTerm = false;
-		}else{
-			
 		}
 	});
 
 	// term is not there yet, add it:
 	if($addNewTerm){
-		$lookUpTerms.push($term);	
+		var $thisTerm = new Object();
+		$thisTerm['term'] = $term['term'];
+		$thisTerm['predicate'] = $term['predicate'];
+		$thisTerm['cells'] = new Array();
+		$thisTerm['cells'].push($term['cell']);
+
+		$lookUpTerms.push($thisTerm);	
 	}	
 	return $lookUpTerms;
 }
@@ -979,6 +986,7 @@ function addPropertyMappings($mapping, $propURI){
 						var $looki = new Object();
 						$looki['term'] = $lookupterm;
 						$looki['predicate'] = $propURI;
+						$looki['cell'] = $(this).attr('data-value-object');
 
 						addLookupTerm($looki, $nolook);					
 					} 
@@ -1043,7 +1051,12 @@ function lookUpModal($inputMapping, $missing, $final){
 
 		$.each($missing, function($i, $miss){
 
-			$('#mappingModal > .modal-body').append('<div class="row"><div class="span2"><h3><code>'+$miss.term+'</code></h3></div><div class="span3" for-term="'+$miss.term+'"></div></div><hr />');
+			var $cellInfo = 'From cell(s):<br /> ';
+			$.each($miss.cells, function($i, $cell){
+				$cellInfo += '<code>'+$cell+'</code><br />';
+			});
+			
+			$('#mappingModal > .modal-body').append('<div class="row"><div class="span2"><h3><code>'+$miss.term+'</code></h3><p>'+$cellInfo+'<p></div><div class="span3" for-term="'+$miss.term+'"></div></div><hr />');
 
 
 			var $query = 'prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> prefix skos: <http://www.w3.org/2004/02/skos/core#> prefix hxl: <http://hxl.humanitarianresponse.info/ns/#> prefix dct: <http://purl.org/dc/terms/>  prefix foaf: <http://xmlns.com/foaf/0.1/> prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> SELECT DISTINCT ?uri ?label ?typelabel ?pcode ?loc WHERE {'+$miss.predicate+' rdfs:range ?range . ?uri rdf:type/rdfs:subClassOf* ?range; a ?type . { ?type skos:prefLabel ?typelabel } UNION { ?type rdfs:label ?typelabel } { ?uri hxl:featureRefName ?label } UNION { ?uri hxl:commonTitle ?label }UNION { ?uri dct:title ?label } UNION { ?uri foaf:name ?label } UNION { ?uri hxl:abbreviation ?label } UNION { ?uri hxl:adminUnitLevelTitle ?label } UNION { ?uri hxl:orgName ?label } UNION { ?uri hxl:title ?label } OPTIONAL {?uri hxl:atLocation* ?location ; hxl:pcode ?pcode . ?location hxl:featureName ?loc; a hxl:Country . } FILTER regex(?label, "'+$miss.term+'", "i") } ORDER BY ?label';
