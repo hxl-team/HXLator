@@ -190,6 +190,7 @@ echo'<!DOCTYPE html>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
+    <meta http-equiv="expires" content="0"> <!-- disable cache -->
 
     <link href="css/hxlator.css" rel="stylesheet"> 
     <link href="css/bootstrap-responsive.css" rel="stylesheet">

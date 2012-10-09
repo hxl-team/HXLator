@@ -481,20 +481,22 @@ function checkAllRows($inputMapping){
 	}
 }
 
-// adds a $term object, consisting of ['term'] and ['predicate'] to $lookUpTerms
+// adds a $term object, consisting of ['term'], ['predicate'], and ['cell'] to $lookUpTerms
 // if there is no $term with the same ['term'] and ['predicate'] yet
 function addLookupTerm($term, $lookUpTerms){
 	
-	var $add = true;
+	var $addNewTerm = true;
 
 	$.each($lookUpTerms, function($i, $looki){		
 		if($looki['term'] == $term['term'] && $looki['predicate'] == $term['predicate']){
-			$add = false;
+			$addNewTerm = false;
+		}else{
+			
 		}
 	});
 
 	// term is not there yet, add it:
-	if($add){
+	if($addNewTerm){
 		$lookUpTerms.push($term);	
 	}	
 	return $lookUpTerms;
