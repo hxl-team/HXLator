@@ -1647,10 +1647,12 @@ var hideHandler = function(){
 		if($('#mappingModal').is(":visible")){
 			$('#mappingModal').modal('hide');
 			$('.shortguide').slideUp().after('<div class="container ctrl-instructions"><div class="alert alert-info">Press <code>CTRL-K</code> again to go back to the mapping window.</div></div>');
-			$(document).bind('keydown', showHandler);		
+			$(document).bind('keydown', showHandler);
+			$(document).focus();
 		}
 	} else if (event.keyCode == 27) { // escape key
 		$(document).unbind('keydown', hideHandler);
+		$(document).focus();
 	}	
 };
 
@@ -1662,6 +1664,7 @@ var showHandler = function(){
 			$('#mappingModal').modal('show');
 			$('.ctrl-instructions').remove();
 			$('.shortguide').slideDown();
+			$(document).focus();
 		}
 	}
 };
