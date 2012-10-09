@@ -491,7 +491,9 @@ function addLookupTerm($term, $lookUpTerms){
 
 	$.each($lookUpTerms, function($i, $looki){		
 		if($looki['term'] == $term['term'] && $looki['predicate'] == $term['predicate']){
-			$looki['cells'].push($term['cell']);
+			if($looki['cells'].indexOf($term['cell']) == -1){
+				$looki['cells'].push($term['cell']);
+			}
 			$addNewTerm = false;
 		}
 	});
