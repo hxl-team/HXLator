@@ -200,8 +200,7 @@ echo'<!DOCTYPE html>
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
     
-    
-    <link rel="shortcut icon" href="img/ochaonline_theme_favicon.ico">
+    <link rel="shortcut icon" href="img/favicon.ico">
   </head>
 
   <body>
@@ -251,7 +250,12 @@ echo'
 function getFoot($extraJS = null, $script = null){ 
 
 	echo'	</div> <!-- /container -->
-	<div class="container footer">
+	<div class="container>
+    <div class="row">
+      <p align="center"><a href="http://hxl.humanitarianresponse.info/">Powered by HXL</a></p>
+    </div>
+  </div>
+  <div class="container footer">
 		<div class="row">
 		  <div class="span3"><strong>Contact</strong><br />
 		  This site is part of the HumanitarianResponse network. Write to 
