@@ -102,7 +102,7 @@ function hxlate(){
 		}            
 				            
 		    echo'      </ul>
-		          <div class="tab-content" style="padding-bottom: 9px; border-bottom: 1px solid #ddd;">';
+		          <div class="tab-content" style="padding-bottom: 9px; border-bottom: 1px solid #ddd; overflow: hidden">';
 		            
 		
 		$tabno = 1;
