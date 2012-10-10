@@ -13,10 +13,9 @@ getHead("contact.php");
 
 ?>
 
-<div class="container">
-	<a href="https://sites.google.com/site/hxlproject/"><img src="img/hxl-logo-s.png" align="right" /></a>
+<div class="container lead">
 	<h1>Contact <i class="icon-envelope"></i></h1>
-	<p style="margin-top:  1.5em; margin-bottom:  1.5em">Contact info with upload option for spreadsheets HXLator coulnd't swallow &ndash; <span class="label label-warning">TBD</span></p>	 
+	<p style="margin-top:  1.5em; margin-bottom:  1.5em">For any questions or feedback around HXLator, feel free to <a href='mailto:hendrix@un.org,me@carsten.io?subject=HXLator'>get in touch with us</a>. In case you are having problems with a specific spreadsheet, please attach it to your email. For general discussions about HXL, please refer to our <a href="https://groups.google.com/forum/?fromgroups#!forum/hxlproject">Google group</a>.</p>	 
 </div> <!-- /container -->
 
 <?php getFoot(); ?>

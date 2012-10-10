@@ -424,7 +424,7 @@ function checkAllRows($inputMapping){
 				$pusher['column'] = $triple.object.substr(8);;
 				$pusher['predicate'] = $triple.predicate;
 					
-				if($lookUpColumns.indexOf($pusher) == -1){ // only add if we don't have it yet
+				if($.inArray($pusher, $lookUpColumns) == -1){ // only add if we don't have it yet
 					$lookUpColumns.push($pusher);
 				}
 			}
@@ -491,7 +491,7 @@ function addLookupTerm($term, $lookUpTerms){
 
 	$.each($lookUpTerms, function($i, $looki){		
 		if($looki['term'] == $term['term'] && $looki['predicate'] == $term['predicate']){
-			if($looki['cells'].indexOf($term['cell']) == -1){
+			if($.inArray($term['cell'], $looki['cells']) == -1){
 				$looki['cells'].push($term['cell']);
 			}
 			$addNewTerm = false;
