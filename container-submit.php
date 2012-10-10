@@ -17,7 +17,8 @@ if(isset($_SESSION['loggedin'])) {   // only submit data if the user is logged i
   // look for the data container in the RDF code to know which named graph we're posting to:
 	foreach(preg_split("/((\r?\n)|(\r\n?))/", $_POST['hxl']) as $line){
     	if(strpos($line, 'a <http://hxl.humanitarianresponse.info/ns/#DataContainer>') !== false){
-    		$container = explode(' ', $line)[0]; // subject of this triple
+    		$container = explode(' ', $line);
+        $container = $container[0]; // subject of this triple
     		$container = substr($container, 1, -1);
     	}
 	}
