@@ -320,7 +320,7 @@ if(!isset($_SESSION['loggedin'])) {   // remove the loading spinner if the user 
 
 
 // load the footer, along with the extra JS required for this page
-getFoot(array("bootstrap-tab.js", "bootstrap-tooltip.js", "bootstrap-popover.js", "bootstrap-dropdown.js", "bootstrap-modal.js", "bootstrap-transition.js", "bootstrap-alert.js", "jquery-ui-1.8.21.custom.min.js", "jquery.dataTables.min.js", "table-fixed-header.js", "hxlator.js" ), $inlineScript);
+getFoot(array("bootstrap-tab.js", "bootstrap-tooltip.js", "bootstrap-popover.js", "bootstrap-dropdown.js", "bootstrap-modal.js", "bootstrap-transition.js", "bootstrap-alert.js", "jquery-ui-1.8.21.custom.min.js", "jquery.dataTables.min.js", "table-fixed-header.js", "hxlator.js?".time() ), $inlineScript);
 
 // renders the given $sheetData as an HTML table
 // $sheetIndex is the index of the given sheet in the containing workbook

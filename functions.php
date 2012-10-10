@@ -192,7 +192,7 @@ echo'<!DOCTYPE html>
     <meta name="author" content="">
     <meta http-equiv="expires" content="0"> <!-- disable cache -->
 
-    <link href="css/hxlator.css" rel="stylesheet"> 
+    <link href="css/hxlator.css?'.time().'" rel="stylesheet"> <!-- css disable cache -->
     <link href="css/bootstrap-responsive.css" rel="stylesheet">
 	<link href="css/jquery-ui-1.8.21.custom.css" rel="stylesheet">
 	
