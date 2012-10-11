@@ -52,7 +52,8 @@ FILTER ( regex(str(?type),"http://www.w3.org/2002/07/owl") )
 	  			  		
 	  }
   	  	    	    
-	echo "</ul>	
+	echo '<li><a class="btn hxlclass hxlprop disabled" data-hxl-uri="rdf:type" data-hxl-propertytype="http://www.w3.org/2002/07/owl#ObjectProperty" data-hxl-range="http://www.w3.org/2000/01/rdf-schema#Class" data-hxl-range-name="Class" href="#" rel="popover" title="type" data-content="Use this property if you want to specify a type for this cell that is different from the type you selected in the first step.">type</a></li>
+	  		</ul>	
 		</div>	
-		";
+		';
 ?>

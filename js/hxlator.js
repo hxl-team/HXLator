@@ -639,9 +639,7 @@ function mappingModal($inputMapping, $propName, $propURI, $propType, $propRange,
 	} else if ($propType == 'http://www.w3.org/2002/07/owl#ObjectProperty'){
 		$('#mappingModal > .modal-body').html('<p>This property should refer to a <a href="'+$propRange+'" target="blank">'+$propRangeName+'</a> from one of our reference lists.</p><div id="value-input" style="display: none"></div>');
 		
-		mapWithURILookup($inputMapping, $propName, $propURI, $propType, $propRange, $propRangeName);
-		
-		
+		mapWithURILookup($inputMapping, $propName, $propURI, $propType, $propRange, $propRangeName);			
 		
 	} else { // Something's going wrong...
 		$('#mappingModal > .modal-body').html('<p>We can\'t handle the property type '+$propType+'</p>');
@@ -761,10 +759,13 @@ function mapWithURILookup($inputMapping, $propName, $propURI, $propType, $propRa
 						
 						$query = 'prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> prefix hxl: <http://hxl.humanitarianresponse.info/ns/#> SELECT * WHERE { ?value rdf:type/rdfs:subClassOf* <'+$propRange+'> ; hxl:abbreviation ?label . FILTER regex(?label, "'+request.term+'", "i") } ORDER BY ?label';	
 
-					}else{
+					} else if ($propRange == 'http://www.w3.org/2000/01/rdf-schema#Class') {
+						$query = 'prefix skos: <http://www.w3.org/2004/02/skos/core#> prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> prefix hxl: <http://hxl.humanitarianresponse.info/ns/#> SELECT * WHERE { ?value rdf:type/rdfs:subClassOf* <'+$propRange+'> . ?value skos:prefLabel ?label . FILTER regex(?label, "'+request.term+'", "i") } ORDER BY ?label';    
+					} else {
 						$query = 'prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> prefix hxl: <http://hxl.humanitarianresponse.info/ns/#> SELECT * WHERE { ?value rdf:type/rdfs:subClassOf* <'+$propRange+'> . ?value hxl:title ?label . FILTER regex(?label, "'+request.term+'", "i") } ORDER BY ?label';    
 					}
 					
+					console.log($query);
 					
 					
 					$('#modal-loading').show();
