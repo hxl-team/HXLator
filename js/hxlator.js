@@ -266,12 +266,12 @@ function mapProperty($inputMapping){
 			tagMappedCellsAndProps($mapping);		
 
 
-			$('.shortguide').append($hint).slideDown();			
-			
-			//explanation popovers for hxl properties:
-			// placement function makes sure the popover stay within the page, via http://stackoverflow.com/questions/10238089/how-can-you-ensure-twitter-bootstrap-popover-windows-are-visible
-			// if we need this placement function for other popovers, we might want to pull it out into a separate function
-			$('.hxlprop').popover({
+			$('.shortguide').append($hint).slideDown(function(){
+				
+				//explanation popovers for hxl properties:
+				// placement function makes sure the popover stay within the page, via http://stackoverflow.com/questions/10238089/how-can-you-ensure-twitter-bootstrap-popover-windows-are-visible
+				// if we need this placement function for other popovers, we might want to pull it out into a separate function			
+				$('.hxlprop').popover({
 			        html: true,
 			        placement: function(tip, element) {
 			            var $element, above, actualHeight, actualWidth, below, boundBottom, boundLeft, boundRight, boundTop, elementAbove, elementBelow, elementLeft, elementRight, isWithinBounds, left, pos, right;
@@ -315,6 +315,8 @@ function mapProperty($inputMapping){
 			            else return "right";
 			          }
 			        });
+			});			
+			
 			
 			enableCellSelection($mapping);
 			
