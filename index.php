@@ -22,7 +22,7 @@ getHead("index.php", $user_name, $user_organisation);
 
 <?php    if(isset($_SESSION['loggedin'])) {   // show the upload options only if the user is logged in:  ?>
         
-        <form class="alert" enctype="multipart/form-data" action="hxlate.php#" method="POST">
+        <form class="alert" id="metadata-form" enctype="multipart/form-data" action="hxlate.php#" method="POST">
 
 			<div class="control-group">
             	<label for="emergencies"><i class="icon-fire"></i> Emergency: </label>
@@ -65,10 +65,10 @@ getHead("index.php", $user_name, $user_organisation);
 				</div>
 			</div>
 			
-            <div class="fileupload fileupload-new" data-provides="fileupload">
+            <div class="fileupload fileupload-new control-group" data-provides="fileupload">
             	<label class="control-label" for="file"><i class="icon-file"></i> Select file to HXLate:</label>
-  				<div class="fileupload-preview span3 uneditable-input" style="border: 1px solid #ccc"></div>
-  				<span class="btn btn-file"><span class="fileupload-new">Select file</span><span class="fileupload-exists">Change</span><input name="userfile" type="file" /></span>  				
+  				<div class="fileupload-preview span3 uneditable-input" id="upload-preview" style="border: 1px solid #ccc"></div>
+  				<span class="btn btn-file" id="file-button"><span class="fileupload-new">Select file</span><span class="fileupload-exists">Change</span><input name="userfile" type="file" /></span>  				
 			</div>
 
             <br />
@@ -149,6 +149,42 @@ getHead("index.php", $user_name, $user_organisation);
 	$customJS = emergencyQuery().'
 
 	$(".fileupload").fileupload();
+
+	$("#metadata-form").submit(function(){
+
+		var isFormValid = true;
+
+		console.log($.trim($("#emergency").val()).length);
+
+		// check if an emergency has been selected
+    	if ($.trim($("#emergency").val()).length == 0){
+           	$("#emergency").parents(".control-group").addClass("error");
+           	isFormValid = false;
+        } else {
+           	$("#emergency").parents(".control-group").removeClass("error");
+        }
+
+        //check if a file is selected for upload
+        if($.trim($("#upload-preview").html()).length == 0){
+        	$("#upload-preview").parents(".control-group").addClass("error");
+        	$("#upload-preview").css("border", "1px solid #B94A48");
+        	$("#file-button").addClass("btn-danger");
+           	isFormValid = false;
+        }else{
+        	$("#upload-preview").parents(".control-group").removeClass("error");           	
+        	$("#upload-preview").css("border", "1px solid #CCC");
+        	$("#file-button").removeClass("btn-danger");
+           	
+        }
+    	
+    	if (!isFormValid) {
+    		if($("#fillme").length == 0){
+    		    $("#metadata-form").before(\'<div class="alert alert-error" id="fillme">Please fill in all fields.</div>\');}
+    	}
+
+    	return isFormValid;
+	});
+
 	';
 	
 	getFoot(array('jquery-ui-1.8.21.custom.min.js', 'bootstrap-fileupload.js'), $customJS ); 
