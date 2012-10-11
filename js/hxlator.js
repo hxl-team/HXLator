@@ -757,9 +757,9 @@ function mapWithURILookup($inputMapping, $propName, $propURI, $propType, $propRa
 					}else if ($propRange == 'http://hxl.humanitarianresponse.info/ns/#Emergency'){
 
 						$query = 'prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> prefix hxl: <http://hxl.humanitarianresponse.info/ns/#> SELECT * WHERE { ?value rdf:type/rdfs:subClassOf* <'+$propRange+'> . ?value hxl:commonTitle ?label . FILTER regex(?label, "'+request.term+'", "i") } ORDER BY ?label';								
-					}else{
+					}else if ($propRange == 'http://hxl.humanitarianresponse.info/ns/#Organisation'){
 						
-						$query = 'prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> prefix hxl: <http://hxl.humanitarianresponse.info/ns/#> SELECT * WHERE { ?value rdf:type/rdfs:subClassOf* <'+$propRange+'> . ?value hxl:title ?label . FILTER regex(?label, "'+request.term+'", "i") } ORDER BY ?label';		
+						$query = 'prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> prefix hxl: <http://hxl.humanitarianresponse.info/ns/#> SELECT * WHERE { ?value rdf:type/rdfs:subClassOf* <'+$propRange+'> ; hxl:abbreviation ?label . FILTER regex(?label, "'+request.term+'", "i") } ORDER BY ?label';	
 
 					}
 					
