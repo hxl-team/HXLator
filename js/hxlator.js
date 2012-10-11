@@ -1541,6 +1541,9 @@ function updateTablePreview($mapping){
 	        // now go through all predicates and check whether we have a value for this one:
 	        $.each($predicates, function($j, $p){		
 	        	$table += '<td>';
+	        	var $cellContent = '';
+	        	if ($p == 'rdf:type') $cellContent = $mapping.classsingular;
+	        	
 	        	$.each($triples['triples'], function($i, $triple){
 	        	    if($triple['predicate'] == $p){
 		        		if($triple['object'].indexOf('<') == 0){
@@ -1552,7 +1555,7 @@ function updateTablePreview($mapping){
 
 							if($names[$uri] == undefined){
 								$('#loading').show();
-								$query = 'prefix hxl: <http://hxl.humanitarianresponse.info/ns/#> prefix foaf: <http://xmlns.com/foaf/0.1/> SELECT * WHERE { {'+$uri+' hxl:title ?name .} UNION {'+$uri+' hxl:featureName ?name .} UNION {'+$uri+' foaf:name ?name .} UNION {'+$uri+' hxl:abbreviation ?name .} UNION {'+$uri+' hxl:commonTitle ?name .} UNION {'+$uri+' hxl:orgName ?name .}}'; 
+								$query = 'prefix skos: <http://www.w3.org/2004/02/skos/core#>  prefix hxl: <http://hxl.humanitarianresponse.info/ns/#> prefix foaf: <http://xmlns.com/foaf/0.1/> SELECT * WHERE { {'+$uri+' hxl:title ?name .} UNION {'+$uri+' hxl:featureName ?name .} UNION {'+$uri+' foaf:name ?name .} UNION {'+$uri+' skos:prefLabel ?name .} UNION {'+$uri+' hxl:abbreviation ?name .} UNION {'+$uri+' hxl:commonTitle ?name .} UNION {'+$uri+' hxl:orgName ?name .}}'; 
 								$.ajax({
 									async: false,
 									url: 'http://hxl.humanitarianresponse.info/sparql',
@@ -1565,7 +1568,7 @@ function updateTablePreview($mapping){
 									success: function( data ) { 
 										$.map( data.results.bindings, function( result ) {
 										 	$names[$uri] = result.name.value;
-										 	$table += '<a href="'+$uri.substr(1,$uri.length-2)+'" target="_blank">'+result.name.value+'</a>';										 	
+										 	$cellContent = '<a href="'+$uri.substr(1,$uri.length-2)+'" target="_blank">'+result.name.value+'</a>';										 	
 										});
 
 										$('#loading').hide();
@@ -1575,7 +1578,7 @@ function updateTablePreview($mapping){
 									}
 								});
 							}else{
-								$table += '<a href="'+$uri.substr(1,$uri.length-2)+'" target="_blank">'+$names[$uri]+'</a>';							   
+								$cellContent = '<a href="'+$uri.substr(1,$uri.length-2)+'" target="_blank">'+$names[$uri]+'</a>';							   
 							}
 						} else if ($triple['object'].indexOf('@lookup') == 0) {
 							
@@ -1584,12 +1587,15 @@ function updateTablePreview($mapping){
     		            } else { 
     		            
     		            	// simple data property
-    		                $table += $triple['object'];
+    		                $cellContent = $triple['object'];
 		        	        
     		            }
 		        	}
 		        		        	
 		        });
+
+				$table += $cellContent;
+
 				if($table.indexOf(' | ', $table.length - 3) !== -1){
 				    $table = $table.substring(0, $table.length -3);
 				}
