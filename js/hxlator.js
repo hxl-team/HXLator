@@ -767,7 +767,6 @@ function mapWithURILookup($inputMapping, $propName, $propURI, $propType, $propRa
 						$query = 'prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> prefix hxl: <http://hxl.humanitarianresponse.info/ns/#> SELECT * WHERE { ?value rdf:type/rdfs:subClassOf* <'+$propRange+'> . ?value hxl:title ?label . FILTER regex(?label, "'+request.term+'", "i") } ORDER BY ?label';    
 					}
 					
-					console.log($query);
 					
 					
 					$('#modal-loading').show();
@@ -1463,8 +1462,17 @@ function generateRDF($inputMapping){
     		}
   
 
-			// type this URI:
-			$turtle += $resuri + ' rdf:type ' + $mapping.classuri + ' .\n';
+			// type this URI with the standard type selected by the user *if there is no other type given*
+			var $typed = false;
+			$.each($triples['triples'], function($i, $triple){
+				if ($triple['predicate'] == 'rdf:type'){
+					$typed = true;
+				}
+			});
+
+			if ( !$typed ) {
+				$turtle += $resuri + ' rdf:type ' + $mapping.classuri + ' .\n';
+			}
 		}
 	
 		$.each($triples['triples'], function($i, $triple){
