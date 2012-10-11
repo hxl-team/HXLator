@@ -154,8 +154,6 @@ getHead("index.php", $user_name, $user_organisation);
 
 		var isFormValid = true;
 
-		console.log($.trim($("#emergency").val()).length);
-
 		// check if an emergency has been selected
     	if ($.trim($("#emergency").val()).length == 0){
            	$("#emergency").parents(".control-group").addClass("error");

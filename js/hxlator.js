@@ -215,7 +215,7 @@ function mapProperty($inputMapping){
 
 
 	// if there are already any cells selected, 'unselect' them first:
-	$('.hxlatorcell').removeClass('selected lastselected');
+	// $('.hxlatorcell').removeClass('selected lastselected');
 		
 	//next step: show properties: 
 	$('.shortguide').slideUp(function(){
@@ -546,6 +546,10 @@ function checkProperties($inputMapping){
 }
 
 function enableCellSelection($mapping){
+
+	// dis- or enable the buttons on startup, depending on whether a cell is selected or not:
+	togglePropertyButtonsDisabled($mapping);
+
 	// handle selection on the highlighted table row
 	$('tr.highlight > td.hxlatorcell').click(function(e) {		
 	  	$(this).toggleClass('selected');
@@ -584,16 +588,22 @@ function enableCellSelection($mapping){
 	  	}
 	  	
 	  	// enable the property buttons and click listener if any cell is selected, disable if not:
-	  	if ( $('tr.highlight > td.hxlatorcell').hasClass('selected') ){
-	  		$('.hxlprop').removeClass('disabled');
-	  		$('.hxlprop').click(function() {
-	  			mappingModal($mapping, $(this).attr('data-original-title'), $(this).attr('data-hxl-uri'), $(this).attr('data-hxl-propertytype'), $(this).attr('data-hxl-range'), $(this).attr('data-hxl-range-name') );	
-	  		});
-	  	} else {
-		  	$('.hxlprop').addClass('disabled');
-		  	$('.hxlprop').unbind();
-	  	}	  			  
+	 	togglePropertyButtonsDisabled($mapping);
+
 	});
+}
+
+// enable the property buttons and click listener if any cell is selected, disable if not:	 	
+function togglePropertyButtonsDisabled($mapping){
+	if ( $('tr.highlight > td.hxlatorcell').hasClass('selected') ){
+  		$('.hxlprop').removeClass('disabled');
+  		$('.hxlprop').click(function() {
+  			mappingModal($mapping, $(this).attr('data-original-title'), $(this).attr('data-hxl-uri'), $(this).attr('data-hxl-propertytype'), $(this).attr('data-hxl-range'), $(this).attr('data-hxl-range-name') );	
+  		});
+  	} else {
+	  	$('.hxlprop').addClass('disabled');
+	  	$('.hxlprop').unbind();
+  	}
 }
 
 // shows and fills the mapping modal
