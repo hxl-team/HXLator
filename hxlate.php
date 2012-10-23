@@ -223,39 +223,42 @@ if(isset($_POST["user_organisation"])){
 $containerURI = makeURI("hxl:DataContainer", $orgPost);
 
 $im = '$initMapping = {
-	  "templates": {
-	    "<'.$containerURI.'>": {
-	      "triples": [
-	        {
-	          "predicate": "a",
-	          "object": "<http://hxl.humanitarianresponse.info/ns/#DataContainer>",          
-	        },
-	        {
-	          "predicate": "hxl:aboutEmergency",
-	          "object": "<'.$_POST["emergency"].'>",          
-	        },
-	        {
-	          "predicate": "hxl:reportCateogry",
-	          "object": "<'.$_POST["report_category"].'>",          
-	        },
-	        {
-	          "predicate": "hxl:reportedBy",
-	          "object": "<'.$_SESSION["user_uri"].'>",          
-	        },
-	        {
-	          "predicate": "hxl:reportedBy",
-	          "object": "<'.$_SESSION["user_organisation_uri"].'>",          
-	        },
-	        {
-	          "predicate": "hxl:date",
-	          "object": "'.date("Y-m-d").'",
-	          "datatype": "xsd:date"          
-	        }
-	      ]
-	    }
-	  },
-	  "lookup": {}
-	};';
+	"datacontainers": [
+	  	{ 
+  		    "<'.$containerURI.'>": {
+		      	"triples": [
+			        {
+			          "predicate": "a",
+			          "object": "<http://hxl.humanitarianresponse.info/ns/#DataContainer>",          
+			        },
+			        {
+			          "predicate": "hxl:aboutEmergency",
+			          "object": "<'.$_POST["emergency"].'>",          
+			        },
+			        {
+			          "predicate": "hxl:reportCateogry",
+			          "object": "<'.$_POST["report_category"].'>",          
+			        },
+			        {
+			          "predicate": "hxl:reportedBy",
+			          "object": "<'.$_SESSION["user_uri"].'>",          
+			        },
+			        {
+			          "predicate": "hxl:reportedBy",
+			          "object": "<'.$_SESSION["user_organisation_uri"].'>",          
+			        },
+			        {
+			          "predicate": "hxl:date",
+			          "object": "'.date("Y-m-d").'",
+			          "datatype": "xsd:date"          
+			        }
+			    ]			    
+			}
+		}
+	],	  
+	"lookup": {}
+	};
+	console.log($initMapping);';
 
 if($_POST["translator"] == "new"){
 

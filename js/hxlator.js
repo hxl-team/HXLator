@@ -225,12 +225,10 @@ function mapProperty($inputMapping){
 			tagMappedCellsAndProps($mapping);
 
 			// show a popup over the "preview HXL" button after the first mapped triple:
-			var $t = 0;
-			$.each($mapping.templates, function($i, $template){
-				$t++;
-			});
-			if($t == 2){
+			if($('td.hxlatorcell.mapped').length == 1){
 				$('#showPreview').tooltip('show');
+			}else{
+				$('#showPreview').tooltip('hide');
 			}
 
 			// if there are already any mappings (i.e., at least one tagged property button), show a different text:			
@@ -957,41 +955,45 @@ function addPropertyMappings($mapping, $propURI){
 				var $uri = '@uri '+$(this).attr('data-value-subject');
 				
 				// if there are no mappings for this URI yet, add this node to the JSON tree:
-				if($mapping.templates[$uri] == undefined){
-					$mapping.templates[$uri] = new Object();
-					$mapping.templates[$uri].triples = new Array();						
+				// TODO: find correct data container! so far, we assume there is only one:
+				console.log($mapping);
+				if($mapping.datacontainers[0][$uri] == undefined){
+				   $mapping.datacontainers[0][$uri] = new Object();
+				   $mapping.datacontainers[0][$uri].triples = new Array();						
 				}
 				
 				// add the triple: 
-				var $index =  $mapping.templates[$uri].triples.length;
+				var $index =  $mapping.datacontainers[0][$uri].triples.length;
 
 				// check if this predicate is already mapped: if so, replace the old value
 				// TODO: this basically assumes that all our properties have a max cardinality of 1; 
 				// we might have to come up with something based on the vocabulary once we have cardinalities in there.
-				$.each($mapping.templates[$uri].triples, function($i, $triple){
+				// TODO: find correct data container! so far, we assume there is only one:
+				$.each($mapping.datacontainers[0][$uri].triples, function($i, $triple){
 					if($triple['predicate'] == $propURI){
 						$index = $i;
 					}
 				});
 
-				$mapping.templates[$uri].triples[$index] = new Object();
-				$mapping.templates[$uri].triples[$index]['predicate'] = $propURI;
+				// TODO: find correct data container! so far, we assume there is only one:				
+				$mapping.datacontainers[0][$uri].triples[$index] = new Object();
+				$mapping.datacontainers[0][$uri].triples[$index]['predicate'] = $propURI;
 				
 				// store a mapping depending on input field metadata
 				if($(this).attr('data-value-object') == undefined){
 					
 					// data property with direct input
-					$mapping.templates[$uri].triples[$index]['object'] = $(this).val();
+					$mapping.datacontainers[0][$uri].triples[$index]['object'] = $(this).val();
 					
 				} else if($(this).attr('data-value-object').indexOf('http') == 0){
 				
 					// object property that has already been looked up
-					$mapping.templates[$uri].triples[$index]['object'] = '<'+$(this).attr('data-value-object')+'>';
+					$mapping.datacontainers[0][$uri].triples[$index]['object'] = '<'+$(this).attr('data-value-object')+'>';
 				
 				} else if($(this).attr('data-function') == '@lookup'){
 					
 					// object property with lookup at the end of the mapping process
-					$mapping.templates[$uri].triples[$index]["object"] = '@lookup '+$(this).attr('data-value-object');
+					$mapping.datacontainers[0][$uri].triples[$index]["object"] = '@lookup '+$(this).attr('data-value-object');
 
 					// check if the term to look up is already in our lookup dictionary; 
 					// if not, we save the term in an array and send the user to (yet anther) mapping // page where s/he can assign URIs to the terms not in the dictionary so far
@@ -1010,7 +1012,7 @@ function addPropertyMappings($mapping, $propURI){
 				} else {
 					
 					// data property that takes the value from the spreadsheet
-					$mapping.templates[$uri].triples[$index]["object"] = '@value '+$(this).attr('data-value-object');
+					$mapping.datacontainers[0][$uri].triples[$index]["object"] = '@value '+$(this).attr('data-value-object');
 					
 				}
 			}
@@ -1325,179 +1327,183 @@ function generateRDF($inputMapping){
 	var $mapping = $.extend(true, {}, $inputMapping);
 
 	var $turtle = '@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> . \n@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> . \n@prefix owl:  <http://www.w3.org/2002/07/owl#> . \n@prefix foaf: <http://xmlns.com/foaf/0.1/> . \n@prefix dc:   <http://purl.org/dc/terms/> . \n@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> . \n@prefix skos: <http://www.w3.org/2004/02/skos/core#> . \n@prefix hxl:  <http://hxl.humanitarianresponse.info/ns/#> . \n@prefix geo:  <http://www.opengis.net/geosparql#> . \n@prefix label: <http://www.wasab.dk/morten/2004/03/label#> . \n \n';
-	$.each($mapping.templates, function($uri, $triples){
-		
-		// first go through the whole mapping object once and replace all @value and @lookup occurrences with the actual values from the spreadsheet:
-		$.each($triples['triples'], function($i, $triple){
+	
+	$.each($mapping.datacontainers, function($t, $templates){
 
-			// values from spreadsheet:
-			if($triple['object'].indexOf('@value') == 0){	
-				$triple['object'] = getCellContents($triple['object'].substr(7));
-			}
-
-			// values from spreadsheet, then map those to existing URIs:
-			if($triple['object'].indexOf('@lookup') == 0){				
-				var $lookupterm = getCellContents($triple['object'].substr(8));
-
-				// check if we already have the term in our lookup "dictionary"
-				if($mapping.lookup[$lookupterm] == undefined){
-					// No @lookup found for this term; let's ignore it:					
-				} else {
-					$triple['object'] = $mapping.lookup[$lookupterm];
-				}
-			}			
-		});
-		
-		// this is the case if the URI is already there:
-		$resuri = $uri;
-
-		// generate a URI if the $uri is not there yet (tagged with "@uri")
-		// (overwriting what we had before)
-		if($uri.indexOf('@uri') == 0){
-		
-			// go through all properties of the resource and generate a URI based on our URI patterns document:
-			// https://docs.google.com/document/d/1-9OoF5vz71qPtPRo3WoaMH4S5J1O41ITszT3arQ5VLs/edit
+		$.each($templates, function($uri, $triples){
 			
-			var $classslug = $mapping.classplural.toLowerCase().replace( /\s/g, '' );
+			// first go through the whole mapping object once and replace all @value and @lookup occurrences with the actual values from the spreadsheet:
+			$.each($triples['triples'], function($i, $triple){
 
-			// populations:
-			if($mapping.classuri == 'hxl:Population' || $mapping.classuri == 'hxl:AffectedPopulation' || $mapping.classuri == 'hxl:TotalPopulation' || $mapping.classuri == 'hxl:Casualty' || $mapping.classuri == 'hxl:Displaced' || $mapping.classuri == 'hxl:NonDisplaced' || $mapping.classuri == 'hxl:Death' || $mapping.classuri == 'hxl:Injury' || $mapping.classuri == 'hxl:Missing' || $mapping.classuri == 'hxl:IDP' || $mapping.classuri == 'hxl:Others' || $mapping.classuri == 'hxl:RefugeesAsylumSeekers' || $mapping.classuri == 'hxl:HostPopulation' || $mapping.classuri == 'hxl:NonHostPopulation') {
+				// values from spreadsheet:
+				if($triple['object'].indexOf('@value') == 0){	
+					$triple['object'] = getCellContents($triple['object'].substr(7));
+				}
 
-				var $loc = '';
-				var $sex = '';
-				var $age = '';
+				// values from spreadsheet, then map those to existing URIs:
+				if($triple['object'].indexOf('@lookup') == 0){				
+					var $lookupterm = getCellContents($triple['object'].substr(8));
 
-				// check whether location, sex and age categories are set:
-				$.each($triples['triples'], function($i, $triple){
-					if ($triple['predicate'] == 'hxl:atLocation'){
-						if($triple['object'].indexOf('@lookup') != 0){
+					// check if we already have the term in our lookup "dictionary"
+					if($mapping.lookup[$lookupterm] == undefined){
+						// No @lookup found for this term; let's ignore it:					
+					} else {
+						$triple['object'] = $mapping.lookup[$lookupterm];
+					}
+				}			
+			});
+			
+			// this is the case if the URI is already there:
+			$resuri = $uri;
+
+			// generate a URI if the $uri is not there yet (tagged with "@uri")
+			// (overwriting what we had before)
+			if($uri.indexOf('@uri') == 0){
+			
+				// go through all properties of the resource and generate a URI based on our URI patterns document:
+				// https://docs.google.com/document/d/1-9OoF5vz71qPtPRo3WoaMH4S5J1O41ITszT3arQ5VLs/edit
+				
+				var $classslug = $mapping.classplural.toLowerCase().replace( /\s/g, '' );
+
+				// populations:
+				if($mapping.classuri == 'hxl:Population' || $mapping.classuri == 'hxl:AffectedPopulation' || $mapping.classuri == 'hxl:TotalPopulation' || $mapping.classuri == 'hxl:Casualty' || $mapping.classuri == 'hxl:Displaced' || $mapping.classuri == 'hxl:NonDisplaced' || $mapping.classuri == 'hxl:Death' || $mapping.classuri == 'hxl:Injury' || $mapping.classuri == 'hxl:Missing' || $mapping.classuri == 'hxl:IDP' || $mapping.classuri == 'hxl:Others' || $mapping.classuri == 'hxl:RefugeesAsylumSeekers' || $mapping.classuri == 'hxl:HostPopulation' || $mapping.classuri == 'hxl:NonHostPopulation') {
+
+					var $loc = '';
+					var $sex = '';
+					var $age = '';
+
+					// check whether location, sex and age categories are set:
+					$.each($triples['triples'], function($i, $triple){
+						if ($triple['predicate'] == 'hxl:atLocation'){
+							if($triple['object'].indexOf('@lookup') != 0){
+								// grab URI and remove < and >
+								var $place = $triple['object'].substr(1, $triple['object'].length-2);
+								// strip the country and p-code from the URI (last two parts of URI):
+								var $placeURIparts = $place.split('/');
+								$loc = '/' + $placeURIparts[$placeURIparts.length - 2] + '/' + $placeURIparts[$placeURIparts.length - 1];	
+							} else { //lookup failed
+								$loc = '/unknownLocation';
+							}
+							
+						}else if ($triple['predicate'] == 'hxl:sexCategory'){
+							if($triple['object'].indexOf('@lookup') != 0){						
+								// grab URI and remove < and >
+								var $sexCategory = $triple['object'].substr(1, $triple['object'].length-2);
+								var $sexCategoryURIparts = $sexCategory.split('/');
+								$sex = '/' + $sexCategoryURIparts[$sexCategoryURIparts.length -1];	
+							} else { // lookup failed
+								$sex = '/unknownSex';
+							}
+						}else if ($triple['predicate'] == 'hxl:ageGroup'){
+							if($triple['object'].indexOf('@lookup') != 0){						
+								// grab URI and remove < and >
+								var $ageGroup = $triple['object'].substr(1, $triple['object'].length-2);
+								var $ageGroupURIparts = $ageGroup.split('/');
+								$age = '/'+$ageGroupURIparts[$ageGroupURIparts.length -1 ];
+							} else { // lookup failed
+								$age =  '/unknownAgeGroup';
+							}
+						}
+					});
+
+					var $resuri = '<http://hxl.humanitarianresponse.info/data/' + $classslug + $loc +  $sex + $age + '>';
+
+				} else if($mapping.classuri == 'hxl:Emergency') {
+					
+					// random GLIDE number for now
+					var $glide = '/unknownGLIDEnumber';
+
+					// check whether the hasGLIDEnumber property is set:
+					$.each($triples['triples'], function($i, $triple){
+						if ($triple['predicate'] == 'hxl:hasGLIDEnumber'){
+							$glide = '/'+$triple['object'];						
+						}
+					});
+					
+					var $resuri = '<http://hxl.humanitarianresponse.info/data/' + $classslug + $glide;
+					
+
+	    		} else if($mapping.classuri == 'hxl:APL') {
+
+					var $loc = '/unknownLocation';
+					var $pcode = '/unknownPcode';
+					
+					// check whether location, sex and age categories are set:
+					$.each($triples['triples'], function($i, $triple){
+						if ($triple['predicate'] == 'hxl:atLocation'){
 							// grab URI and remove < and >
 							var $place = $triple['object'].substr(1, $triple['object'].length-2);
 							// strip the country and p-code from the URI (last two parts of URI):
 							var $placeURIparts = $place.split('/');
-							$loc = '/' + $placeURIparts[$placeURIparts.length - 2] + '/' + $placeURIparts[$placeURIparts.length - 1];	
-						} else { //lookup failed
-							$loc = '/unknownLocation';
-						}
-						
-					}else if ($triple['predicate'] == 'hxl:sexCategory'){
-						if($triple['object'].indexOf('@lookup') != 0){						
+							// we use only the country code
+							$loc = '/' + $placeURIparts[$placeURIparts.length - 2];
+						}else if ($triple['predicate'] == 'hxl:pcode'){
 							// grab URI and remove < and >
-							var $sexCategory = $triple['object'].substr(1, $triple['object'].length-2);
-							var $sexCategoryURIparts = $sexCategory.split('/');
-							$sex = '/' + $sexCategoryURIparts[$sexCategoryURIparts.length -1];	
-						} else { // lookup failed
-							$sex = '/unknownSex';
+							$pcode = '/' + $triple['object'];	
 						}
-					}else if ($triple['predicate'] == 'hxl:ageGroup'){
-						if($triple['object'].indexOf('@lookup') != 0){						
-							// grab URI and remove < and >
-							var $ageGroup = $triple['object'].substr(1, $triple['object'].length-2);
-							var $ageGroupURIparts = $ageGroup.split('/');
-							$age = '/'+$ageGroupURIparts[$ageGroupURIparts.length -1 ];
-						} else { // lookup failed
-							$age =  '/unknownAgeGroup';
-						}
-					}
-				});
+					});
 
-				var $resuri = '<http://hxl.humanitarianresponse.info/data/' + $classslug + $loc +  $sex + $age + '>';
+	    			// example: http://hxl.humanitarianresponse.info/data/locations/apl/bfa/UNHCR-POC-80
+	    			var $resuri = '<http://hxl.humanitarianresponse.info/data/locations/apl' + $loc + $pcode + '>';			
 
-			} else if($mapping.classuri == 'hxl:Emergency') {
-				
-				// random GLIDE number for now
-				var $glide = '/unknownGLIDEnumber';
+	    		} else if($mapping.classuri == 'hxl:Organisation') {
 
-				// check whether the hasGLIDEnumber property is set:
+	    			// random acronym for now:
+	    			var $acro = '';
+
+	    			// check if the acronym is set:
+	    			$.each($triples['triples'], function($i, $triple){
+	    				if ($triple['predicate'] == 'hxl:abbreviation'){
+	    					// remove blanks, just in case...
+	    					$acro = '/' + $triple['object'].toLowerCase().replace( /\s/g, '' );;					
+	    				}
+	    			});
+
+	    			var $resuri = '<http://hxl.humanitarianresponse.info/data/' + $classslug + $acro + '>';
+
+	    		} else {
+	    			console.error('Error during URI generation');
+	    			$resuri = '<http://some.error/crap>'; 
+	    		}
+	  
+
+				// type this URI with the standard type selected by the user *if there is no other type given*
+				var $typed = false;
 				$.each($triples['triples'], function($i, $triple){
-					if ($triple['predicate'] == 'hxl:hasGLIDEnumber'){
-						$glide = '/'+$triple['object'];						
-					}
-				});
-				
-				var $resuri = '<http://hxl.humanitarianresponse.info/data/' + $classslug + $glide;
-				
-
-    		} else if($mapping.classuri == 'hxl:APL') {
-
-				var $loc = '/unknownLocation';
-				var $pcode = '/unknownPcode';
-				
-				// check whether location, sex and age categories are set:
-				$.each($triples['triples'], function($i, $triple){
-					if ($triple['predicate'] == 'hxl:atLocation'){
-						// grab URI and remove < and >
-						var $place = $triple['object'].substr(1, $triple['object'].length-2);
-						// strip the country and p-code from the URI (last two parts of URI):
-						var $placeURIparts = $place.split('/');
-						// we use only the country code
-						$loc = '/' + $placeURIparts[$placeURIparts.length - 2];
-					}else if ($triple['predicate'] == 'hxl:pcode'){
-						// grab URI and remove < and >
-						$pcode = '/' + $triple['object'];	
+					if ($triple['predicate'] == 'rdf:type'){
+						$typed = true;
 					}
 				});
 
-    			// example: http://hxl.humanitarianresponse.info/data/locations/apl/bfa/UNHCR-POC-80
-    			var $resuri = '<http://hxl.humanitarianresponse.info/data/locations/apl' + $loc + $pcode + '>';			
-
-    		} else if($mapping.classuri == 'hxl:Organisation') {
-
-    			// random acronym for now:
-    			var $acro = '';
-
-    			// check if the acronym is set:
-    			$.each($triples['triples'], function($i, $triple){
-    				if ($triple['predicate'] == 'hxl:abbreviation'){
-    					// remove blanks, just in case...
-    					$acro = '/' + $triple['object'].toLowerCase().replace( /\s/g, '' );;					
-    				}
-    			});
-
-    			var $resuri = '<http://hxl.humanitarianresponse.info/data/' + $classslug + $acro + '>';
-
-    		} else {
-    			console.error('Error during URI generation');
-    			$resuri = '<http://some.error/crap>'; 
-    		}
-  
-
-			// type this URI with the standard type selected by the user *if there is no other type given*
-			var $typed = false;
-			$.each($triples['triples'], function($i, $triple){
-				if ($triple['predicate'] == 'rdf:type'){
-					$typed = true;
+				if ( !$typed ) {
+					$turtle += $resuri + ' rdf:type ' + $mapping.classuri + ' .\n';
 				}
-			});
-
-			if ( !$typed ) {
-				$turtle += $resuri + ' rdf:type ' + $mapping.classuri + ' .\n';
-			}
-		}
-	
-		$.each($triples['triples'], function($i, $triple){
-			
-			// handling the triples object:
-			var $object = '';
-			if($triple['object'].indexOf('<http') == 0){ // object property
-				$object = $triple['object'];
-			}else if($triple['object'].indexOf('http') == 0){ // object property
-				$object = '<'+$triple['object']+'>';
-			}else{ // data property
-				$object = '"'+$triple['object']+'"';
 			}
 		
+			$.each($triples['triples'], function($i, $triple){
+				
+				// handling the triples object:
+				var $object = '';
+				if($triple['object'].indexOf('<http') == 0){ // object property
+					$object = $triple['object'];
+				}else if($triple['object'].indexOf('http') == 0){ // object property
+					$object = '<'+$triple['object']+'>';
+				}else{ // data property
+					$object = '"'+$triple['object']+'"';
+				}
 			
-			var $datatype = '';
-			if ($triple['datatype'] != undefined){
-				$datatype  = '^^' + $triple['datatype'];
-			}
-			
-			// add the triple, but ONLY if the object is not empty and the lookup did work:
-			if($object != '' && $object.indexOf('"@value') != 0 && $object.indexOf('"@lookup') != 0 && $object.indexOf('"@userlookup') != 0){			
-				$turtle += $resuri + ' ' + $triple['predicate'] + ' ' + $object + $datatype + ' .\n';
-			}
+				
+				var $datatype = '';
+				if ($triple['datatype'] != undefined){
+					$datatype  = '^^' + $triple['datatype'];
+				}
+				
+				// add the triple, but ONLY if the object is not empty and the lookup did work:
+				if($object != '' && $object.indexOf('"@value') != 0 && $object.indexOf('"@lookup') != 0 && $object.indexOf('"@userlookup') != 0){			
+					$turtle += $resuri + ' ' + $triple['predicate'] + ' ' + $object + $datatype + ' .\n';
+				}
 
+			});
 		});
 	});
 	// update the preview modal:
@@ -1514,16 +1520,18 @@ function updateTablePreview($mapping){
 	var $table = '<p>A table-based preview of your spreadsheet, translated into HXL. You can sort by each column by clicking the column header, or filter using the search field:</p><table id="previewTable" class="table table-hover table-bordered table-condensed">';
 	// go through all triples and figure out how many distinct properties we have, so that we know the number of columns in the table:
 	var $predicates = new Array();
-	$.each($mapping.templates, function($uri, $triples){
-		if($uri.indexOf('@uri') == 0){   // ignore the metadata stuff
-			$.each($triples['triples'], function($i, $triple){
-				if($.inArray($triple['predicate'], $predicates) == -1){
-					$predicates.push($triple['predicate']);
-				}
-			});
-		}
+
+	$.each($mapping.datacontainers, function($t, $templates){
+		$.each($templates, function($uri, $triples){
+			if($uri.indexOf('@uri') == 0){   // ignore the metadata stuff
+				$.each($triples['triples'], function($i, $triple){
+					if($.inArray($triple['predicate'], $predicates) == -1){
+						$predicates.push($triple['predicate']);
+					}
+				});
+			}
+		});
 	});
-	
 	$table += '<thead><tr>';
 	$table += '<th>'+$mapping.classsingular+' in cell...</th>';
 	$.each($predicates, function($i, $p){		
@@ -1534,77 +1542,79 @@ function updateTablePreview($mapping){
 	
 	var $templateCounter = 0;
 
-	$.each($mapping.templates, function($subjuri, $triples){
-	    if($subjuri.indexOf('@uri') == 0){   // ignore the metadata stuff
-    	    $table += '<tr>';
-	        $table += '<th>'+$subjuri.substr(5)+'</th>';
-	        // now go through all predicates and check whether we have a value for this one:
-	        $.each($predicates, function($j, $p){		
-	        	$table += '<td>';
-	        	var $cellContent = '';
-	        	if ($p == 'rdf:type') $cellContent = $mapping.classsingular;
-	        	
-	        	$.each($triples['triples'], function($i, $triple){
-	        	    if($triple['predicate'] == $p){
-		        		if($triple['object'].indexOf('<') == 0){
-							
-		        			var $uri = $triple['object'];
+	$.each($mapping.datacontainers, function($t, $templates){
+		$.each($templates, function($subjuri, $triples){
+		    if($subjuri.indexOf('@uri') == 0){   // ignore the metadata stuff
+	    	    $table += '<tr>';
+		        $table += '<th>'+$subjuri.substr(5)+'</th>';
+		        // now go through all predicates and check whether we have a value for this one:
+		        $.each($predicates, function($j, $p){		
+		        	$table += '<td>';
+		        	var $cellContent = '';
+		        	if ($p == 'rdf:type') $cellContent = $mapping.classsingular;
+		        	
+		        	$.each($triples['triples'], function($i, $triple){
+		        	    if($triple['predicate'] == $p){
+			        		if($triple['object'].indexOf('<') == 0){
+								
+			        			var $uri = $triple['object'];
 
-    		        		// get the name for this URI, either from the global $names object, or, if it is not there yet,
-							// via AJAX (and then add it to the $names object for future use)
+	    		        		// get the name for this URI, either from the global $names object, or, if it is not there yet,
+								// via AJAX (and then add it to the $names object for future use)
 
-							if($names[$uri] == undefined){
-								$('#loading').show();
-								$query = 'prefix skos: <http://www.w3.org/2004/02/skos/core#>  prefix hxl: <http://hxl.humanitarianresponse.info/ns/#> prefix foaf: <http://xmlns.com/foaf/0.1/> SELECT * WHERE { {'+$uri+' hxl:title ?name .} UNION {'+$uri+' hxl:featureName ?name .} UNION {'+$uri+' foaf:name ?name .} UNION {'+$uri+' skos:prefLabel ?name .} UNION {'+$uri+' hxl:abbreviation ?name .} UNION {'+$uri+' hxl:commonTitle ?name .} UNION {'+$uri+' hxl:orgName ?name .}}'; 
-								$.ajax({
-									async: false,
-									url: 'http://hxl.humanitarianresponse.info/sparql',
-									headers: {
-										Accept: 'application/sparql-results+json'
-									},
-									data: { 
-										query: $query 
-									},							
-									success: function( data ) { 
-										$.map( data.results.bindings, function( result ) {
-										 	$names[$uri] = result.name.value;
-										 	$cellContent = '<a href="'+$uri.substr(1,$uri.length-2)+'" target="_blank">'+result.name.value+'</a>';										 	
-										});
+								if($names[$uri] == undefined){
+									$('#loading').show();
+									$query = 'prefix skos: <http://www.w3.org/2004/02/skos/core#>  prefix hxl: <http://hxl.humanitarianresponse.info/ns/#> prefix foaf: <http://xmlns.com/foaf/0.1/> SELECT * WHERE { {'+$uri+' hxl:title ?name .} UNION {'+$uri+' hxl:featureName ?name .} UNION {'+$uri+' foaf:name ?name .} UNION {'+$uri+' skos:prefLabel ?name .} UNION {'+$uri+' hxl:abbreviation ?name .} UNION {'+$uri+' hxl:commonTitle ?name .} UNION {'+$uri+' hxl:orgName ?name .}}'; 
+									$.ajax({
+										async: false,
+										url: 'http://hxl.humanitarianresponse.info/sparql',
+										headers: {
+											Accept: 'application/sparql-results+json'
+										},
+										data: { 
+											query: $query 
+										},							
+										success: function( data ) { 
+											$.map( data.results.bindings, function( result ) {
+											 	$names[$uri] = result.name.value;
+											 	$cellContent = '<a href="'+$uri.substr(1,$uri.length-2)+'" target="_blank">'+result.name.value+'</a>';										 	
+											});
 
-										$('#loading').hide();
-									},
-									error: function($jqXHR, $textStatus, $errorThrown){
-										console.error($textStatus);
-									}
-								});
-							}else{
-								$cellContent = '<a href="'+$uri.substr(1,$uri.length-2)+'" target="_blank">'+$names[$uri]+'</a>';							   
-							}
-						} else if ($triple['object'].indexOf('@lookup') == 0) {
-							
-							// lookup failed, skip this value
-    		            
-    		            } else { 
-    		            
-    		            	// simple data property
-    		                $cellContent = $triple['object'];
-		        	        
-    		            }
-		        	}
-		        		        	
+											$('#loading').hide();
+										},
+										error: function($jqXHR, $textStatus, $errorThrown){
+											console.error($textStatus);
+										}
+									});
+								}else{
+									$cellContent = '<a href="'+$uri.substr(1,$uri.length-2)+'" target="_blank">'+$names[$uri]+'</a>';							   
+								}
+							} else if ($triple['object'].indexOf('@lookup') == 0) {
+								
+								// lookup failed, skip this value
+	    		            
+	    		            } else { 
+	    		            
+	    		            	// simple data property
+	    		                $cellContent = $triple['object'];
+			        	        
+	    		            }
+			        	}
+			        		        	
+			        });
+
+					$table += $cellContent;
+
+					if($table.indexOf(' | ', $table.length - 3) !== -1){
+					    $table = $table.substring(0, $table.length -3);
+					}
+			        $table += '</td>';
 		        });
-
-				$table += $cellContent;
-
-				if($table.indexOf(' | ', $table.length - 3) !== -1){
-				    $table = $table.substring(0, $table.length -3);
-				}
-		        $table += '</td>';
-	        });
-	        $table += '</tr>';   
-	    }	    
+		        $table += '</tr>';   
+		    }	    
+		});
 	});
-	
+
 	$table += '</tbody></table>';
 	$('#previewtabtable').html($table);
 	$('#previewTable').dataTable( {
@@ -1624,25 +1634,27 @@ function tagMappedCellsAndProps($mapping){
 	$('a.hxlprop').removeClass('mapped');
 
 	// iterate through mapping and count occurrences of cells and properties:
-	$.each($mapping.templates, function($uri, $triples){
-		
-		// find cell mappings in subject URIs:
-		if($uri.indexOf('@uri') == 0){
-			$('td.hxlatorcell[data-cellid="'+$uri.substr(5)+'"]').addClass('mapped');			
-		}
-
-		// find cell mappings in object URIs, and list properties 
-		$.each($triples['triples'], function($i, $triple){
-
-			$('a.hxlprop[data-hxl-uri="'+$triple['predicate']+'"]').addClass('mapped');
-
-			// values from spreadsheet:
-			if($triple['object'].indexOf('@value') == 0){				
-				$('td.hxlatorcell[data-cellid="'+$triple['object'].substr(7)+'"]').addClass('mapped');							
+	$.each($mapping.datacontainers, function($t, $templates){
+		$.each($templates, function($uri, $triples){
+			
+			// find cell mappings in subject URIs:
+			if($uri.indexOf('@uri') == 0){
+				$('td.hxlatorcell[data-cellid="'+$uri.substr(5)+'"]').addClass('mapped');			
 			}
 
+			// find cell mappings in object URIs, and list properties 
+			$.each($triples['triples'], function($i, $triple){
+
+				$('a.hxlprop[data-hxl-uri="'+$triple['predicate']+'"]').addClass('mapped');
+
+				// values from spreadsheet:
+				if($triple['object'].indexOf('@value') == 0){				
+					$('td.hxlatorcell[data-cellid="'+$triple['object'].substr(7)+'"]').addClass('mapped');							
+				}
+
+			});
 		});
-	});
+	});	
 
 	// hover lister for all mapped cells, highlighting all properties the cell has been mapped to
 	// unbind first, just in case
@@ -1651,12 +1663,14 @@ function tagMappedCellsAndProps($mapping){
 		function(){ // mouse enter
 			var $cellid = $(this).attr('data-cellid');
 			// go through mapping and find all properties this cell has been mapped to:
-			$.each($mapping.templates, function($uri, $template){
-				if($uri.indexOf($cellid) != -1){
-					$.each($template.triples, function($i, $triple){
-						$('a.btn.hxlprop[data-hxl-uri="'+$triple.predicate+'"]').addClass('btn-success');
-					});
-				}			
+			$.each($mapping.datacontainers, function($t, $templates){
+				$.each($templates, function($uri, $template){
+					if($uri.indexOf($cellid) != -1){
+						$.each($template.triples, function($i, $triple){
+							$('a.btn.hxlprop[data-hxl-uri="'+$triple.predicate+'"]').addClass('btn-success');
+						});
+					}			
+				});
 			});
 		},
 		function(){ // mouse leave
