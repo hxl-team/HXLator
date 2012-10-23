@@ -249,7 +249,7 @@ $im = '$initMapping = {
 			        },
 			        {
 			          "predicate": "hxl:date",
-			          "object": "'.date("Y-m-d").'",
+			          "object": "'.$_POST["date"].'",
 			          "datatype": "xsd:date"          
 			        }
 			    ]			    

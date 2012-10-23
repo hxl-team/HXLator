@@ -44,6 +44,13 @@ getHead("index.php", $user_name, $user_organisation);
             		</select>  <span style="margin-left: 20px;"><em>This determines who will verify and approve your submission.</em></span><br />            	
 	           	</div>
 	        </div>
+
+			<div class="control-group">	
+            	<label class="control-label" for="report_category" ><i class="icon-calendar"></i> Data valid on:</label>
+            	<div class="controls">
+					<input id="date" name="date" class="span3" data-date="<?php echo date('Y-m-d'); ?>" data-date-format="yyyy-mm-dd" size="16" type="text" value="<?php echo date('Y-m-d'); ?>" /><span style="margin-left: 20px;"><em>If there are data for different dates in the spreadsheet, this can be changed later.</em></span><br />
+			  	</div>    
+			</div>
 			
 			<div class="control-group">
 			    <label class="control-label" for="translator"><i class="icon-briefcase"></i> HXL translator:</label>
@@ -149,6 +156,7 @@ getHead("index.php", $user_name, $user_organisation);
 	$customJS = emergencyQuery().'
 
 	$(".fileupload").fileupload();
+	$("#date").datepicker();
 
 	$("#metadata-form").submit(function(){
 
@@ -185,7 +193,7 @@ getHead("index.php", $user_name, $user_organisation);
 
 	';
 	
-	getFoot(array('jquery-ui-1.8.21.custom.min.js', 'bootstrap-fileupload.js'), $customJS ); 
+	getFoot(array('jquery-ui-1.8.21.custom.min.js', 'bootstrap-fileupload.js', 'bootstrap-datepicker.js' ), $customJS ); 
 
 
 } else {
