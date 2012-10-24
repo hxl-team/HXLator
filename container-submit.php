@@ -43,7 +43,7 @@ if(isset($_SESSION['loggedin'])) {   // only submit data if the user is logged i
   if(strpos(strval($status), '4') === 0 ){ // error - http code 4XX
     echo '<p class="lead"><span class="label label-important">Your upload failed.</span> Server message: '.$result.'</p>';
   } else { // okay
-    echo '<p class="lead">The data container <code>'.$container.'</code> has been submitted for <a href="approve.php">approval</a>.</p>';
+    echo '<code>'.$container.'</code><br />';
   }
 
 

@@ -993,8 +993,7 @@ function addPropertyMappings($mapping, $propURI){
 			$.each($mapping.datacontainers[0], function($uri, $triples){
 				if($uri.indexOf('<http://hxl.humanitarianresponse.info/data/datacontainers') == 0){
 					var newContainerMetadata = $.extend(true, {}, $triples);
-					console.log(newContainerMetadata);
-
+					
 					// replace all metadata values that have changed:
 					$('input.metadata').each(function(){
 				
@@ -1344,21 +1343,30 @@ function generateFinalRDF($mapping){
 			$('#hxlPreview > .modal-footer').slideUp();
 		});
 
-		$.post('container-submit.php', { hxl: generateRDF($mapping) }, function($data){
-			$('#hxlPreview > .modal-header').html('<h3>Data submitted!</h3>');
-			$('#hxlPreview > .modal-body').html($data);
-			$('#hxlPreview > .modal-footer').html('<p class="lead"><a href="index.php" class="btn">HXLate another spreadsheet</a></p>');
-			
-			// only save the translator if it hasn't been saved before:
-			if(!$recycle){
-				saveTranslator($mapping);				
-			}else{
-				$('#hxlPreview > .modal-body').slideDown(function(){
-					$('#hxlPreview > .modal-footer').slideDown();
-				});		
-			}
-			
+		$('#hxlPreview > .modal-header').html('<h3>Submitting data...</h3>');
+		$('#hxlPreview > .modal-body').html('<p>The following data containers have been submitted for approval:</p>');
+		// upload all datacontainers
+		var turtles = generateRDF($mapping);
+		$.each(turtles, function(i, turtle){
+			$.post('container-submit.php', { hxl: turtle }, function($data){
+				
+				$('#hxlPreview > .modal-body').append($data);
+				
+				
+			});
 		});
+		
+		$('#hxlPreview > .modal-footer').html('<p class="lead"><a href="index.php" class="btn">HXLate another spreadsheet</a></p>');
+
+		// only save the translator if it hasn't been saved before:
+		if(!$recycle){
+			saveTranslator($mapping);				
+		}else{
+			$('#hxlPreview > .modal-body').slideDown(function(){
+				$('#hxlPreview > .modal-footer').slideDown();
+			});		
+		}
+				
 	});
 
 	$('#mappingModal').modal('hide');
@@ -1396,6 +1404,7 @@ function generateRDF($inputMapping){
 	var $mapping = $.extend(true, {}, $inputMapping);
 
 	var $html = '';
+	var $turtles = new Array();
 
 	$.each($mapping.datacontainers, function($t, $templates){
 
@@ -1578,14 +1587,14 @@ function generateRDF($inputMapping){
 		});
 
 		$html += '<pre>'+htmlentities($turtle, 0)+'</pre>';
+		$turtles.push($turtle);
 
 	});
 	// update the preview modal:
 	$('#nakedturtle').html($html);
 	// update the preview table:
 	updateTablePreview($mapping);
-	// return $turtle; // TODO: how do we handle this one? 
-	return '';
+	return $turtles;
 }
 
 
@@ -1593,7 +1602,9 @@ function generateRDF($inputMapping){
 function updateTablePreview($mapping){
 	
 	var $table = '<p>A table-based preview of your spreadsheet, translated into HXL. You can sort by each column by clicking the column header, or filter using the search field:</p><table id="previewTable" class="table table-hover table-bordered table-condensed">';
-	// go through all triples and figure out how many distinct properties we have, so that we know the number of columns in the table:
+	
+	// go through all triples and figure out how many distinct properties we have, 
+	// so that we know the number of columns in the table:
 	var $predicates = new Array();
 
 	$.each($mapping.datacontainers, function($t, $templates){
@@ -1607,6 +1618,7 @@ function updateTablePreview($mapping){
 			}
 		});
 	});
+
 	$table += '<thead><tr>';
 	$table += '<th>'+$mapping.classsingular+' in cell...</th>';
 	$.each($predicates, function($i, $p){		
