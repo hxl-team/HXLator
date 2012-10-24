@@ -248,7 +248,7 @@ $im = '$initMapping = {
 			          "object": "<'.$_SESSION["user_organisation_uri"].'>",          
 			        },
 			        {
-			          "predicate": "hxl:date",
+			          "predicate": "hxl:validOn",
 			          "object": "'.$_POST["date"].'",
 			          "datatype": "xsd:date"          
 			        }

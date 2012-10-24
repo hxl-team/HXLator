@@ -619,9 +619,9 @@ function mappingModal($inputMapping, $propName, $propURI, $propType, $propRange,
 		
 	$('#mappingModal > .modal-header > h3').html('<img src="img/loader.gif" id="modal-loading" class="pull-right" />Mapping '+$numCells+' to the <em>'+$propName+'</em> property');
 	
-	$('#mappingModal > .modal-footer').html('<div class="metadata-panel"><h3>Metadata</h3><p>Adjust the metadata for the information above if it differs from the metadata provided during upload.</p><div class="control-group"><label class="control-label" for="report_category" ><i class="icon-calendar"></i> Data valid on:</label><div class="controls"><input id="validOn" name="validOn" class="span3" data-date="'+$validOn+'" data-date-format="yyyy-mm-dd" size="16" type="text" value="'+$validOn+'" /></span></div></div></div><div class="submit-panel"><p><i class="icon-hand-right"></i> Peek at your spreadsheet by pressing <code>ALT-K</code>.</p><a href="#" id="storeMapping" class="btn btn-primary">Store mapping</a><a href="#" class="btn" data-dismiss="modal">Cancel</a></div>');
+	$('#mappingModal > .modal-footer').html('<div class="metadata-panel"><h3>Metadata</h3><p>Adjust the metadata for the information above if it differs from the metadata provided during upload.</p><div class="control-group"><label class="control-label" for="report_category" ><i class="icon-calendar"></i> Data valid on:</label><div class="controls"><input id="hxl:validOn" name="hxl:validOn" class="span3 metadata" data-date="'+$validOn+'" data-date-format="yyyy-mm-dd" size="16" type="text" value="'+$validOn+'" /></span></div></div></div><div class="submit-panel"><p><i class="icon-hand-right"></i> Peek at your spreadsheet by pressing <code>ALT-K</code>.</p><a href="#" id="storeMapping" class="btn btn-primary">Store mapping</a><a href="#" class="btn" data-dismiss="modal">Cancel</a></div>');
 	
-	$("#validOn").datepicker();
+	$('input[name="hxl:validOn"]').datepicker();
 
 	if($propType == 'http://www.w3.org/2002/07/owl#DataProperty'){
 		$('#mappingModal > .modal-body').html('<p>You can either <a href="#" class="btn" id="mapCellValues">use the values in the selected cell(s)</a> or <a href="#" class="btn" id="mapDifferentValues">use a different value</a></p><div id="value-input" style="display: none"></div>');
@@ -949,6 +949,78 @@ function addPropertyMappings($mapping, $propURI){
 
 		// store all @lookup values that are not in the lookup table yet in an array:
 		var $nolook = new Array();
+
+		// first find the right datacontainer that these triples go into.
+		// check the metadata we have, iterate through the datacontainers, 
+		// and pick the first one that has 100% overlap
+
+		var indexOfMatchingContainer = -1;
+
+		$.each($mapping.datacontainers, function($index, $container){
+			var $mismatch = false;
+		
+			$('input.metadata').each(function(){
+				
+				var $predicate = $(this).attr('id');
+				var $object = $(this).val();
+				
+				$.each($container, function($uri, $uris){
+					$.each($uris, function($i, $triples){
+						// check for mismatch in the values of the metadata properties:
+						$.each($triples, function($i, $triple){
+							if($triple['predicate'] == $predicate && $triple['object'] != $object){
+								$mismatch = true;								
+							}							
+						});
+					});
+				});
+			});
+
+			if(!$mismatch){
+				indexOfMatchingContainer = $index;
+			}
+		});
+			
+
+		// if there is no datacontainer with this combination of metadata, add a new one.
+		// copy all metadata from the first data container over (which has all the standard metadata from the upload 
+		// page) and replace those with our modified metadata
+
+		if(indexOfMatchingContainer == -1){
+			var stamp = new Date().getTime();
+			var newContainerURI = '<http://hxl.humanitarianresponse.info/data/datacontainers/'+stamp+'>';
+
+			$.each($mapping.datacontainers[0], function($uri, $triples){
+				if($uri.indexOf('<http://hxl.humanitarianresponse.info/data/datacontainers') == 0){
+					var newContainerMetadata = $.extend(true, {}, $triples);
+					console.log(newContainerMetadata);
+
+					// replace all metadata values that have changed:
+					$('input.metadata').each(function(){
+				
+						var $predicate = $(this).attr('id');
+						var $object = $(this).val();
+
+						$.each(newContainerMetadata.triples, function($i, $triple){
+							if($triple.predicate == $predicate){
+								$triple.object = $object;
+							}
+						});
+
+					});
+					
+
+					var newContainer = new Object();
+					newContainer[newContainerURI] = newContainerMetadata;
+					// add to mapping
+					$mapping.datacontainers.push(newContainer);
+				}
+			});	
+
+			indexOfMatchingContainer = $mapping.datacontainers.length-1;					
+		}
+
+		// console.log($mapping);
 		
 		// iterate through all input fields 
 		$('.value-input').each(function(){
@@ -957,44 +1029,42 @@ function addPropertyMappings($mapping, $propURI){
 				var $uri = '@uri '+$(this).attr('data-value-subject');
 				
 				// if there are no mappings for this URI yet, add this node to the JSON tree:
-				// TODO: find correct data container! so far, we assume there is only one:
-				if($mapping.datacontainers[0][$uri] == undefined){
-				   $mapping.datacontainers[0][$uri] = new Object();
-				   $mapping.datacontainers[0][$uri].triples = new Array();						
+				if($mapping.datacontainers[indexOfMatchingContainer][$uri] == undefined){
+				   $mapping.datacontainers[indexOfMatchingContainer][$uri] = new Object();
+				   $mapping.datacontainers[indexOfMatchingContainer][$uri].triples = new Array();						
 				}
 				
 				// add the triple: 
-				var $index =  $mapping.datacontainers[0][$uri].triples.length;
+				var $index =  $mapping.datacontainers[indexOfMatchingContainer][$uri].triples.length;
 
 				// check if this predicate is already mapped: if so, replace the old value
 				// TODO: this basically assumes that all our properties have a max cardinality of 1; 
 				// we might have to come up with something based on the vocabulary once we have cardinalities in there.
-				// TODO: find correct data container! so far, we assume there is only one:
-				$.each($mapping.datacontainers[0][$uri].triples, function($i, $triple){
+				$.each($mapping.datacontainers[indexOfMatchingContainer][$uri].triples, function($i, $triple){
 					if($triple['predicate'] == $propURI){
 						$index = $i;
 					}
 				});
 
-				// TODO: find correct data container! so far, we assume there is only one:				
-				$mapping.datacontainers[0][$uri].triples[$index] = new Object();
-				$mapping.datacontainers[0][$uri].triples[$index]['predicate'] = $propURI;
+						
+				$mapping.datacontainers[indexOfMatchingContainer][$uri].triples[$index] = new Object();
+				$mapping.datacontainers[indexOfMatchingContainer][$uri].triples[$index]['predicate'] = $propURI;
 				
 				// store a mapping depending on input field metadata
 				if($(this).attr('data-value-object') == undefined){
 					
 					// data property with direct input
-					$mapping.datacontainers[0][$uri].triples[$index]['object'] = $(this).val();
+					$mapping.datacontainers[indexOfMatchingContainer][$uri].triples[$index]['object'] = $(this).val();
 					
 				} else if($(this).attr('data-value-object').indexOf('http') == 0){
 				
 					// object property that has already been looked up
-					$mapping.datacontainers[0][$uri].triples[$index]['object'] = '<'+$(this).attr('data-value-object')+'>';
+					$mapping.datacontainers[indexOfMatchingContainer][$uri].triples[$index]['object'] = '<'+$(this).attr('data-value-object')+'>';
 				
 				} else if($(this).attr('data-function') == '@lookup'){
 					
 					// object property with lookup at the end of the mapping process
-					$mapping.datacontainers[0][$uri].triples[$index]["object"] = '@lookup '+$(this).attr('data-value-object');
+					$mapping.datacontainers[indexOfMatchingContainer][$uri].triples[$index]["object"] = '@lookup '+$(this).attr('data-value-object');
 
 					// check if the term to look up is already in our lookup dictionary; 
 					// if not, we save the term in an array and send the user to (yet anther) mapping // page where s/he can assign URIs to the terms not in the dictionary so far
@@ -1013,7 +1083,7 @@ function addPropertyMappings($mapping, $propURI){
 				} else {
 					
 					// data property that takes the value from the spreadsheet
-					$mapping.datacontainers[0][$uri].triples[$index]["object"] = '@value '+$(this).attr('data-value-object');
+					$mapping.datacontainers[indexOfMatchingContainer][$uri].triples[$index]["object"] = '@value '+$(this).attr('data-value-object');
 					
 				}
 			}
@@ -1078,7 +1148,7 @@ function lookUpModal($inputMapping, $missing, $final){
 			$('#mappingModal > .modal-body').append('<div class="row"><div class="span2"><h3><code>'+$miss.term+'</code></h3><p>'+$cellInfo+'<p></div><div class="span3" for-term="'+$miss.term+'"></div></div><hr />');
 
 
-			var $query = 'prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> prefix skos: <http://www.w3.org/2004/02/skos/core#> prefix hxl: <http://hxl.humanitarianresponse.info/ns/#> prefix dct: <http://purl.org/dc/terms/>  prefix foaf: <http://xmlns.com/foaf/0.1/> prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> SELECT DISTINCT ?uri ?label ?typelabel ?pcode ?loc WHERE {'+$miss.predicate+' rdfs:range ?range . ?uri rdf:type/rdfs:subClassOf* ?range; a ?type . { ?type skos:prefLabel ?typelabel } UNION { ?type rdfs:label ?typelabel } { ?uri hxl:featureRefName ?label } UNION { ?uri hxl:commonTitle ?label }UNION { ?uri dct:title ?label } UNION { ?uri foaf:name ?label } UNION { ?uri hxl:abbreviation ?label } UNION { ?uri hxl:adminUnitLevelTitle ?label } UNION { ?uri hxl:orgName ?label } UNION { ?uri hxl:title ?label } OPTIONAL {?uri hxl:atLocation* ?location ; hxl:pcode ?pcode . ?location hxl:featureName ?loc; a hxl:Country . } FILTER regex(?label, "'+$miss.term+'", "i") } ORDER BY ?label';
+			var $query = 'prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> prefix skos: <http://www.w3.org/2004/02/skos/core#> prefix hxl: <http://hxl.humanitarianresponse.info/ns/#> prefix dct: <http://purl.org/dc/terms/>  prefix foaf: <http://xmlns.com/foaf/0.1/> prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> SELECT DISTINCT ?uri ?label ?typelabel ?pcode ?loc WHERE {'+$miss.predicate+' rdfs:range ?range . ?uri rdf:type/rdfs:subClassOf* ?range; a ?type . { ?type skos:prefLabel ?typelabel } UNION { ?type rdfs:label ?typelabel } { ?uri hxl:featureRefName ?label } UNION { ?uri hxl:commonTitle ?label } UNION { ?uri dct:title ?label } UNION { ?uri foaf:name ?label } UNION { ?uri hxl:abbreviation ?label } UNION { ?uri hxl:adminUnitLevelTitle ?label } UNION { ?uri hxl:orgName ?label } UNION { ?uri hxl:title ?label } OPTIONAL {?uri hxl:atLocation* ?location ; hxl:pcode ?pcode . ?location hxl:featureName ?loc; a hxl:Country . } FILTER regex(?label, "'+$miss.term+'", "i") } ORDER BY ?label';
 
 			$.ajax({
 				url: 'http://hxl.humanitarianresponse.info/sparql',
@@ -1195,7 +1265,6 @@ function lookUpModal($inputMapping, $missing, $final){
 
 			// fetch all selected URIs and add them to the mapping object:
 			$('input:checked').each(function(){
-				console.log("storing lookup for "+$(this).attr('name'));
 				$mapping.lookup[$(this).attr('name')] = '<'+$(this).attr('value')+'>';
 			});
 			
