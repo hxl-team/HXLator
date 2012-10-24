@@ -616,11 +616,13 @@ function mappingModal($inputMapping, $propName, $propURI, $propType, $propRange,
 	}else{
 		var $numCells = $nc+' cells';
 	}
-	
+		
 	$('#mappingModal > .modal-header > h3').html('<img src="img/loader.gif" id="modal-loading" class="pull-right" />Mapping '+$numCells+' to the <em>'+$propName+'</em> property');
 	
-	$('#mappingModal > .modal-footer').html('<i class="icon-hand-right"></i> Don\'t worry about doing anything wrong here, you can always go back to fix it later.</p><p><i class="icon-hand-right"></i> If you want to peek at your spreadsheet, you can always hide this popup by pressing <code>ALT-K</code>.<br />Pressing <code>ALT-K</code> again will bring the popup back.</p><a href="#" id="storeMapping" class="btn btn-primary">Store mapping</a><a href="#" class="btn" data-dismiss="modal">Cancel</a>');
+	$('#mappingModal > .modal-footer').html('<div class="metadata-panel"><h3>Metadata</h3><p>Adjust the metadata for the information above if it differs from the metadata provided during upload.</p><div class="control-group"><label class="control-label" for="report_category" ><i class="icon-calendar"></i> Data valid on:</label><div class="controls"><input id="validOn" name="validOn" class="span3" data-date="'+$validOn+'" data-date-format="yyyy-mm-dd" size="16" type="text" value="'+$validOn+'" /></span></div></div></div><div class="submit-panel"><p><i class="icon-hand-right"></i> Peek at your spreadsheet by pressing <code>ALT-K</code>.</p><a href="#" id="storeMapping" class="btn btn-primary">Store mapping</a><a href="#" class="btn" data-dismiss="modal">Cancel</a></div>');
 	
+	$("#validOn").datepicker();
+
 	if($propType == 'http://www.w3.org/2002/07/owl#DataProperty'){
 		$('#mappingModal > .modal-body').html('<p>You can either <a href="#" class="btn" id="mapCellValues">use the values in the selected cell(s)</a> or <a href="#" class="btn" id="mapDifferentValues">use a different value</a></p><div id="value-input" style="display: none"></div>');
 		
@@ -956,7 +958,6 @@ function addPropertyMappings($mapping, $propURI){
 				
 				// if there are no mappings for this URI yet, add this node to the JSON tree:
 				// TODO: find correct data container! so far, we assume there is only one:
-				console.log($mapping);
 				if($mapping.datacontainers[0][$uri] == undefined){
 				   $mapping.datacontainers[0][$uri] = new Object();
 				   $mapping.datacontainers[0][$uri].triples = new Array();						
@@ -1058,7 +1059,7 @@ function lookUpModal($inputMapping, $missing, $final){
 	
 	
 	$('#mappingModal > .modal-footer').slideUp(function(){
-		$(this).html('<i class="icon-hand-right"></i> Don\'t worry about doing anything wrong here, you can always go back to fix it later.</p><p><i class="icon-hand-right"></i> If you want to peek at your spreadsheet, you can always hide this popup by pressing <code>ALT-K</code> key.<br />Pressing it again will bring the popup back.</p><a href="#" id="storeLookUps" class="btn btn-primary">Save and Continue</a><a href="#" class="btn" data-dismiss="modal">Cancel</a>');		
+		$(this).html('<p><i class="icon-hand-right"></i> Peek at your spreadsheet by pressing <code>ALT-K</code>.</p><a href="#" id="storeLookUps" class="btn btn-primary">Save and Continue</a><a href="#" class="btn" data-dismiss="modal">Cancel</a>');		
 		$(this).slideDown();
 	});
 	
@@ -1513,7 +1514,8 @@ function generateRDF($inputMapping){
 	$('#nakedturtle').html($html);
 	// update the preview table:
 	updateTablePreview($mapping);
-	return $turtle; // TODO: how do we handle this one? 
+	// return $turtle; // TODO: how do we handle this one? 
+	return '';
 }
 
 
