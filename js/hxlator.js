@@ -1065,7 +1065,7 @@ function lookUpModal($inputMapping, $missing, $final){
 	
 	
 	$('#mappingModal > .modal-body').slideUp(function(){
-		$(this).html('<p>Please select one URI from our reference lists for each value that you have selected in your spreadsheet. We try to propose URIs that match the terms; if that does not work, you can also look them up yourself.</p><hr />');
+		$(this).html('<p>Please select one URI from our reference lists for each value that you have selected in your spreadsheet. HXLator tries to propose URIs that match the terms; if that does not work, you can also look them up yourself.</p><hr />');
 		$(this).append('<div class="row"><div class="span2"><h3>Term</h3></div><div class="span3"><h3>URI</h3></div></div><hr />');
 
 		$.each($missing, function($i, $miss){
@@ -1100,11 +1100,11 @@ function lookUpModal($inputMapping, $missing, $final){
 
 					// if there are no results:
 					if(data.results.bindings.length == 0){
-						$('div[for-term="'+$miss.term+'"]').append('<p class="'+$miss.term+'">No suggestion found for this term, you can try to find a URI yourself:</p>');
+						$('div[for-term="'+$miss.term+'"]').append('<p missing-term="'+$miss.term+'">No suggestion found for this term, you can try to find a URI yourself:</p>');
 						$('div[for-term="'+$miss.term+'"]').append('<input type="text" class="uri-search" placeholder="Start typing to search reference list" for-term="'+$miss.term+'" />');
 					}else{
-						$('div[for-term="'+$miss.term+'"]').append('<p class="'+$miss.term+'">If the correct URI is not among the suggestions, you can try to find it yourself:</p>');
-						$('div[for-term="'+$miss.term+'"]').append('<label class="radio"><input type="radio" name="'+$miss.term+'"  class="rdio" value="@userlookup"><input type="text" readonly class="uri-search" placeholder="Start typing to search reference list" for-term="'+$miss.term+'" /></label>');
+						$('div[for-term="'+$miss.term+'"]').append('<p missing-term="'+$miss.term+'">If the correct URI is not among the suggestions, you can try to find it yourself:</p>');
+						$('div[for-term="'+$miss.term+'"]').append('<label class="radio"><input type="radio" name="'+$miss.term+'" class="rdio" value="@userlookup"><input type="text" readonly class="uri-search" placeholder="Start typing to search reference list" for-term="'+$miss.term+'" /></label>');
 					}
 
 					// make the radio buttons next to the input boxes enable the corresponding text input box:
@@ -1172,7 +1172,7 @@ function lookUpModal($inputMapping, $missing, $final){
 						minLength: 1,
 						select: function( event, ui ) {
 							// Add one option to the radio list and select it:
-							$('<label class="radio"><input type="radio" name="'+$miss.term+'" checked class="rdio" value="'+ui.item.uri+'">'+ui.item.value+'<br /><small><a href="'+ui.item.uri+'" target="_blank">'+ui.item.uri+'</a></small></label>').insertBefore('p.'+$miss.term);
+							$('p[missing-term="'+$miss.term+'"]').before('<label class="radio"><input type="radio" name="'+$miss.term+'" checked class="rdio" value="'+ui.item.uri+'">'+ui.item.value+'<br /><small><a href="'+ui.item.uri+'" target="_blank">'+ui.item.uri+'</a></small></label>');							
 							// empty and deselect input box by triggering change event
 							$('input[name="'+$miss.term+'"]').change(); 
 
@@ -1195,6 +1195,7 @@ function lookUpModal($inputMapping, $missing, $final){
 
 			// fetch all selected URIs and add them to the mapping object:
 			$('input:checked').each(function(){
+				console.log("storing lookup for "+$(this).attr('name'));
 				$mapping.lookup[$(this).attr('name')] = '<'+$(this).attr('value')+'>';
 			});
 			
