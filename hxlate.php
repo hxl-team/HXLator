@@ -258,7 +258,7 @@ $im = '$initMapping = {
 	],	  
 	"lookup": {}
 	};
-	console.log($initMapping);';
+	';
 
 if($_POST["translator"] == "new"){
 

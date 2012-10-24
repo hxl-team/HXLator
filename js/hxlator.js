@@ -1273,8 +1273,6 @@ function generateFinalRDF($mapping){
 			$('#hxlPreview > .modal-footer').slideUp();
 		});
 
-
-
 		$.post('container-submit.php', { hxl: generateRDF($mapping) }, function($data){
 			$('#hxlPreview > .modal-header').html('<h3>Data submitted!</h3>');
 			$('#hxlPreview > .modal-body').html($data);
@@ -1326,10 +1324,12 @@ function generateRDF($inputMapping){
 	// we'll be manipulation the mapping a bit, so we copy it first to make sure the original remains untouched:
 	var $mapping = $.extend(true, {}, $inputMapping);
 
-	var $turtle = '@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> . \n@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> . \n@prefix owl:  <http://www.w3.org/2002/07/owl#> . \n@prefix foaf: <http://xmlns.com/foaf/0.1/> . \n@prefix dc:   <http://purl.org/dc/terms/> . \n@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> . \n@prefix skos: <http://www.w3.org/2004/02/skos/core#> . \n@prefix hxl:  <http://hxl.humanitarianresponse.info/ns/#> . \n@prefix geo:  <http://www.opengis.net/geosparql#> . \n@prefix label: <http://www.wasab.dk/morten/2004/03/label#> . \n \n';
-	
+	var $html = '';
+
 	$.each($mapping.datacontainers, function($t, $templates){
 
+		var $turtle = '@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> . \n@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> . \n@prefix owl:  <http://www.w3.org/2002/07/owl#> . \n@prefix foaf: <http://xmlns.com/foaf/0.1/> . \n@prefix dc:   <http://purl.org/dc/terms/> . \n@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> . \n@prefix skos: <http://www.w3.org/2004/02/skos/core#> . \n@prefix hxl:  <http://hxl.humanitarianresponse.info/ns/#> . \n@prefix geo:  <http://www.opengis.net/geosparql#> . \n@prefix label: <http://www.wasab.dk/morten/2004/03/label#> . \n \n';
+	
 		$.each($templates, function($uri, $triples){
 			
 			// first go through the whole mapping object once and replace all @value and @lookup occurrences with the actual values from the spreadsheet:
@@ -1505,12 +1505,15 @@ function generateRDF($inputMapping){
 
 			});
 		});
+
+		$html += '<pre>'+htmlentities($turtle, 0)+'</pre>';
+
 	});
 	// update the preview modal:
-	$('#nakedturtle').html(htmlentities($turtle, 0));
+	$('#nakedturtle').html($html);
 	// update the preview table:
 	updateTablePreview($mapping);
-	return $turtle;
+	return $turtle; // TODO: how do we handle this one? 
 }
 
 

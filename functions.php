@@ -299,8 +299,8 @@ function getFoot($extraJS = null, $script = null){
 
 // Generates the empty modal (see http://twitter.github.com/bootstrap/javascript.html#modals ) that 
 // we'll be using to preview the HXL code
-function loadHXLPreviewModal(){
-	echo '
+function loadHXLPreviewModal(){ ?>
+
 	<div id="hxlPreview" class="modal hide fade">
             <div class="modal-header">
               <button type="button" class="close" data-dismiss="modal">×</button>
@@ -322,10 +322,8 @@ function loadHXLPreviewModal(){
                         <p><span class="label label-warning">Please map some properties first, this preview will then show what you have done so far.</span></p>
                       </div>
                       <div class="tab-pane" id="previewtabturtle">
-                      	<p>Preview in <a href="http://en.wikipedia.org/wiki/Turtle_(syntax)" target="_blank">Turtle syntax</a>:</p>
-                        <code>
-                        	<pre id="nakedturtle"></pre>
-                        </code>
+                      	<p>Preview in <a href="http://en.wikipedia.org/wiki/Turtle_(syntax)" target="_blank">Turtle syntax</a>. If you see several blocks of code here, this is because there are different combinations of metadata in your spreadsheet, each of which ends up in a separate <a href="http://hxl.humanitarianresponse.info/ns/#DataContainer" target="_blank">HXL Datacontainer</a>.</p>
+                        <div id="nakedturtle"></div>                        
                       </div>
                     </div>
                   </div>            
@@ -334,8 +332,8 @@ function loadHXLPreviewModal(){
               <a href="#" class="btn" data-dismiss="modal">Close</a>
               </div>
           </div>
-	';
-}
+
+<?php   }  // end loadHXLPreviewModal
 
 
 // Generates the empty mapping modal (see http://twitter.github.com/bootstrap/javascript.html#modals ) that 
