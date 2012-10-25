@@ -1458,37 +1458,43 @@ function generateRDF($inputMapping){
 					var $age = '';
 
 					// check whether location, sex and age categories are set:
-					$.each($triples['triples'], function($i, $triple){
-						if ($triple['predicate'] == 'hxl:atLocation'){
-							if($triple['object'].indexOf('@lookup') != 0){
-								// grab URI and remove < and >
-								var $place = $triple['object'].substr(1, $triple['object'].length-2);
-								// strip the country and p-code from the URI (last two parts of URI):
-								var $placeURIparts = $place.split('/');
-								$loc = '/' + $placeURIparts[$placeURIparts.length - 2] + '/' + $placeURIparts[$placeURIparts.length - 1];	
-							} else { //lookup failed
-								$loc = '/unknownLocation';
-							}
-							
-						}else if ($triple['predicate'] == 'hxl:sexCategory'){
-							if($triple['object'].indexOf('@lookup') != 0){						
-								// grab URI and remove < and >
-								var $sexCategory = $triple['object'].substr(1, $triple['object'].length-2);
-								var $sexCategoryURIparts = $sexCategory.split('/');
-								$sex = '/' + $sexCategoryURIparts[$sexCategoryURIparts.length -1];	
-							} else { // lookup failed
-								$sex = '/unknownSex';
-							}
-						}else if ($triple['predicate'] == 'hxl:ageGroup'){
-							if($triple['object'].indexOf('@lookup') != 0){						
-								// grab URI and remove < and >
-								var $ageGroup = $triple['object'].substr(1, $triple['object'].length-2);
-								var $ageGroupURIparts = $ageGroup.split('/');
-								$age = '/'+$ageGroupURIparts[$ageGroupURIparts.length -1 ];
-							} else { // lookup failed
-								$age =  '/unknownAgeGroup';
-							}
-						}
+					$.each($mapping.datacontainers, function($tt, $ttemplates){
+						$.each($ttemplates, function($uuri, $ttriples){
+							if($uri == $uuri){
+								$.each($ttriples['triples'], function($i, $triple){
+									if ($triple['predicate'] == 'hxl:atLocation'){
+										if($triple['object'].indexOf('@lookup') != 0){
+											// grab URI and remove < and >
+											var $place = $triple['object'].substr(1, $triple['object'].length-2);
+											// strip the country and p-code from the URI (last two parts of URI):
+											var $placeURIparts = $place.split('/');
+											$loc = '/' + $placeURIparts[$placeURIparts.length - 2] + '/' + $placeURIparts[$placeURIparts.length - 1];	
+										} else { //lookup failed
+											$loc = '/unknownLocation';
+										}
+										
+									}else if ($triple['predicate'] == 'hxl:sexCategory'){
+										if($triple['object'].indexOf('@lookup') != 0){						
+											// grab URI and remove < and >
+											var $sexCategory = $triple['object'].substr(1, $triple['object'].length-2);
+											var $sexCategoryURIparts = $sexCategory.split('/');
+											$sex = '/' + $sexCategoryURIparts[$sexCategoryURIparts.length -1];	
+										} else { // lookup failed
+											$sex = '/unknownSex';
+										}
+									}else if ($triple['predicate'] == 'hxl:ageGroup'){
+										if($triple['object'].indexOf('@lookup') != 0){						
+											// grab URI and remove < and >
+											var $ageGroup = $triple['object'].substr(1, $triple['object'].length-2);
+											var $ageGroupURIparts = $ageGroup.split('/');
+											$age = '/'+$ageGroupURIparts[$ageGroupURIparts.length -1 ];
+										} else { // lookup failed
+											$age =  '/unknownAgeGroup';
+										}
+									}
+								});
+							}							
+						});
 					});
 
 					var $resuri = '<http://hxl.humanitarianresponse.info/data/' + $classslug + $loc +  $sex + $age + '>';
@@ -1498,12 +1504,20 @@ function generateRDF($inputMapping){
 					// random GLIDE number for now
 					var $glide = '/unknownGLIDEnumber';
 
-					// check whether the hasGLIDEnumber property is set:
-					$.each($triples['triples'], function($i, $triple){
-						if ($triple['predicate'] == 'hxl:hasGLIDEnumber'){
-							$glide = '/'+$triple['object'];						
-						}
-					});
+					$.each($mapping.datacontainers, function($tt, $ttemplates){
+						$.each($ttemplates, function($uuri, $ttriples){
+							if($uri == $uuri){
+					
+								// check whether the hasGLIDEnumber property is set:
+								$.each($ttriples['triples'], function($i, $triple){
+									if ($triple['predicate'] == 'hxl:hasGLIDEnumber'){
+										$glide = '/'+$triple['object'];						
+									}
+								});
+
+							}
+						});
+					});	
 					
 					var $resuri = '<http://hxl.humanitarianresponse.info/data/' + $classslug + $glide;
 					
@@ -1514,18 +1528,26 @@ function generateRDF($inputMapping){
 					var $pcode = '/unknownPcode';
 					
 					// check whether location, sex and age categories are set:
-					$.each($triples['triples'], function($i, $triple){
-						if ($triple['predicate'] == 'hxl:atLocation'){
-							// grab URI and remove < and >
-							var $place = $triple['object'].substr(1, $triple['object'].length-2);
-							// strip the country and p-code from the URI (last two parts of URI):
-							var $placeURIparts = $place.split('/');
-							// we use only the country code
-							$loc = '/' + $placeURIparts[$placeURIparts.length - 2];
-						}else if ($triple['predicate'] == 'hxl:pcode'){
-							// grab URI and remove < and >
-							$pcode = '/' + $triple['object'];	
-						}
+
+					$.each($mapping.datacontainers, function($tt, $ttemplates){
+						$.each($ttemplates, function($uuri, $ttriples){
+							if($uri == $uuri){
+
+								$.each($ttriples['triples'], function($i, $triple){
+									if ($triple['predicate'] == 'hxl:atLocation'){
+										// grab URI and remove < and >
+										var $place = $triple['object'].substr(1, $triple['object'].length-2);
+										// strip the country and p-code from the URI (last two parts of URI):
+										var $placeURIparts = $place.split('/');
+										// we use only the country code
+										$loc = '/' + $placeURIparts[$placeURIparts.length - 2];
+									}else if ($triple['predicate'] == 'hxl:pcode'){
+										// grab URI and remove < and >
+										$pcode = '/' + $triple['object'];	
+									}
+								});
+							}
+						});
 					});
 
 	    			// example: http://hxl.humanitarianresponse.info/data/locations/apl/bfa/UNHCR-POC-80
@@ -1536,13 +1558,20 @@ function generateRDF($inputMapping){
 	    			// random acronym for now:
 	    			var $acro = '';
 
-	    			// check if the acronym is set:
-	    			$.each($triples['triples'], function($i, $triple){
-	    				if ($triple['predicate'] == 'hxl:abbreviation'){
-	    					// remove blanks, just in case...
-	    					$acro = '/' + $triple['object'].toLowerCase().replace( /\s/g, '' );;					
-	    				}
-	    			});
+	    			$.each($mapping.datacontainers, function($tt, $ttemplates){
+						$.each($ttemplates, function($uuri, $ttriples){
+							if($uri == $uuri){
+
+				    			// check if the acronym is set:
+				    			$.each($ttriples['triples'], function($i, $triple){
+				    				if ($triple['predicate'] == 'hxl:abbreviation'){
+				    					// remove blanks, just in case...
+				    					$acro = '/' + $triple['object'].toLowerCase().replace( /\s/g, '' );;					
+				    				}
+				    			});
+				    		}
+				    	});
+				    });		
 
 	    			var $resuri = '<http://hxl.humanitarianresponse.info/data/' + $classslug + $acro + '>';
 
