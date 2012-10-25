@@ -25,7 +25,7 @@ getHead("approve.php");
 		$login = file_get_contents('../../store.txt');
 
 		// some federated query voodoo:
-		$query = 'prefix hxl: <http://hxl.humanitarianresponse.info/ns/#> prefix foaf: <http://xmlns.com/foaf/0.1/>  SELECT * WHERE {?container a <http://hxl.humanitarianresponse.info/ns/#DataContainer>; hxl:reportedBy ?reporter, ?org; hxl:date ?date. SERVICE <http://hxl.humanitarianresponse.info/sparql> { ?reporter a foaf:Person; foaf:name ?name . ?org a hxl:Organisation; hxl:orgDisplayName ?orgname . } }';
+		$query = 'prefix hxl: <http://hxl.humanitarianresponse.info/ns/#> prefix foaf: <http://xmlns.com/foaf/0.1/> SELECT * WHERE {?container a <http://hxl.humanitarianresponse.info/ns/#DataContainer>; hxl:reportedBy ?reporter, ?org; hxl:date ?date. SERVICE <http://hxl.humanitarianresponse.info/sparql> { ?reporter a foaf:Person; foaf:name ?name . ?org a hxl:Organisation; hxl:orgDisplayName ?orgname . } }';
 		
 		$endpoint = 'http://hxl.humanitarianresponse.info/incubator-sparql';
 		// query via cURL, because we have to send the password along:

@@ -58,7 +58,7 @@ $hxlHistory.processMapping = function(){
 	$('#loading').show();
 	
 	var $mapping = $hxlHistory.states[$hxlHistory.currentState];
-	if($debug){ console.log($mapping); }
+	debug($mapping); 
 	
 	// if the user is coming back with an existing mapping, send her straight to the row selection:
 	if($recycle){
@@ -416,18 +416,19 @@ function checkAllRows($inputMapping){
 
 	var $lookUpColumns = new Array();
 	// first, iterate through the mapping to see at which colums we need to look for @lookup values
-	$.each($mapping.templates, function($i, $template){
-		$.each($template.triples, function($i, $triple){
-			if($triple.object.indexOf('@lookup') == 0){
-				
-				var $pusher = new Object;
-				$pusher['column'] = $triple.object.substr(8);;
-				$pusher['predicate'] = $triple.predicate;
-					
-				if($.inArray($pusher, $lookUpColumns) == -1){ // only add if we don't have it yet
-					$lookUpColumns.push($pusher);
-				}
-			}
+	$.each($mapping.datacontainers, function($c, $datacontainer){
+		$.each($datacontainer, function($uri, $mappings){			
+			$.each($mappings.triples, function($i, $triple){
+					if($triple.object.indexOf('@lookup') == 0){					
+						var $pusher = new Object;
+						$pusher['column'] = $triple.object.substr(8);;
+						$pusher['predicate'] = $triple.predicate;
+							
+						if($.inArray($pusher, $lookUpColumns) == -1){ // only add if we don't have it yet
+							$lookUpColumns.push($pusher);
+						}
+					}
+			});
 		});
 	});
 
@@ -1294,42 +1295,44 @@ function generateFinalRDF($mapping){
     
     // iterate through all templates in the mapping and copy them for each highlighted row,
 	// replacing the row index in each @value, @uri and @lookup values
-	$.each($mapping.templates, function($uri, $template){
-        // only do that for URIs generated from the spreadsheet:
-		// and for each row EXCEPT the sample row!
-		if($uri.indexOf('@uri') == 0){
-			$('tr.hxlatorrow.selected').each(function(){
-                var $thisRow = $(this).attr('data-rowid').split('-')[1];
-				// make sure we don't overwrite the samplerow:
-                if($thisRow != $samplerow){
-                    // replace all @value, @uri and @lookup values according to the current row
-				    // and add these back to the mapping as a new template:
-				    var $oldURI = $uri.split('-');
-				    var $newURI = $oldURI[0]+'-'+$oldURI[1]+'-'+$thisRow;
+	$.each($mapping.datacontainers, function($c, $datacontainer){
+		$.each($datacontainer, function($uri, $template){				
+	        // only do that for URIs generated from the spreadsheet:
+			// and for each row EXCEPT the sample row!
+			if($uri.indexOf('@uri') == 0){
+				$('tr.hxlatorrow.selected').each(function(){
+	                var $thisRow = $(this).attr('data-rowid').split('-')[1];
+					// make sure we don't overwrite the samplerow:
+	                if($thisRow != $samplerow){
+	                    // replace all @value, @uri and @lookup values according to the current row
+					    // and add these back to the mapping as a new template:
+					    var $oldURI = $uri.split('-');
+					    var $newURI = $oldURI[0]+'-'+$oldURI[1]+'-'+$thisRow;
 
-				    $mapping.templates[$newURI] = new Object();				                
-				    
-				    // now go through all triples and copy them over:
-				    $mapping.templates[$newURI].triples = new Array();	
-				    
-				    $.each($template.triples, function($i, $triple){				        
-				        $mapping.templates[$newURI].triples[$i] = $.extend(true, {}, $template.triples[$i]);
-				        // replace the row if there is an @uri, @lookup, or @value tag in the object:
-				        if($mapping.templates[$newURI].triples[$i].object.indexOf('@') == 0){
-				            // only move forward if the @ reference is to a value in the sample row
-				            // if this is not the case, this is a mapping to some other cell
-				            // (e.g. in the header of the sheet) and must not be changed!
-				            var $maprow = $mapping.templates[$newURI].triples[$i].object.split('-');
-				            if($samplerow == $maprow[2]){
-				                $mapping.templates[$newURI].triples[$i].object = $maprow[0]+'-'+$maprow[1]+'-'+$thisRow;
-				            }
-				        }    
-				    });
-				    
-                }																
+					    $datacontainer[$newURI] = new Object();				                
+					    
+					    // now go through all triples and copy them over:
+					    $datacontainer[$newURI].triples = new Array();	
+					    
+					    $.each($template.triples, function($i, $triple){				        
+					        $datacontainer[$newURI].triples[$i] = $.extend(true, {}, $template.triples[$i]);
+					        // replace the row if there is an @uri, @lookup, or @value tag in the object:
+					        if($datacontainer[$newURI].triples[$i].object.indexOf('@') == 0){
+					            // only move forward if the @ reference is to a value in the sample row
+					            // if this is not the case, this is a mapping to some other cell
+					            // (e.g. in the header of the sheet) and must not be changed!
+					            var $maprow = $datacontainer[$newURI].triples[$i].object.split('-');
+					            if($samplerow == $maprow[2]){
+					                $datacontainer[$newURI].triples[$i].object = $maprow[0]+'-'+$maprow[1]+'-'+$thisRow;
+					            }
+					        }    
+					    });
+					    
+	                }																
 
-			});			
-		}		
+				});			
+			}		
+		});
 	});
     
     $hxlHistory.pushState($mapping);
@@ -1343,20 +1346,7 @@ function generateFinalRDF($mapping){
 			$('#hxlPreview > .modal-footer').slideUp();
 		});
 
-		$('#hxlPreview > .modal-header').html('<h3>Submitting data...</h3>');
 		$('#hxlPreview > .modal-body').html('<p>The following data containers have been submitted for approval:</p>');
-		// upload all datacontainers
-		var turtles = generateRDF($mapping);
-		$.each(turtles, function(i, turtle){
-			$.post('container-submit.php', { hxl: turtle }, function($data){
-				
-				$('#hxlPreview > .modal-body').append($data);
-				
-				
-			});
-		});
-		
-		$('#hxlPreview > .modal-footer').html('<p class="lead"><a href="index.php" class="btn">HXLate another spreadsheet</a></p>');
 
 		// only save the translator if it hasn't been saved before:
 		if(!$recycle){
@@ -1366,6 +1356,21 @@ function generateFinalRDF($mapping){
 				$('#hxlPreview > .modal-footer').slideDown();
 			});		
 		}
+
+		// upload all datacontainers
+		var turtles = generateRDF($mapping);
+		$.each(turtles, function(i, turtle){
+			$.post('container-submit.php', { hxl: turtle }, function($data){
+				
+				$('#hxlPreview > .modal-body').append($data);	
+
+				$('#hxlPreview > .modal-header').html('<h3>Upload complete.</h3>');
+					
+				
+			});
+		});
+		
+		$('#hxlPreview > .modal-footer').html('<p class="lead"><a href="index.php" class="btn">HXLate another spreadsheet</a></p>');		
 				
 	});
 
@@ -1376,7 +1381,7 @@ function generateFinalRDF($mapping){
 // saves the mapping via AJAX under the user's name
 function saveTranslator($mapping){
 	$.post('store-mapping.php', { mapping: JSON.stringify($mapping) }, function($data){
-		$('#hxlPreview > .modal-body').append($data);
+		$('#hxlPreview > .modal-body').prepend($data);
 		$('#hxlPreview > .modal-body').slideDown(function(){
 				$('#hxlPreview > .modal-footer').slideDown();
 			});
@@ -1851,4 +1856,8 @@ function trim(s) {
 	s = s.replace(/[ ]{2,}/gi," ");
 	s = s.replace(/\n /,"\n");
 	return s;
+}
+
+function debug($obj){
+	if ($debug) console.log($obj);
 }
