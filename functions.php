@@ -12,7 +12,7 @@ if (isset($_SESSION['LAST_ACTIVITY'])) {
 
     $slept = (time() - $_SESSION['LAST_ACTIVITY']);
 
-    if($slept > 20){
+    if($slept > 3600){
         // last request was more than 60 minutes ago
         session_destroy();   // destroy session data in storage
         session_unset();     // unset $_SESSION variable for the runtime
