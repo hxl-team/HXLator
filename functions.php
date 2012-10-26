@@ -5,20 +5,29 @@ set_include_path('Classes/');
 require_once "EasyRdf.php";
 require_once "html_tag_helpers.php";
 
-//handle the logins data TODO: fake for now, needs to be revised:
 session_start();
-// if(isset($_POST["user_name"]) && isset($_POST["user_organisation"])){
-// 	$_SESSION["user_name"] = $_POST["user_name"];
-// 	$_SESSION["user_organisation"] = $_POST["user_organisation"];
-// }
 
-// end session and force user to re-login after 60 minutes (3600 sec.):
-if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > 3600)) {
-    // last request was more than 30 minates ago
-    session_destroy();   // destroy session data in storage
-    session_unset();     // unset $_SESSION variable for the runtime
+//end session and force user to re-login after 60 minutes (3600 sec.):
+if (isset($_SESSION['LAST_ACTIVITY'])) {
+
+    $slept = (time() - $_SESSION['LAST_ACTIVITY']);
+
+    if($slept > 20){
+        // last request was more than 60 minutes ago
+        session_destroy();   // destroy session data in storage
+        session_unset();     // unset $_SESSION variable for the runtime
+    
+        header('Location: index.php?msg=timeout');
+        
+        die();
+
+    }
+
+} else {
+
+  $_SESSION['LAST_ACTIVITY'] = time(); // update last activity time stamp
+
 }
-$_SESSION['LAST_ACTIVITY'] = time(); // update last activity time stamp
 
 
 
@@ -82,7 +91,11 @@ function show_login_form() {
         if($_POST['logout'] == 'logout'){
             echo '<legend><p><span class="label label-info" style="font-size: 1em; font-weight: normal">You are now logged out.</span></p></legend>';
         }
-    }else{
+    } else if(isset($_GET['msg'])) {
+      if($_GET['msg'] == 'timeout'){
+            echo '<legend><p><span class="label label-important" style="font-size: 1em; font-weight: normal">You have been inactive for more than one hour and have been automatically logged out.</span></p></legend>';
+      }
+    } else {
         echo '<legend>Please log in:</legend>';
     }
 ?>
@@ -190,7 +203,10 @@ echo'<!DOCTYPE html>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
-    <meta http-equiv="expires" content="0"> <!-- disable cache -->
+
+    <!-- disable cache -->
+    <meta http-equiv="expires" content="0"> 
+    <meta http-equiv="pragma" content="no-cache"> 
 
     <link href="css/hxlator.css?'.time().'" rel="stylesheet"> <!-- css disable cache -->
     <link href="css/bootstrap-responsive.css" rel="stylesheet">

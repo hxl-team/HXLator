@@ -4,11 +4,6 @@ set_time_limit(0);
 
 date_default_timezone_set('Europe/London');
 
-$user_name = "John Doe";
-$user_uri = "http://hxl.humanitarianresponse.info/data/persons/unhcr/john_doe";
-$user_organisation = "UNHCR";
-$user_organisation_uri = "http://hxl.humanitarianresponse.info/data/orgs/unhcr";
-
 include_once('functions.php');
 getHead("index.php", $user_name, $user_organisation); 
 

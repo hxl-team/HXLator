@@ -5,142 +5,134 @@ include_once('functions.php');
 
 getHead("index.php"); 
 
-if(isset($_SESSION['loggedin'])) {   // only hxlate if the user is logged in:
-	hxlate();
-}else{
-	show_login_form();
+//  5MB maximum file size 
+$MAXIMUM_FILESIZE = 5 * 1024 * 1024; 
+//  Valid file extensions: 
+$rEFileTypes = "/^\.(csv|txt|xls|xlsx|ods|fods){1}$/i"; 
+$dir_base = getcwd().'/uploads/';
+$uploadfile = ""; // we'll set this later
+
+$isFile = is_uploaded_file($_FILES['userfile']['tmp_name']); 
+$isMove = false;
+
+if ($isFile) {//  sanitize file name 
+    //     - remove extra spaces/convert to _, 
+    //     - remove non 0-9a-Z._- characters, 
+    //     - remove leading/trailing spaces 
+    //  check if under 5MB, 
+    //  check file extension for legal file types 
+    $safe_filename = preg_replace( 
+                     array("/\s+/", "/[^-\.\w]+/"), 
+                     array("_", ""), 
+                     trim($_FILES['userfile']['name'])); 
+                     
+    $uploadfile = $dir_base.$safe_filename; 
+    
+    if ($_FILES['userfile']['size'] <= $MAXIMUM_FILESIZE){ 
+        if(preg_match($rEFileTypes, strrchr($safe_filename, '.'))) {
+        	$isMove = move_uploaded_file ( $_FILES['userfile']['tmp_name'], $uploadfile);
+        } else {
+        	showError('<strong>'.$_FILES['userfile']['name'].'</strong> does not seem to be a spreadsheet (<code>.xls</code>, <code>.xlsx</code>, <code>.ods</code>, <code>.csv</code>, and the like). Please <a href="index.php" class="btn">go back</a> and try a different file.</p><p>If you are sure it is a spreadsheet, there is something wrong with the HXLator; in that case, please <a class="btn" href="contact.php">get in touch with us</a>, so we can fix it.');
+        }	
+    } else {
+    	showError("<strong>".$_FILES['userfile']['name']."</strong> is too large. The limit for uploaded files is <strong>5MB</strong>.");
+    }
+    
+} else {
+
+	showError('You\'ll need to <a class="btn" href="index.php">upload a spreadsheet</a> to HXLate.');
+
 }
 
-function hxlate(){
 
-	//  5MB maximum file size 
-	$MAXIMUM_FILESIZE = 5 * 1024 * 1024; 
-	//  Valid file extensions: 
-	$rEFileTypes = "/^\.(csv|txt|xls|xlsx|ods|fods){1}$/i"; 
-	$dir_base = getcwd().'/uploads/';
-	$uploadfile = ""; // we'll set this later
 
-	$isFile = is_uploaded_file($_FILES['userfile']['tmp_name']); 
-	$isMove = false;
+// get going if the file upload has worked:
 
-	if ($isFile) {//  sanitize file name 
-	    //     - remove extra spaces/convert to _, 
-	    //     - remove non 0-9a-Z._- characters, 
-	    //     - remove leading/trailing spaces 
-	    //  check if under 5MB, 
-	    //  check file extension for legal file types 
-	    $safe_filename = preg_replace( 
-	                     array("/\s+/", "/[^-\.\w]+/"), 
-	                     array("_", ""), 
-	                     trim($_FILES['userfile']['name'])); 
-	                     
-	    $uploadfile = $dir_base.$safe_filename; 
-	    
-	    if ($_FILES['userfile']['size'] <= $MAXIMUM_FILESIZE){ 
-	        if(preg_match($rEFileTypes, strrchr($safe_filename, '.'))) {
-	        	$isMove = move_uploaded_file ( $_FILES['userfile']['tmp_name'], $uploadfile);
-	        } else {
-	        	showError('<strong>'.$_FILES['userfile']['name'].'</strong> does not seem to be a spreadsheet (<code>.xls</code>, <code>.xlsx</code>, <code>.ods</code>, <code>.csv</code>, and the like). Please <a href="index.php" class="btn">go back</a> and try a different file.</p><p>If you are sure it is a spreadsheet, there is something wrong with the HXLator; in that case, please <a class="btn" href="contact.php">get in touch with us</a>, so we can fix it.');
-	        }	
-	    } else {
-	    	showError("<strong>".$_FILES['userfile']['name']."</strong> is too large. The limit for uploaded files is <strong>5MB</strong>.");
+if($isMove === true) {
+
+	$_SESSION['file'] = $_FILES["userfile"]["name"];
+
+	/** Include path **/
+	set_include_path(get_include_path() . PATH_SEPARATOR . './Classes/');
+	
+	/** PHPExcel_IOFactory */
+	include 'PHPExcel/IOFactory.php';
+	
+	
+	// using IOFactory to identify the format
+	$workbook = load($uploadfile);
+
+	loadHXLPreviewModal();
+	loadMappingModal();
+
+	echo '
+			<div class="row">
+			<div class="span12">
+			<p class="lead"><strong>Build translator for  <em>'.$_SESSION['file'].'</em></strong> <a class="btn btn-info pull-right" id="showPreview" href="#" rel="tooltip" title="Check your output here" data-placement="left">Preview HXL</a></p>
+			</div>
+			</div>
+			</div>
+			<div class="shortguide container">';
+		
+	echo '
+		</div> <!-- shortguide -->
+		';
+	
+	// Let's show the spreadsheet"
+	// iterate once for the tabs (i.e., one tab per sheet in the workbook)
+	echo '<div class="container tabbable" style="margin-bottom: 18px;">
+	          <ul class="nav nav-tabs">';
+	
+	$tabno = 1; 
+	foreach ($workbook->getWorksheetIterator() as $worksheet) {    
+		if($tabno === 1){  // make the first tab active
+	   		echo '   <li class="active"><a href="#tab1" data-toggle="tab">'.$worksheet->getTitle().'</a></li>';
+	    }else{
+		   	echo '   <li><a href="#tab'.$tabno.'" data-toggle="tab">'.$worksheet->getTitle().'</a></li>';		   
 	    }
-	    
-	} else {
-
-		showError('You\'ll need to <a class="btn" href="index.php">upload a spreadsheet</a> to HXLate.');
-
-	}
-
-
-
-	// get going if the file upload has worked:
-
-	if($isMove === true) {
-
-		$_SESSION['file'] = $_FILES["userfile"]["name"];
-
-		/** Include path **/
-		set_include_path(get_include_path() . PATH_SEPARATOR . './Classes/');
+	    $tabno++;
+	}            
+			            
+	    echo'      </ul>
+	          <div class="tab-content" style="padding-bottom: 9px; border-bottom: 1px solid #ddd; overflow: hidden">';
+	            
+	
+	$tabno = 1;
+	// iterate through all sheets in this file
+	foreach ($workbook->getWorksheetIterator() as $worksheet) {
+		//$sheetData = $workbook->getActiveSheet()->toArray(null,true,true,true); 
 		
-		/** PHPExcel_IOFactory */
-		include 'PHPExcel/IOFactory.php';
-		
-		
-		// using IOFactory to identify the format
-		$workbook = load($uploadfile);
-
-		loadHXLPreviewModal();
-		loadMappingModal();
-
-		echo '
-				<div class="row">
-				<div class="span12">
-				<p class="lead"><strong>Build translator for  <em>'.$_SESSION['file'].'</em></strong> <a class="btn btn-info pull-right" id="showPreview" href="#" rel="tooltip" title="Check your output here" data-placement="left">Preview HXL</a></p>
-				</div>
-				</div>
-				</div>
-				<div class="shortguide container">';
-			
-		echo '
-			</div> <!-- shortguide -->
-			';
-		
-		// Let's show the spreadsheet"
-		// iterate once for the tabs (i.e., one tab per sheet in the workbook)
-		echo '<div class="container tabbable" style="margin-bottom: 18px;">
-		          <ul class="nav nav-tabs">';
-		
-		$tabno = 1; 
-		foreach ($workbook->getWorksheetIterator() as $worksheet) {    
-			if($tabno === 1){  // make the first tab active
-		   		echo '   <li class="active"><a href="#tab1" data-toggle="tab">'.$worksheet->getTitle().'</a></li>';
-		    }else{
-			   	echo '   <li><a href="#tab'.$tabno.'" data-toggle="tab">'.$worksheet->getTitle().'</a></li>';		   
-		    }
-		    $tabno++;
-		}            
-				            
-		    echo'      </ul>
-		          <div class="tab-content" style="padding-bottom: 9px; border-bottom: 1px solid #ddd; overflow: hidden">';
-		            
-		
-		$tabno = 1;
-		// iterate through all sheets in this file
-		foreach ($workbook->getWorksheetIterator() as $worksheet) {
-			//$sheetData = $workbook->getActiveSheet()->toArray(null,true,true,true); 
-			
-			$sheetData = $worksheet->toArray(null,true,true,true); 
-		
-			if ($tabno === 1){
-				echo '<div class="tab-pane active" id="tab1">';
-			}else{
-				echo '<div class="tab-pane" id="tab'.$tabno.'">';
-			}
-			echo "
-				<div class='fixed-table'>
-				<div class='table-content'>
-				<table class='table table-bordered table-condensed table-fixed-header'>";
-		
-			renderTable($sheetData, $tabno);				
-		
-			echo"
-				  </table>
-				  </div>
-				  </div>
-				</div>";
-				
-			$tabno++;
+		$sheetData = $worksheet->toArray(null,true,true,true); 
+	
+		if ($tabno === 1){
+			echo '<div class="tab-pane active" id="tab1">';
+		}else{
+			echo '<div class="tab-pane" id="tab'.$tabno.'">';
 		}
-		
-		echo   ' </div>
-		</div>';
-		
-		// we're done - delete the uploaded file
-		unlink($uploadfile);
-				
-	} 
-}
+		echo "
+			<div class='fixed-table'>
+			<div class='table-content'>
+			<table class='table table-bordered table-condensed table-fixed-header'>";
+	
+		renderTable($sheetData, $tabno);				
+	
+		echo"
+			  </table>
+			  </div>
+			  </div>
+			</div>";
+			
+		$tabno++;
+	}
+	
+	echo   ' </div>
+	</div>';
+	
+	// we're done - delete the uploaded file
+	unlink($uploadfile);
+			
+} 
+
 
 
 // some functions from IOFactory.php, slightly adopted for our use case:
