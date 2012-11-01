@@ -1431,7 +1431,10 @@ function generateRDF($inputMapping){
 
 					// check if we already have the term in our lookup "dictionary"
 					if($mapping.lookup[$lookupterm] == undefined){
-						// No @lookup found for this term; let's ignore it:					
+						$triple['object'] = '@notfound: '.$lookupterm; // mark for later
+
+						// HIER WEITER
+
 					} else {
 						$triple['object'] = $mapping.lookup[$lookupterm];
 					}
