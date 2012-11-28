@@ -24,3 +24,7 @@ mappings/carsten/fake.xls (2012-09-28 at 15h15).json
 *.json
 
 /backups/*
+
+generate-script.php
+
+restore.php
