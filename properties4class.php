@@ -7,7 +7,7 @@
 	$props = sparqlQuery('
 
 SELECT DISTINCT ?proplabel ?prop ?type ?description ?domain ?range ?rangename WHERE {
-   ?class rdfs:subClassOf* ?domain .
+   '.$_GET['classuri'].' rdfs:subClassOf* ?domain .
    ?prop rdfs:domain ?domain ;
          a ?type ; 
 	     rdfs:range ?range ;
@@ -19,9 +19,8 @@ SELECT DISTINCT ?proplabel ?prop ?type ?description ?domain ?range ?rangename WH
 FILTER NOT EXISTS {
     ?sub rdfs:subPropertyOf ?prop.
     ?sub rdfs:domain ?d.
-    ?class rdfs:subClassOf* ?d .
+    '.$_GET['classuri'].' rdfs:subClassOf* ?d .
 }
-FILTER (?class = '.$_GET['classuri'].')
 FILTER ( regex(str(?type),"http://www.w3.org/2002/07/owl") )
 
 } ORDER BY ?proplabel', 'http://hxl.humanitarianresponse.info/sparql');
