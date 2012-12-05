@@ -34,12 +34,12 @@
           <tr><th>Term</th><th>Short Explanation</th></tr>
         </thead>
           <tr>
-            <th id="feature">Feature<a href="http://en.wikipedia.org/wiki/Geographic_feature" target="_blank"><i class="icon-book pull-right"> </i></a></th>
-            <td></td>
+            <th id="feature">Feature<a href="http://www.opengeospatial.org/standards/sfa" target="_blank"><i class="icon-book pull-right"> </i></a></th>
+            <td>Geographical features are things we find in the real world, both natural (lakes, rivers, mountains, etc.) and artificial (cities, streets, buildings, etc.). In HXL, we stick to the terminology of the Open Geospatial Consortium that uses the term feature both for geographical features and for their representations, e.g. in HXL, in KML, or as a shape on a map.</td>
           </tr>
           <tr>
             <th id="ld">Linked Data<a href="http://linkeddatabook.com" target="_blank"><i class="icon-book pull-right"> </i></a></th>
-            <td></td>
+            <td>Linked Data is a method of publishing structured data based on standard Web technologies such as HTTP and URIs so that it can be interlinked and become richer and reusable. It adopts the idea of interlinked documents from the human-readable Web to raw data, interlinking datasets (usually represented in RDF) and making the queryable. </td>
           </tr>
           <tr>
             <th id="mapping">Mapping/translator</th>
@@ -47,7 +47,32 @@
           </tr><tr>
             <th id="uri">URI/URL<a href="http://en.wikipedia.org/wiki/Uniform_Resource_Identifier" target="_blank"><i class="icon-book pull-right"> </i></a></th>
             <td>Short for <em>Uniform Resource Identifier</em>. URIs include URLs (Uniform Resource Locators) such as <a href="http://humanitarianresponse.info">http://humanitarianresponse.info</a> that you use whenever you visit a webpage. HXL builds on the Linked Data approach, which uses URLs as identifiers for things. For HXL, this means that we have a URL for each affected people's location (e.g., <a href="http://hxl.humanitarianresponse.info/data/locations/apl/bfa/UNHCR-POC-80">http://hxl.humanitarianresponse.info/data/locations/apl/bfa/UNHCR-POC-80</a>), admin unit (e.g., <a href="http://hxl.humanitarianresponse.info/data/locations/admin/bfa/BFA056001">http://hxl.humanitarianresponse.info/data/locations/admin/bfa/BFA056001</a>), person (e.g., <a href="http://hxl.humanitarianresponse.info/data/persons/unocha/cj_hendrix">http://hxl.humanitarianresponse.info/data/persons/unocha/cj_hendrix</a> ), organisation (e.g., <a href="http://hxl.humanitarianresponse.info/data/organisations/unocha">http://hxl.humanitarianresponse.info/data/organisations/unocha</a>), and so on. As you can see, URLs are perfect for publishing data on the web, where they both uniquely identify a thing <em>and</em> tell us where to find information about this thing.</td>
-          </tr>          
+          </tr> 
+          <tr>
+            <th id="rdf">RDF<a href="http://en.wikipedia.org/wiki/Resource_Description_Framework" target="_blank"><i class="icon-book pull-right"> </i></a></th>
+            <td>The Resource Description Framework (RDF) is a data model defined by W3C specifications that allows to make statements (in the form of <a href="#triple">triples</a>) about resources. Unlike other technologies like XML, RDF is an abstract model that can be encoded in various file formats such as N-Triples, <a href="#turtle">Turtle</a>, or RDF/XML.</td>
+          </tr>
+          <tr>
+            <th id="sparql">SPARQL<a href="http://www.w3.org/TR/sparql11-query/" target="_blank"><i class="icon-book pull-right"> </i></a></th>
+            <td>The SPARQL Protocol and RDF Query Language enables queries over RDF data, comparable (and not too different in syntax) to SQL for relational databases.</td>
+          </tr>
+          <tr>
+            <th id="endpoint">SPARQL endpoint<a href="" target="_blank"><i class="icon-book pull-right"> </i></a></th>
+            <td>A SPARQL endpoint is a HTTP address published by a <a href="#3store">triple store</a> that clients can send <a href="#sparql">SPARQL</a> requests to, which will then be executed by the store. The results are then returned by HTTP again and can be encoded in a variety of formats such as XML, CSV, or JSON. The client can specifiy the expected result format in its query header.</td>
+          </tr>
+          <tr>
+            <th id="triple">Triple<a href="http://www.w3.org/TR/rdf-concepts/#section-triples" target="_blank"><i class="icon-book pull-right"> </i></a></th>
+            <td>In the context of <a href="#rdf">RDF</a> and <a href="#ld">Linked Data</a>, triples are statements consisting of subject, predicate, and object, such as <code>Batman knows Robin</code>. The triples are made machine-readable by replacing the parts of the statment with <a href="#uri">URIs</a> which contain more information (e.g. about <code>Batman</code>, <code>Robin</code>, or the <code>knows</code> predicate).</td>
+          </tr>
+          <tr>
+            <th id="3store">Triple store<a href="http://en.wikipedia.org/wiki/Triplestore" target="_blank"><i class="icon-book pull-right"> </i></a></th>
+            <td>A triple store is a database optimized for storage, indexing and querying <a href="#triple>">triples</a>. It usually offers a SPARQL endpoint to query (and possibly insert, update, and delete) data.</td>
+          </tr> 
+          <tr>
+            <th id="sparql">Turtle<a href="http://www.w3.org/TeamSubmission/turtle/" target="_blank"><i class="icon-book pull-right"> </i></a></th>
+            <td>Turtle is an easy-to-read and compact syntax for <a href="#rdf">RDF</a>.</td>
+          </tr>
+             
         <tbody></tbody>
       </table>
     </div>  
