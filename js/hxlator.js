@@ -242,7 +242,7 @@ function mapProperty($inputMapping){
 				});
 
 			}else{
-				$('.shortguide').html('<p class="lead alert instr"><strong>Step 3:</strong> In HXL, any '+$mapping.classsingular+' can have the following properties. <br />3a: Pick a cell or set of cells from the selected row that provide some information about one of the listed HXL properties.<br />3b: Then click the property to which the data in this cell applies.<br /> <span class="muted">Note that a given cell (or set of cells) may address several properties.</span></p><p align="right" id="togglep"><a href="#" id="toggle" class="btn btn-mini"><i class="icon-resize-vertical"></i> Toggle instructions</a></p>');
+				$('.shortguide').html('<p class="lead alert instr"><strong>Step 3:</strong> In HXL, any '+$mapping.classsingular+' can have the following properties. <br />Step 3a: Pick a cell or set of cells from the selected row that provide some information about one of the listed HXL properties.<br />Step 3b: Then click the property to which the data in this cell applies.<br /> <span class="muted">Note that a given cell (or set of cells) may address several properties.</span></p><p align="right" id="togglep"><a href="#" id="toggle" class="btn btn-mini"><i class="icon-resize-vertical"></i> Toggle instructions</a></p>');
 
 				$hint = '<p align="right"><i class="icon-hand-right"></i> Use <code>shift</code> to select a range of cells.</p>';
 			}
