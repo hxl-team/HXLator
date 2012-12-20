@@ -233,7 +233,7 @@ function mapProperty($inputMapping){
 
 			// if there are already any mappings (i.e., at least one tagged property button), show a different text:			
 			if($('a.mapped').length > 0){
-				$('.shortguide').html('<p class="lead alert instr">Keep doing this (select one or more cells, then select a property) until you have mapped all cells in the selected row. Keep in mind that a cell may address several properties, or a property may be addressed by several cells. Are you <a href="#" id="done" class="btn btn-info">done?</a></p><p align="right" id="togglep"><a href="#" id="toggle" class="btn btn-mini"><i class="icon-resize-vertical"></i> Toggle instructions</a></p>');
+				$('.shortguide').html('<p class="lead alert instr">Keep doing this (select one or more cells, then select a property) until you have mapped all cells in the selected row. Keep in mind that a cell may address several properties, or a property may be addressed by several cells. Are you <a href="#" id="done" class="btn btn-info">done?</a></p><p align="right" id="togglep"><a href="#" id="toggle" class="btn btn-mini"><i class="icon-remove-sign"></i> Hide instructions</a></p>');
 
 				$hint = '<p align="right"><i class="icon-hand-right"></i> Made a mistake? You can always go back using the buttons at the top right.</p>';
 
@@ -242,7 +242,7 @@ function mapProperty($inputMapping){
 				});
 
 			}else{
-				$('.shortguide').html('<p class="lead alert instr"><strong>Step 3:</strong> In HXL, any '+$mapping.classsingular+' can have the following properties. <br />Step 3a: Pick a cell or set of cells from the selected row that provide some information about one of the listed HXL properties.<br />Step 3b: Then click the property to which the data in this cell applies.<br /> <span class="muted">Note that a given cell (or set of cells) may address several properties.</span></p><p align="right" id="togglep"><a href="#" id="toggle" class="btn btn-mini"><i class="icon-resize-vertical"></i> Toggle instructions</a></p>');
+				$('.shortguide').html('<p class="lead alert instr"><strong>Step 3:</strong> In HXL, any '+$mapping.classsingular+' can have the following properties. <br />Step 3a: Pick a cell or set of cells from the selected row that provide some information about one of the listed HXL properties.<br />Step 3b: Then click the property to which the data in this cell applies.<br /> <span class="muted">Note that a given cell (or set of cells) may address several properties.</span></p><p align="right" id="togglep"><a href="#" id="toggle" class="btn btn-mini"><i class="icon-remove-sign"></i> Hide instructions</a></p>');
 
 				$hint = '<p align="right"><i class="icon-hand-right"></i> Use <code>shift</code> to select a range of cells.</p>';
 			}
@@ -250,12 +250,22 @@ function mapProperty($inputMapping){
 			//hide instructions if they were hidden before:
 			if(!$showInstructions){
 				$('p.instr').hide();
+				$('#togglep').hide();				
 			}
 			// enable toggling of instructions:
-			$('#toggle').unbind();
 			$('#toggle').click(function(){
-				$('p.instr').toggle('fast');
-				$showInstructions = !$showInstructions;
+				$('p.instr').hide('fast');
+				$('#togglep').hide('fast');
+				$showInstructions = false;
+				
+				$('a#btn-instr').show('fast');
+				$('a#btn-instr').click(function(){
+					$('p.instr').show('fast');
+					$('#togglep').show('fast');
+					$('a#btn-instr').hide('fast');
+					$showInstructions = true;
+				});
+
 			});
 
 

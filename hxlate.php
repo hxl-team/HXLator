@@ -68,7 +68,7 @@ if($isMove === true) {
 	echo '
 			<div class="row">
 			<div class="span12">
-			<p class="lead"><strong>Build translator for  <em>'.$_SESSION['file'].'</em></strong> <a class="btn btn-info pull-right" id="showPreview" href="#" rel="tooltip" title="Check your output here" data-placement="left">Preview HXL</a></p>
+			<p class="lead"><strong>Build translator for  <em>'.$_SESSION['file'].'</em></strong> <a class="btn btn-info pull-right" id="btn-instr" href="#" rel="tooltip" title="Click to show the instructions" data-placement="right">Instructions</a> <a class="btn btn-info pull-right" id="showPreview" href="#" rel="tooltip" title="Check your output here" data-placement="left">Preview HXL</a></p>
 			</div>
 			</div>
 			</div>
