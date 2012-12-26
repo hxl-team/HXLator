@@ -277,8 +277,9 @@ function getFoot($extraJS = null, $script = null){
 		  This site is part of the HumanitarianResponse network. Write to 
 		  <a href="mailto:info@humanitarianresponse.info">info@humanitarianresponse.info</a> for more information.</div>
 		  <div class="span3"><strong>Links</strong><br />
-		  <a href="https://sites.google.com/site/hxlproject/">HXL Project</a><br />
-		  <a href="http://hxl.humanitarianresponse.info/">HXL Standard</a></div>
+		  <a href="http://hxl.humanitarianresponse.info/docs/">HXL Documentation</a><br />
+      <a href="https://sites.google.com/site/hxlproject/">HXL Project</a><br />
+		  <a href="http://hxl.humanitarianresponse.info/ns/">HXL Standard</a></div>
 		  <div class="span3"><strong>Follow HXL</strong><br />
 		  <span class="label label-warning">TBD</span></div>
 		  <div class="span3"><strong>Legal</strong><br />
