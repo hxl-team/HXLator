@@ -63,7 +63,7 @@ getHead("index.php", $user_name, $user_organisation);
 						    closedir($handle);
 						}
 						?>
-		        	</select>			    	
+		        	</select><span style="margin-left: 20px;"><em>If your spreadsheet has the same structure as a spreadsheet you have HXLated before, you can reuse the mapping.</em></span><br />		    	
 				</div>
 			</div>
 			
