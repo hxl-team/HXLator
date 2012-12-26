@@ -10,9 +10,15 @@ getHead("index.php", $user_name, $user_organisation);
 
 ?>
 
-    <div class="hero-unit">	    
-        <h1>HXLator</h1>
-        <p style="margin-top:  1.5em; margin-bottom:  1.5em">A simple online tool to convert a spreadsheet into the Humanitarian eXchange Langue (HXL). Take a look at our <a href="guide.php">quick start guide</a> or start by uploading your spreadsheet here:</p>	    
+    <div class="hero-unit">	  
+    	<div class="row">
+	    	<div class="span4">  
+	        	<h1>HXLator</h1>
+	        </div>
+	        <div class="span6">  
+	        	<p style="margin-bottom:  1.5em">A simple online tool to convert a spreadsheet into the Humanitarian eXchange Langue (HXL). Take a look at our <a href="guide.php">quick start guide</a> or start by uploading your spreadsheet here:</p>	    
+	        </div>
+	    </div>
 
 
 <?php    if(isset($_SESSION['loggedin'])) {   // show the upload options only if the user is logged in:  ?>
