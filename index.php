@@ -119,7 +119,7 @@ getHead("index.php", $user_name, $user_organisation);
 		 */
 		
 		var emergencies = [';
-		
+
 		foreach($emergencies as $emergency){
 		    $elist .= ' { value: "'.$emergency->$label.'", uri: "'.$emergency->$uri.'"}, ' ;                 
 		}
@@ -129,19 +129,20 @@ getHead("index.php", $user_name, $user_organisation);
 		// see http://jqueryui.com/demos/autocomplete/ for the documentation
 		$elist .= ' {} ]
 		
-		
 		$("#emergencies").autocomplete({
 			source: function(request, response) {
 		       	var results = $.ui.autocomplete.filter(emergencies, request.term);
 		     	if(!results.length){
-		     		response(["<span style=\"color:red\">No matching emergencies found.</span>"]);
+		     		$("#emergency").parents(".control-group").addClass("error");
+		     		response([]);
 		     	}else{
+		     		$("#emergency").parents(".control-group").removeClass("error");
 		     		response(results);
 		     	}		     	
             },
             select: function(event, ui) {
-                $("#emergency").val(ui.item.uri);                
-            }
+            	$("#emergency").val(ui.item.uri);		     	
+            }            
         }).data("autocomplete")._renderItem = function(ul, item) {
             return $("<li></li>")
             	.data("item.autocomplete", item)
