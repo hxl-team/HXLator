@@ -1424,7 +1424,7 @@ function generateRDF($inputMapping){
 
 	$.each($mapping.datacontainers, function($t, $templates){
 
-		var $turtle = '@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> . \n@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> . \n@prefix owl:  <http://www.w3.org/2002/07/owl#> . \n@prefix foaf: <http://xmlns.com/foaf/0.1/> . \n@prefix dc:   <http://purl.org/dc/terms/> . \n@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> . \n@prefix skos: <http://www.w3.org/2004/02/skos/core#> . \n@prefix hxl:  <http://hxl.humanitarianresponse.info/ns/#> . \n@prefix geo:  <http://www.opengis.net/geosparql#> . \n@prefix label: <http://www.wasab.dk/morten/2004/03/label#> . \n \n';
+		var $turtle = '@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> . \r\n@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> . \r\n@prefix owl:  <http://www.w3.org/2002/07/owl#> . \r\n@prefix foaf: <http://xmlns.com/foaf/0.1/> . \r\n@prefix dc:   <http://purl.org/dc/terms/> . \r\n@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> . \r\n@prefix skos: <http://www.w3.org/2004/02/skos/core#> . \r\n@prefix hxl:  <http://hxl.humanitarianresponse.info/ns/#> . \r\n@prefix geo:  <http://www.opengis.net/geosparql#> . \r\n@prefix label: <http://www.wasab.dk/morten/2004/03/label#> . \r\n \r\n';
 	
 		$.each($templates, function($uri, $triples){
 			
@@ -1619,11 +1619,11 @@ function generateRDF($inputMapping){
 				});
 
 				if ( !$typed ) {
-					$turtle += $resuri + ' rdf:type ' + $mapping.classuri + ' .\n';
+					$turtle += $resuri + ' rdf:type ' + $mapping.classuri + ' .\r\n';
 				}
 
 				if( $comment != ''){
-					$turtle += $resuri + ' rdfs:comment "' + $comment + '"@en .\n';	
+					$turtle += $resuri + ' rdfs:comment "' + $comment + '"@en .\r\n';	
 				}
 			}
 		
@@ -1649,7 +1649,7 @@ function generateRDF($inputMapping){
 				
 				// add the triple, but ONLY if the object is not empty and the lookup did work:
 				if($object != '' && $object.indexOf('"@value') != 0 && $object.indexOf('"@lookup') != 0 && $object.indexOf('"@userlookup') != 0){			
-					$turtle += $resuri + ' ' + $triple['predicate'] + ' ' + $object + $datatype + ' .\n';
+					$turtle += $resuri + ' ' + $triple['predicate'] + ' ' + $object + $datatype + ' .\r\n';
 				}
 
 			});
@@ -1920,7 +1920,7 @@ Array.prototype.remove = function(from, to) {
 function trim(s) {
 	s = s.replace(/(^\s*)|(\s*$)/gi,"");
 	s = s.replace(/[ ]{2,}/gi," ");
-	s = s.replace(/\n /,"\n");
+	s = s.replace(/\r\n /,"\r\n");
 	return s;
 }
 
