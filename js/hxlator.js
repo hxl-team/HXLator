@@ -431,7 +431,7 @@ function checkAllRows($inputMapping){
 			$.each($mappings.triples, function($i, $triple){
 					if($triple.object.indexOf('@lookup') == 0){					
 						var $pusher = new Object;
-						$pusher['column'] = $triple.object.substr(8);;
+						$pusher['column'] = $triple.object.substr(8);
 						$pusher['predicate'] = $triple.predicate;
 							
 						if($.inArray($pusher, $lookUpColumns) == -1){ // only add if we don't have it yet
@@ -1455,6 +1455,8 @@ function generateRDF($inputMapping){
 			// this is the case if the URI is already there:
 			$resuri = $uri;
 
+			var $comment = ''; // we'll use this in case the lookup fails
+
 			// generate a URI if the $uri is not there yet (tagged with "@uri")
 			// (overwriting what we had before)
 			if($uri.indexOf('@uri') == 0){
@@ -1470,6 +1472,7 @@ function generateRDF($inputMapping){
 					var $loc = '';
 					var $sex = '';
 					var $age = '';
+					
 
 					// check whether location, sex and age categories are set:
 					$.each($mapping.datacontainers, function($tt, $ttemplates){
@@ -1477,8 +1480,12 @@ function generateRDF($inputMapping){
 							if($uri == $uuri){
 								$.each($ttriples['triples'], function($i, $triple){
 									if ($triple['predicate'] == 'hxl:atLocation'){
-										if(typeof $triple['object'] == 'undefined' || $triple['object'].indexOf('@lookup') == 0){
+										if(typeof $triple['object'] == 'undefined'){
 											$loc = '/unknownLocation';
+											$comment = 'Missing lookup value';
+										}else if ($triple['object'].indexOf('@lookup') == 0){
+											$loc = '/unknownLocation';
+											$comment = 'Missing lookup value for term ' + $triple['object'].substr(8);
 										}else{
 											// grab URI and remove < and >
 											var $place = $triple['object'].substr(1, $triple['object'].length-2);
@@ -1488,8 +1495,12 @@ function generateRDF($inputMapping){
 										}
 										
 									}else if ($triple['predicate'] == 'hxl:sexCategory'){
-										if (typeof $triple['object'] == 'undefined' || $triple['object'].indexOf('@lookup') == 0){
+										if (typeof $triple['object'] == 'undefined'){
 											$sex = '/unknownSex';
+											$comment = 'Missing lookup value';
+										} else if ($triple['object'].indexOf('@lookup') == 0){
+											$sex = '/unknownSex';
+											$comment = 'Missing lookup value for term ' + $triple['object'].substr(8);
 										} else {
 											// grab URI and remove < and >
 											var $sexCategory = $triple['object'].substr(1, $triple['object'].length-2);
@@ -1497,8 +1508,12 @@ function generateRDF($inputMapping){
 											$sex = '/' + $sexCategoryURIparts[$sexCategoryURIparts.length -1];
 										}
 									}else if ($triple['predicate'] == 'hxl:ageGroup'){
-										if (typeof $triple['object'] == 'undefined' || $triple['object'].indexOf('@lookup') == 0){
+										if (typeof $triple['object'] == 'undefined'){
 											$age =  '/unknownAgeGroup';
+											$comment = 'Missing lookup value';
+										}else if ($triple['object'].indexOf('@lookup') == 0){
+											$age =  '/unknownAgeGroup';
+											$comment = 'Missing lookup value for term ' + $triple['object'].substr(8);
 										} else {
 											// grab URI and remove < and >
 											var $ageGroup = $triple['object'].substr(1, $triple['object'].length-2);
@@ -1605,6 +1620,10 @@ function generateRDF($inputMapping){
 
 				if ( !$typed ) {
 					$turtle += $resuri + ' rdf:type ' + $mapping.classuri + ' .\n';
+				}
+
+				if( $comment != ''){
+					$turtle += $resuri + ' rdfs:comment "' + $comment + '"@en .\n';	
 				}
 			}
 		
