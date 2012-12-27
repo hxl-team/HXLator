@@ -1275,6 +1275,7 @@ function lookUpModal($inputMapping, $missing, $final){
 
 			// fetch all selected URIs and add them to the mapping object:
 			$('input:checked').each(function(){
+				console.log("adding "+$(this).attr('value'));
 				$mapping.lookup[$(this).attr('name')] = '<'+$(this).attr('value')+'>';
 			});
 			
@@ -1476,34 +1477,34 @@ function generateRDF($inputMapping){
 							if($uri == $uuri){
 								$.each($ttriples['triples'], function($i, $triple){
 									if ($triple['predicate'] == 'hxl:atLocation'){
-										if($triple['object'].indexOf('@lookup') != 0){
+										if(typeof $triple['object'] == 'undefined' || $triple['object'].indexOf('@lookup') == 0){
+											$loc = '/unknownLocation';
+										}else{
 											// grab URI and remove < and >
 											var $place = $triple['object'].substr(1, $triple['object'].length-2);
 											// strip the country and p-code from the URI (last two parts of URI):
 											var $placeURIparts = $place.split('/');
-											$loc = '/' + $placeURIparts[$placeURIparts.length - 2] + '/' + $placeURIparts[$placeURIparts.length - 1];	
-										} else { //lookup failed
-											$loc = '/unknownLocation';
+											$loc = '/' + $placeURIparts[$placeURIparts.length - 2] + '/' + $placeURIparts[$placeURIparts.length - 1];											
 										}
 										
 									}else if ($triple['predicate'] == 'hxl:sexCategory'){
-										if($triple['object'].indexOf('@lookup') != 0){						
+										if (typeof $triple['object'] == 'undefined' || $triple['object'].indexOf('@lookup') == 0){
+											$sex = '/unknownSex';
+										} else {
 											// grab URI and remove < and >
 											var $sexCategory = $triple['object'].substr(1, $triple['object'].length-2);
 											var $sexCategoryURIparts = $sexCategory.split('/');
-											$sex = '/' + $sexCategoryURIparts[$sexCategoryURIparts.length -1];	
-										} else { // lookup failed
-											$sex = '/unknownSex';
+											$sex = '/' + $sexCategoryURIparts[$sexCategoryURIparts.length -1];
 										}
 									}else if ($triple['predicate'] == 'hxl:ageGroup'){
-										if($triple['object'].indexOf('@lookup') != 0){						
+										if (typeof $triple['object'] == 'undefined' || $triple['object'].indexOf('@lookup') == 0){
+											$age =  '/unknownAgeGroup';
+										} else {
 											// grab URI and remove < and >
 											var $ageGroup = $triple['object'].substr(1, $triple['object'].length-2);
 											var $ageGroupURIparts = $ageGroup.split('/');
 											$age = '/'+$ageGroupURIparts[$ageGroupURIparts.length -1 ];
-										} else { // lookup failed
-											$age =  '/unknownAgeGroup';
-										}
+										} 
 									}
 								});
 							}							
@@ -1611,19 +1612,21 @@ function generateRDF($inputMapping){
 				
 				// handling the triples object:
 				var $object = '';
-				if($triple['object'].indexOf('<http') == 0){ // object property
-					$object = $triple['object'];
-				}else if($triple['object'].indexOf('http') == 0){ // object property
-					$object = '<'+$triple['object']+'>';
-				}else{ // data property
-					$object = '"'+$triple['object']+'"';
-				}
-			
+				if(typeof $triple['object'] != 'undefined'){
+					if($triple['object'].indexOf('<http') == 0){ // object property
+						$object = $triple['object'];
+					}else if($triple['object'].indexOf('http') == 0){ // object property
+						$object = '<'+$triple['object']+'>';
+					}else{ // data property
+						$object = '"'+$triple['object']+'"';
+					}
 				
-				var $datatype = '';
-				if ($triple['datatype'] != undefined){
-					$datatype  = '^^' + $triple['datatype'];
-				}
+					
+					var $datatype = '';
+					if ($triple['datatype'] != undefined){
+						$datatype  = '^^' + $triple['datatype'];
+					}
+				}				
 				
 				// add the triple, but ONLY if the object is not empty and the lookup did work:
 				if($object != '' && $object.indexOf('"@value') != 0 && $object.indexOf('"@lookup') != 0 && $object.indexOf('"@userlookup') != 0){			
@@ -1689,7 +1692,8 @@ function updateTablePreview($mapping){
 		        	
 		        	$.each($triples['triples'], function($i, $triple){
 		        	    if($triple['predicate'] == $p){
-			        		if($triple['object'].indexOf('<') == 0){
+		        	    	if(typeof $triple['object'] != 'undefined'){
+		        	    		if($triple['object'].indexOf('<') == 0){
 								
 			        			var $uri = $triple['object'];
 
@@ -1733,6 +1737,7 @@ function updateTablePreview($mapping){
 	    		                $cellContent = $triple['object'];
 			        	        
 	    		            }
+		        	    	}			        		
 			        	}
 			        		        	
 			        });
