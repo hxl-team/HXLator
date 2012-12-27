@@ -209,8 +209,7 @@ echo'<!DOCTYPE html>
     <meta http-equiv="pragma" content="no-cache"> 
 
     <link href="css/hxlator.css?'.time().'" rel="stylesheet"> <!-- css disable cache -->
-    <link href="css/bootstrap-responsive.css" rel="stylesheet">
-	<link href="css/jquery-ui-1.8.21.custom.css" rel="stylesheet">
+    <link href="css/jquery-ui-1.8.21.custom.css" rel="stylesheet">
 	
     <!--[if lt IE 9]>
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
