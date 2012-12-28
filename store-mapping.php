@@ -14,7 +14,8 @@ if(isset($_SESSION['loggedin'])) {   // only submit data if the user is logged i
 	// create user folder if it doesn't exist yet:
 	if(!is_dir($path)){
 		if(!mkdir($path)){
-			echo '<p>Your user directory could not be initialized. Please <a href="contact.php">let us know</a> about this error.</p>';
+			error_log('Directory '.$path.' could not be created.');
+			die('<p>Your user directory could not be initialized. Please <a href="contact.php">let us know</a> about this error.</p>');
 		}
 	}
 
