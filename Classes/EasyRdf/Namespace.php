@@ -45,7 +45,7 @@
  */
 class EasyRdf_Namespace
 {
-    /** Namespace registery */
+    /** Namespace registry */
     private static $_namespaces = array(
       'bibo' => 'http://purl.org/ontology/bibo/',
       'cc' => 'http://creativecommons.org/ns#',
@@ -56,8 +56,10 @@ class EasyRdf_Namespace
       'exif' => 'http://www.w3.org/2003/12/exif/ns#',
       'foaf' => 'http://xmlns.com/foaf/0.1/',
       'geo' => 'http://www.w3.org/2003/01/geo/wgs84_pos#',
+      'og' => 'http://ogp.me/ns#',
       'owl' => 'http://www.w3.org/2002/07/owl#',
       'rdf' => 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
+      'rdfa' => 'http://www.w3.org/ns/rdfa#',
       'rdfs' => 'http://www.w3.org/2000/01/rdf-schema#',
       'rss' => 'http://purl.org/rss/1.0/',
       'sioc' => 'http://rdfs.org/sioc/ns#',
@@ -170,51 +172,19 @@ class EasyRdf_Namespace
     }
 
     /**
-      * Return the prefix namespace that a URI belongs to.
-      *
-      * @param string $uri A full URI (eg 'http://xmlns.com/foaf/0.1/name')
-      * @return string The prefix namespace that it is a part of(eg 'foaf')
-      */
-    public static function prefixOfUri($uri)
-    {
-        # FIXME: sort out code duplication with shorten()
-        if ($uri === null or $uri === '') {
-            throw new InvalidArgumentException(
-                "\$uri cannot be null or empty"
-            );
-        }
-
-        if (is_object($uri) and ($uri instanceof EasyRdf_Resource)) {
-            $uri = $uri->getUri();
-        } else if (!is_string($uri)) {
-            throw new InvalidArgumentException(
-                "\$uri should be a string or EasyRdf_Resource"
-            );
-        }
-
-
-        foreach (self::$_namespaces as $prefix => $long) {
-            if (substr($uri, 0, strlen($long)) == $long)
-                return $prefix;
-        }
-
-        return null;
-    }
-
-    /**
-      * Shorten a URI by substituting in the namespace prefix.
+      * Try and breakup a URI into a prefix and local part
       *
       * If $createNamespace is true, and the URI isn't part of an existing
       * namespace, then EasyRdf will attempt to create a new namespace and
-      * use that namespace to shorten the URI (for example ns0:term).
+      * return the name of the new prefix (for example 'ns0', 'term').
       *
-      * If it isn't possible to shorten the URI, then null will be returned.
+      * If it isn't possible to split the URI, then null will be returned.
       *
       * @param string  $uri The full URI (eg 'http://xmlns.com/foaf/0.1/name')
       * @param bool    $createNamespace If true, a new namespace will be created
-      * @return string The shortened URI (eg 'foaf:name') or null
+      * @return array  The split URI (eg 'foaf', 'name') or null
       */
-    public static function shorten($uri, $createNamespace=false)
+    public static function splitUri($uri, $createNamespace=false)
     {
         if ($uri === null or $uri === '') {
             throw new InvalidArgumentException(
@@ -232,7 +202,7 @@ class EasyRdf_Namespace
 
         foreach (self::$_namespaces as $prefix => $long) {
             if (substr($uri, 0, strlen($long)) == $long) {
-                return $prefix . ':' . substr($uri, strlen($long));
+                return array($prefix, substr($uri, strlen($long)));
             }
         }
 
@@ -242,11 +212,44 @@ class EasyRdf_Namespace
             if (preg_match("/^(.+?)([\w\-]+)$/", $uri, $matches)) {
                 $prefix = "ns".(self::$_anonymousNamespaceCount++);
                 self::set($prefix, $matches[1]);
-                return $prefix . ':' . $matches[2];
+                return array($prefix, $matches[2]);
             }
         }
 
         return null;
+    }
+
+    /**
+      * Return the prefix namespace that a URI belongs to.
+      *
+      * @param string $uri A full URI (eg 'http://xmlns.com/foaf/0.1/name')
+      * @return string The prefix namespace that it is a part of(eg 'foaf')
+      */
+    public static function prefixOfUri($uri)
+    {
+        if ($parts = self::splitUri($uri)) {
+            return $parts[0];
+        }
+    }
+
+    /**
+      * Shorten a URI by substituting in the namespace prefix.
+      *
+      * If $createNamespace is true, and the URI isn't part of an existing
+      * namespace, then EasyRdf will attempt to create a new namespace and
+      * use that namespace to shorten the URI (for example ns0:term).
+      *
+      * If it isn't possible to shorten the URI, then null will be returned.
+      *
+      * @param string  $uri The full URI (eg 'http://xmlns.com/foaf/0.1/name')
+      * @param bool    $createNamespace If true, a new namespace will be created
+      * @return string The shortened URI (eg 'foaf:name') or null
+      */
+    public static function shorten($uri, $createNamespace=false)
+    {
+        if ($parts = self::splitUri($uri, $createNamespace)) {
+            return implode(':', $parts);
+        }
     }
 
     /**

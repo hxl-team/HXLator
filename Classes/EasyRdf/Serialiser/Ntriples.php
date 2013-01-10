@@ -5,7 +5,7 @@
  *
  * LICENSE
  *
- * Copyright (c) 2009-2010 Nicholas J Humfrey.  All rights reserved.
+ * Copyright (c) 2009-2012 Nicholas J Humfrey.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -31,7 +31,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  * @package    EasyRdf
- * @copyright  Copyright (c) 2009-2010 Nicholas J Humfrey
+ * @copyright  Copyright (c) 2009-2012 Nicholas J Humfrey
  * @license    http://www.opensource.org/licenses/bsd-license.php
  * @version    $Id$
  */
@@ -41,7 +41,7 @@
  * with no external dependancies.
  *
  * @package    EasyRdf
- * @copyright  Copyright (c) 2009-2010 Nicholas J Humfrey
+ * @copyright  Copyright (c) 2009-2012 Nicholas J Humfrey
  * @license    http://www.opensource.org/licenses/bsd-license.php
  */
 class EasyRdf_Serialiser_Ntriples extends EasyRdf_Serialiser
@@ -51,47 +51,9 @@ class EasyRdf_Serialiser_Ntriples extends EasyRdf_Serialiser
     /**
      * @ignore
      */
-    protected function ntriplesResource($res)
+    protected function escapeString($str)
     {
-        $id = $this->escape($res->getURI());
-        if ($res->isBNode()) {
-            return $id;
-        } else {
-            return "<$id>";
-        }
-    }
-
-    /**
-     * @ignore
-     */
-    protected function ntriplesObject($obj)
-    {
-        if ($obj instanceof EasyRdf_Resource) {
-            return $this->ntriplesResource($obj);
-        } else if ($obj instanceof EasyRdf_Literal) {
-            $value = $this->escape(strval($obj));
-            if ($obj->getLang()) {
-                $lang = $this->escape($obj->getLang());
-                return '"' . $value . '"' . '@' . $lang;
-            } else if ($obj->getDatatypeUri()) {
-                $datatype = $this->escape($obj->getDatatypeUri());
-                return '"' . $value . '"' . "^^<$datatype>";
-            } else {
-                return '"' . $value . '"';
-            }
-        } else {
-            throw new EasyRdf_Exception(
-                "Unable to serialise object to ntriples: ".gettype($obj)
-            );
-        }
-    }
-
-    /**
-     * @ignore
-     */
-    protected function escape($str)
-    {
-        if (strpos(utf8_decode(str_replace('?', '', $str)), '?') === false) {
+        if (strpos(utf8_decode(str_replace('?', '', $str)), '?') === FALSE) {
             $str = utf8_decode($str);
         }
 
@@ -100,7 +62,7 @@ class EasyRdf_Serialiser_Ntriples extends EasyRdf_Serialiser
         for ($i = 0; $i < $strLen; $i++) {
             $c = $str[$i];
             if (!isset($this->_escChars[$c])) {
-                $this->_escChars[$c] = $this->escapedChar($c, $this->unicodeCharNo($c));
+                $this->_escChars[$c] = $this->escapedChar($c);
             }
             $result .= $this->_escChars[$c];
         }
@@ -141,8 +103,10 @@ class EasyRdf_Serialiser_Ntriples extends EasyRdf_Serialiser
     /**
      * @ignore
      */
-    protected function escapedChar($c, $no)
+    protected function escapedChar($c)
     {
+        $no = $this->unicodeCharNo($c);
+
         /* see http://www.w3.org/TR/rdf-testcases/#ntrip_strings */
         if ($no < 9)        return "\\u" . sprintf('%04X', $no);  /* #x0-#x8 (0-8) */
         if ($no == 9)       return '\t';                          /* #x9 (9) */
@@ -161,6 +125,44 @@ class EasyRdf_Serialiser_Ntriples extends EasyRdf_Serialiser
     }
 
     /**
+     * @ignore
+     */
+    protected function ntriplesResource($res)
+    {
+        $escaped = $this->escapeString($res);
+        if (substr($res, 0, 2) == '_:') {
+            return $escaped;
+        } else {
+            return "<$escaped>";
+        }
+    }
+
+    /**
+     * @ignore
+     */
+    protected function ntriplesValue($value)
+    {
+        if ($value['type'] == 'uri' or $value['type'] == 'bnode') {
+            return $this->ntriplesResource($value['value']);
+        } else if ($value['type'] == 'literal') {
+            $escaped = $this->escapeString($value['value']);
+            if (isset($value['lang'])) {
+                $lang = $this->escapeString($value['lang']);
+                return '"' . $escaped . '"' . '@' . $lang;
+            } else if (isset($value['datatype'])) {
+                $datatype = $this->escapeString($value['datatype']);
+                return '"' . $escaped . '"' . "^^<$datatype>";
+            } else {
+                return '"' . $escaped . '"';
+            }
+        } else {
+            throw new EasyRdf_Exception(
+                "Unable to serialise object to ntriples: ".$value['type']
+            );
+        }
+    }
+
+    /**
      * Serialise an EasyRdf_Graph into N-Triples
      *
      * @param object EasyRdf_Graph $graph   An EasyRdf_Graph object.
@@ -171,25 +173,22 @@ class EasyRdf_Serialiser_Ntriples extends EasyRdf_Serialiser
     {
         parent::checkSerialiseParams($graph, $format);
 
-        if ($format != 'ntriples') {
+        if ($format == 'ntriples') {
+            $nt = '';
+            foreach ($graph->toArray() as $resource => $properties) {
+                foreach ($properties as $property => $values) {
+                    foreach ($values as $value) {
+                        $nt .= $this->ntriplesResource($resource)." ";
+                        $nt .= "<" . $this->escapeString($property) . "> ";
+                        $nt .= $this->ntriplesValue($value)." .\n";
+                    }
+                }
+            }
+            return $nt;
+        } else {
             throw new EasyRdf_Exception(
                 "EasyRdf_Serialiser_Ntriples does not support: $format"
             );
         }
-
-        $nt = '';
-        foreach ($graph->resources() as $resource) {
-            foreach ($resource->propertyUris() as $property) {
-                $objects = $resource->all($property);
-                foreach ($objects as $object) {
-                    $nt .= $this->ntriplesResource($resource)." ";
-                    $nt .= "<" . $this->escape($property) . "> ";
-                    $nt .= $this->ntriplesObject($object)." .\n";
-                }
-            }
-        }
-        return $nt;
     }
 }
-
-EasyRdf_Format::registerSerialiser('ntriples', 'EasyRdf_Serialiser_Ntriples');

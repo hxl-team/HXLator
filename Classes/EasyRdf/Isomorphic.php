@@ -5,7 +5,7 @@
  *
  * LICENSE
  *
- * Copyright (c) 2009-2012 Nicholas J Humfrey.  All rights reserved.
+ * Copyright (c) 2012 Nicholas J Humfrey.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -31,41 +31,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  * @package    EasyRdf
- * @copyright  Copyright (c) 2009-2012 Nicholas J Humfrey
+ * @copyright  Copyright (c) 2012 Nicholas J Humfrey
  * @license    http://www.opensource.org/licenses/bsd-license.php
  * @version    $Id$
  */
 
 /**
- * Class that represents an RDF Literal of datatype xsd:decimal
+ * Functions to compare to graphs with each other
  *
  * @package    EasyRdf
- * @link       http://www.w3.org/TR/xmlschema-2/#decimal
- * @copyright  Copyright (c) 2009-2012 Nicholas J Humfrey
+ * @copyright  Copyright (c) 2012 Nicholas J Humfrey
  * @license    http://www.opensource.org/licenses/bsd-license.php
  */
-class EasyRdf_Literal_Decimal extends EasyRdf_Literal
+class EasyRdf_Isomorphic
 {
-    /** Constructor for creating a new decimal literal
-     *
-     * @param  mixed  $value     The value of the literal
-     * @param  string $lang      Should be null (literals with a datatype can't have a language)
-     * @param  string $datatype  Optional datatype (default 'xsd:decimal')
-     * @return object EasyRdf_Literal_Decimal
+
+    /*
+     * Returns `true` if $graph1 is isomorphic with $graph2
      */
-    public function __construct($value, $lang=null, $datatype=null)
+    public static function isIsomorphic($graph1, $graph2)
     {
-        parent::__construct($value, null, $datatype);
+        return self::bijectionOf($graph1, $graph2) !== NULL;
+    }
+    
+    public static function bijectionOf($graph1, $graph2)
+    {
+        // First do some quick-checks
+        //if ($graph1->count()
+        
     }
 
-    /** Return the value of the literal cast to a PHP double
-     *
-     * @return double
-     */
-    public function getValue()
-    {
-        return (double)$this->_value;
-    }
 }
-
-EasyRdf_Literal::setDatatypeMapping('xsd:decimal', 'EasyRdf_Literal_Decimal');

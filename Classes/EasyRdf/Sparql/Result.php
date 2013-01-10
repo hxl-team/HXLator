@@ -152,7 +152,7 @@ class EasyRdf_Sparql_Result extends ArrayIterator
      * This method is intended to be a debugging aid and will
      * return a pretty-print view of the query result.
      *
-     * @param  bool  $html  Set to true to format the using HTML
+     * @param  bool  $html  Set to true to format the dump using HTML
      */
     public function dump($html=true)
     {
@@ -245,17 +245,17 @@ class EasyRdf_Sparql_Result extends ArrayIterator
     {
         switch($data['type']) {
           case 'bnode':
-            return new EasyRdf_Resource('_:'.$data['value']);
+              return new EasyRdf_Resource('_:'.$data['value']);
           case 'uri':
-            return new EasyRdf_Resource($data['value']);
+              return new EasyRdf_Resource($data['value']);
           case 'literal':
           case 'typed-literal':
-            return EasyRdf_Literal::create($data);
+              return EasyRdf_Literal::create($data);
           default:
-            throw new EasyRdf_Exception(
-                "Failed to parse SPARQL Query Results format, unknown term type: ".
-                $data['type']
-            );
+              throw new EasyRdf_Exception(
+                  "Failed to parse SPARQL Query Results format, unknown term type: ".
+                  $data['type']
+              );
         }
     }
 
@@ -306,14 +306,19 @@ class EasyRdf_Sparql_Result extends ArrayIterator
                 $t = new stdClass();
                 foreach ($bindings as $binding) {
                     $key = $binding->getAttribute('name');
-                    $term = $binding->firstChild;
-                    $data = array(
-                        'type' => $term->nodeName,
-                        'lang' => $term->getAttribute('lang'),
-                        'datatype' => $term->getAttribute('datatype'),
-                        'value' => $term->nodeValue
-                    );
-                    $t->$key = $this->_newTerm($data);
+                    foreach ($binding->childNodes as $node) {
+                        if ($node->nodeType != XML_ELEMENT_NODE)
+                            continue;
+                        $t->$key = $this->_newTerm(
+                            array(
+                                'type' => $node->nodeName,
+                                'value' => $node->nodeValue,
+                                'lang' => $node->getAttribute('xml:lang'),
+                                'datatype' => $node->getAttribute('datatype')
+                            )
+                        );
+                        break;
+                    }
                 }
                 $this[] = $t;
             }

@@ -131,9 +131,9 @@ class EasyRdf_Http_Client
             $uri = strval($uri);
         }
 
-        if (!preg_match('/^http:/', $uri)) {
+        if (!preg_match('/^http(s?):/', $uri)) {
             throw new InvalidArgumentException(
-                "EasyRdf_Http_Client only supports the 'http' scheme."
+                "EasyRdf_Http_Client only supports the 'http' and 'https' schemes."
             );
         }
 
@@ -387,16 +387,6 @@ class EasyRdf_Http_Client
         do {
             // Clone the URI and add the additional GET parameters to it
             $uri = parse_url($this->_uri);
-            if (isset($uri['port'])) {
-                $port = $uri['port'];
-            } else {
-                if ($uri['scheme'] === 'https') {
-                    $port = 443;
-                } else {
-                    $port = 80;
-                }
-            }
-
             if ($uri['scheme'] === 'http') {
                 $host = $uri['host'];
             } else if ($uri['scheme'] === 'https') {
@@ -405,6 +395,16 @@ class EasyRdf_Http_Client
                 throw new EasyRdf_Exception(
                     "Unsupported URI scheme: ".$uri['scheme']
                 );
+            }
+
+            if (isset($uri['port'])) {
+                $port = $uri['port'];
+            } else {
+                if ($uri['scheme'] === 'https') {
+                    $port = 443;
+                } else {
+                    $port = 80;
+                }
             }
 
             if (!empty($this->_paramsGet)) {
@@ -463,6 +463,11 @@ class EasyRdf_Http_Client
                 // Avoid problems with buggy servers that add whitespace at the
                 // end of some headers (See ZF-11283)
                 $location = trim($location);
+
+                // Some servers return relative URLs in the location header
+                // resolve it in relation to previous request
+                $baseUri = new EasyRdf_ParsedUri($this->_uri);
+                $location = $baseUri->resolve($location)->toString();
 
                 // If it is a 303 then drop the parameters and send a GET request
                 if ($response->getStatus() == 303) {
