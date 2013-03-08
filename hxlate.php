@@ -271,25 +271,34 @@ if($_POST["translator"] == "new"){
 	$trans = json_decode($translator, true);
 
 	// replace data container metadata:
-	foreach ($trans['templates'] as $uri => $template) {
-		// remove metadata from this container
-		// TODO: we'll probably need to update this once we start splitting a file up into several data containers
-		if(strpos($uri, '/datacontainers/') !== false){
-			unset($trans['templates'][$uri]);
-		}
+	$i = 0;
+	foreach ($trans['datacontainers'] as $container){
 
-		// remove all mappings outside of the samplerow:
-		if(strpos($uri, '@uri') === 0){
-			$parts = explode(" ", $uri);
-			$thiscell = explode("-", $parts[1]);
-
-			$thisrow = $thiscell[0].'-'.$thiscell[2];
+		foreach ($container as $uri => $template) { 
 			
-			// check if this cell is outside of the sample row:
-			if($thisrow != $trans['samplerow']){
-				unset($trans['templates'][$uri]);
-			} 
+			error_log($uri);
+
+			// remove metadata from this container -
+			// the hxlator.js will create 'fresh' metadata
+			if(strpos($uri, '/datacontainers/') !== false)
+				unset($trans['datacontainers'][$i][$uri]);
+
+			// remove all mappings outside of the samplerow:
+			if(strpos($uri, '@uri') === 0){
+				$parts = explode(" ", $uri);
+				$thiscell = explode("-", $parts[1]);
+
+				$thisrow = $thiscell[0].'-'.$thiscell[2];
+				
+				// check if this cell is outside of the sample row:
+				if($thisrow != $trans['samplerow'])
+					unset($trans['datacontainers'][$i][$uri]);
+									
+			}
+
 		}
+
+		$i++;
 	}
 
 	$inlineScript = $im.'
