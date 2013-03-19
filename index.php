@@ -16,7 +16,7 @@ getHead("index.php", $user_name, $user_organisation);
 	        	<h1>HXLator</h1>
 	        </div>
 	        <div class="span6">  
-	        	<p style="margin-bottom:  1.5em">A simple online tool to convert a spreadsheet into the Humanitarian eXchange Langue (HXL). Take a look at our <a href="guide.php">quick start guide</a> or start by uploading your spreadsheet here:</p>	    
+	        	<p style="margin-bottom:  1.5em">A simple online tool to convert a spreadsheet into the Humanitarian eXchange Language (HXL). Take a look at our <a href="guide.php">quick start guide</a> or start by uploading your spreadsheet here:</p>	    
 	        </div>
 	    </div>
 
