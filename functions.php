@@ -8,27 +8,21 @@ require_once "html_tag_helpers.php";
 session_start();
 
 //end session and force user to re-login after 60 minutes (3600 sec.):
-if (isset($_SESSION['LAST_ACTIVITY'])) {
+if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > 3600)) {
+  
+  // kill session
+  session_destroy(); // destroy session data in storage
+  session_unset(); // unset $_SESSION variable for the runtime
 
-    $slept = (time() - $_SESSION['LAST_ACTIVITY']);
-
-    if($slept > 3600){
-        // last request was more than 60 minutes ago
-        session_destroy();   // destroy session data in storage
-        session_unset();     // unset $_SESSION variable for the runtime
-    
-        header('Location: index.php?msg=timeout');
-        
-        die();
-
-    }
-
-} else {
-
-  $_SESSION['LAST_ACTIVITY'] = time(); // update last activity time stamp
-
+  // forward to login page w/ notice that the session has expired  
+  header('Location: index.php?msg=timeout');
+  
+  // make sure the rest of this script is not executed
+  die();
 }
 
+// update last activity time stamp
+$_SESSION['LAST_ACTIVITY'] = time(); 
 
 
 // check login data, if there are any:

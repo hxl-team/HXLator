@@ -5,7 +5,6 @@ set_time_limit(0);
 
 date_default_timezone_set('Europe/London');
 
-
 include_once('functions.php');
 getHead("approve.php"); 
 
@@ -67,7 +66,7 @@ getHead("approve.php");
    		
 
 	}else{
-		echo '<p style="margin-top:  1.5em; margin-bottom:  1.5em"><span class="label label-warning">Not allowed.</span> Please log in with a user name that is authorized to approve data to proceed.</p>';	
+		echo '<p style="margin-top:  1.5em; margin-bottom:  1.5em"><span class="label label-warning">Not allowed.</span> Please log in as a user who is authorized to approve data to proceed.</p>';	
 	}
 	
 }else{
