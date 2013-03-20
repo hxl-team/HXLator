@@ -55,7 +55,7 @@
 		
 		foreach($hxlClasses as $hxlClass){	  	
 			if($hxlClass->$count != "0") { 
-				$pills .= '<li class="solo"><a href="#" class="hxlclass hxlclass-expandable" rel="popover" title="'.$hxlClass->$label.'" data-content="'.$hxlClass->$description.' <br /><small><strong>Click to view '.$hxlClass->$count.' subclasses.<strong></small>" classuri="'.shorten($hxlClass->$class, 'hxl').'">'.$hxlClass->$plural.'<span class="badge badge-inverse pull-right">'.$hxlClass->$count.' types</span>'; 
+				$pills .= '<li class="solo"><a href="#" class="hxlclass hxlclass-expandable" rel="popover" title="'.$hxlClass->$label.'" data-content="'.$hxlClass->$description.' <br /><small><strong>Click to view '.$hxlClass->$count.' subclasses.<strong></small>" classuri="'.shorten($hxlClass->$class, 'hxl').'"><span class="badge badge-inverse pull-right">'.$hxlClass->$count.' types</span>'.$hxlClass->$plural; 
 				// we're gonna show subclasses for this one:
 				$recursionClasses[] = array($hxlClass->$class, $hxlClass->$label, $hxlClass->$plural);
 			}else{
